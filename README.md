@@ -11,36 +11,20 @@ A comprehensive Claude Code plugin providing specialized agents, skills, and too
 
 ## Installation
 
-### Using Claude Code CLI
+### Add the marketplace
+
+Add the marketplace for this repo (the marketplace is the same name as the plugin: `bork-ai`)
 
 ```bash
-# Install from GitHub
-claude mcp add-plugin https://github.com/borkweb/bork-ai
+claude
+/plugin marketplace add borkweb/bork-ai
 ```
 
-### Manual Installation
-
-1. Clone this repository:
-```bash
-git clone https://github.com/borkweb/bork-ai.git
-cd bork-ai
-```
-
-2. Install the plugin:
-```bash
-# Link to Claude Code plugins directory
-claude mcp add-plugin .
-```
-
-### Verify Installation
-
-After installation, you can verify the plugin is loaded:
+### Install the plugin
 
 ```bash
-claude mcp list-plugins
+/plugin install bork-ai@bork-ai
 ```
-
-You should see `bork-ai` in the list of installed plugins.
 
 ## Available Agents
 
