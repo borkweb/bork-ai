@@ -9,7 +9,7 @@
   - Structured format: `<type>(<scope>): <description>`
   - Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore
   - Optional body and footer
-  - Breaking changes marked with `!` or `BREAKING CHANGE:` footer
+  - Breaking changes marked with ! or `BREAKING CHANGE:` footer
 
 ### Git Commit Messages Best Practices
 - **Subject line**: 50 characters (hard limit 72)
