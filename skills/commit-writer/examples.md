@@ -159,7 +159,7 @@ Environments auto-deleted after PR close/merge.
 ## Breaking Changes
 
 ```
-feat(api)!: standardize error response format
+feat(api): standardize error response format
 
 BREAKING CHANGE: All API errors now return consistent format:
 {

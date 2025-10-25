@@ -106,12 +106,9 @@ If changes span multiple concerns, consider suggesting separate commits:
 "I notice these changes address both authentication and logging. Would you like to split these into separate commits?"
 
 ### Breaking Changes
-For breaking changes, use either format:
-- Add exclamation mark after the type (e.g., `feat!:`)
-- Add `BREAKING CHANGE:` footer
-
+Add `BREAKING CHANGE:` footer to indicate breaking changes:
 ```
-feat(api)!: change user endpoint response format
+feat(api): change user endpoint response format
 
 BREAKING CHANGE: User API now returns `userId` instead of `id`
 ```
