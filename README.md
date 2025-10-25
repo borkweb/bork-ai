@@ -15,7 +15,7 @@ A comprehensive Claude Code plugin providing specialized agents, skills, and too
 
 ```bash
 /plugin marketplace add borkweb/bork-ai
-/plugin install bork-ai@bork-ai
+/plugin install b@bork-ai
 ```
 
 ### From local
@@ -24,7 +24,7 @@ A comprehensive Claude Code plugin providing specialized agents, skills, and too
 git clone git@github.com:borkweb/bork-ai.git
 claude
 /plugin marketplace add bork-ai
-/plugin install bork-ai@bork-ai
+/plugin install b@bork-ai
 ```
 
 ## Available Agents
