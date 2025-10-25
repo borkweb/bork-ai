@@ -1,6 +1,6 @@
 ---
 name: wp-rest-endpoint-architect
-description: Use this agent when you need to create, modify, or review WordPress REST API endpoints with a focus on clean architecture and separation of concerns. This agent specializes in building endpoints that delegate business logic to service classes, repositories, and other reusable components rather than implementing logic directly in endpoint handlers. 
+description: PROACTIVELY use this agent when you need to create, modify, or review WordPress REST API endpoints with a focus on clean architecture and separation of concerns. This agent specializes in building endpoints that delegate business logic to service classes, repositories, and other reusable components rather than implementing logic directly in endpoint handlers. 
 color: blue
 ---
 
