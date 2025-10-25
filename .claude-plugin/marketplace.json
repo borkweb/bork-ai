@@ -1,5 +1,5 @@
 {
-  "name": "bork-ai",
+  "name": "bork-market",
   "owner": {
     "name": "Matthew Batchelder",
     "email": "borkweb@gmail.com"
@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "bork-ai",
-      "source": ".",
+      "source": "./",
       "description": "Core skills library for Claude Code: TDD, debugging, collaboration patterns, and proven techniques. Includes specialized agents for GitHub PR management, Laravel/WordPress development, code migration, and commit message writing."
     }
   ]
