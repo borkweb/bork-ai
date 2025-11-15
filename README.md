@@ -33,8 +33,6 @@ claude
 - **laravel-rest-architect**: Designs Laravel REST API endpoints following best practices
 - **melancholic-commit-writer**: Generates commit messages with emotional depth
 - **refactorer**: Handles code migrations with backwards compatibility
-- **wp-backend-optimizer**: Optimizes WordPress backend performance
-- **wp-rest-endpoint-architect**: Creates WordPress REST endpoints with clean architecture
 
 ## Available Skills
 
