@@ -49,10 +49,17 @@ When asked to write a commit message:
 
 4. **Follow These Rules**
    - **Subject line**: 50-72 characters max, imperative mood ("add" not "added")
-   - **Body**: Wrap at 72 characters, explain WHY and provide context
+   - **Body**: Explain WHY and provide context. No need to limit line length.
    - **Separate** subject from body with blank line
    - **No period** at end of subject line
    - **Capitalize** first letter of subject
+
+A good pull request should contain the following:
+
+* Title: A descriptive, yet concise, title.
+* Issue: Link to the GitHub issue that the PR addresses (if appropriate).
+* Description: Write a brief summary about this PR. Consider and address: Why is this change needed? What does this change do? Were there other solutions you considered? Why did you choose to pursue this solution? Describe any trade-offs you might have had to make. If the change is looking to be a bit bigger, it’s often a good idea to share your plan for tackling it before writing a lot of code.
+* Testing instructions: How should this be tested, and how can a reviewer test the end-user functionality? Are there known issues that you plan to address in a future PR? Are there any side effects that readers should be aware of?.
 
 ## Examples
 
@@ -71,16 +78,13 @@ Closes #234
 ```
 fix(api): prevent race condition in user creation
 
-The previous implementation didn't properly lock during user
-creation, leading to duplicate users under high load. Added
-database-level unique constraint and proper error handling.
+The previous implementation didn't properly lock during user creation, leading to duplicate users under high load. Added database-level unique constraint and proper error handling.
 ```
 
 ```
 refactor(database): extract query builder to separate module
 
-Improves maintainability by separating query building logic
-from repository classes. No functional changes.
+Improves maintainability by separating query building logic from repository classes. No functional changes.
 ```
 
 ### Poor Commit Messages (Avoid These)
