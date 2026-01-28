@@ -42,7 +42,22 @@ When asked to write a commit message:
    ```
    <type>(<scope>): <short summary>
 
+   <summary-heading - optional if long enough>
    <body - optional but recommended>
+
+   <fixes - optional if relevant>
+   
+   <why-heading - optional if relevant>
+   <why-body - optional if relevant>
+
+   <how-heading - optional if relevant>
+   <how-body - optional if relevant>
+
+   <breaking-changes-heading - optional if relevant>
+   <breaking-changes-body - optional if relevant>
+
+   <testing-heading - optional if relevant>
+   <testing-body - optional if relevant>
 
    <footer - optional>
    ```
@@ -53,6 +68,7 @@ When asked to write a commit message:
    - **Separate** subject from body with blank line
    - **No period** at end of subject line
    - **Capitalize** first letter of subject
+   - **No Claude attribution**. We don't need to attribute anything as AI generated.
 
 A good pull request should contain the following:
 
@@ -66,19 +82,40 @@ A good pull request should contain the following:
 ### Good Commit Messages
 
 ```
-feat(auth): add JWT refresh token rotation
+feat(admin): OpenCode Admin UI Enhancement and usage tracking
 
-Implements automatic refresh token rotation to improve security.
-Tokens now expire after 15 minutes and are rotated on each refresh.
-Includes Redis storage for token blacklisting.
+## Summary
 
-Closes #234
+Enhance the `/admin` agent interface with real-time usage cost tracking, token statistics display, and improved visual feedback. Also fixes Docker workspace permissions for bind-mounted directories.
+
+Fixes #234
+
+## Why
+
+* Users need visibility into API costs and token usage during agent sessions
+* Tool execution status was unclear during streaming responses
+* Docker containers couldn't write to bind-mounted workspace directories due to permission issues
+* Navigation was broken when pressing back button
+
+## How
+
+* Parse usage_cost events from OpenCode stream (both message.updated and step-finish parts)
+* Accumulate and display cost/tokens in the UI header
+* Add tool status cards with visual states (pending → running → completed)
+* Replace "streaming" pulse animation with "Thinking..." indicator
+* Set 0777 permissions on workspace directories and 0666 on files for Docker compatibility
+* Fix back button URL from `/admin` to `./` for relative navigation
 ```
 
 ```
 fix(api): prevent race condition in user creation
 
-The previous implementation didn't properly lock during user creation, leading to duplicate users under high load. Added database-level unique constraint and proper error handling.
+## Summary
+Added database-level unique constraint and proper error handling.
+
+## Why
+
+The previous implementation didn't properly lock during user creation, leading to duplicate users under high load.
 ```
 
 ```
@@ -110,11 +147,12 @@ If changes span multiple concerns, consider suggesting separate commits:
 "I notice these changes address both authentication and logging. Would you like to split these into separate commits?"
 
 ### Breaking Changes
-Add `BREAKING CHANGE:` footer to indicate breaking changes:
+Add `## Breaking changes` footer to indicate breaking changes:
 ```
 feat(api): change user endpoint response format
 
-BREAKING CHANGE: User API now returns `userId` instead of `id`
+## Breaking changes
+User API now returns `userId` instead of `id`
 ```
 
 ### Repository Style Adaptation

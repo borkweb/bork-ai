@@ -17,6 +17,7 @@
 - **Imperative mood**: "Add feature" not "Added feature"
 - **Separate subject from body**: With blank line
 - **Explain what and why**: Not how (code shows how)
+- **No Claude attribution**. We don't need to attribute anything as AI generated.
 
 ## Commit Types Reference
 
