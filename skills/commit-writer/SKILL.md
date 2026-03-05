@@ -42,25 +42,28 @@ When asked to write a commit message:
    ```
    <type>(<scope>): <short summary>
 
-   <summary-heading - optional if long enough>
-   <body - optional but recommended>
+   ## Summary
+   <body>
 
    <fixes - optional if relevant>
-   
-   <why-heading - optional if relevant>
-   <why-body - optional if relevant>
 
-   <how-heading - optional if relevant>
-   <how-body - optional if relevant>
+   ## Why
+   <why-body>
+
+   ## How
+   <how-body>
 
    <breaking-changes-heading - optional if relevant>
    <breaking-changes-body - optional if relevant>
 
-   <testing-heading - optional if relevant>
-   <testing-body - optional if relevant>
+   ## Testing
+   - [ ] <testing step 1>
+   - [ ] <testing step 2>
 
    <footer - optional>
    ```
+
+   **Note:** Summary, Why, How, and Testing are standard headings — always include them. Use `- [ ]` checkbox bullets for testing steps.
 
 4. **Follow These Rules**
    - **Subject line**: 50-72 characters max, imperative mood ("add" not "added")
@@ -116,6 +119,17 @@ Added database-level unique constraint and proper error handling.
 ## Why
 
 The previous implementation didn't properly lock during user creation, leading to duplicate users under high load.
+
+## How
+
+* Add unique constraint on `users.email` column
+* Wrap creation in database transaction with row-level locking
+* Return existing user on duplicate key instead of erroring
+
+## Testing
+
+- [ ] Run `php artisan test --filter=UserCreationTest`
+- [ ] Verify concurrent requests don't create duplicates
 ```
 
 ```

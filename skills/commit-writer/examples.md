@@ -29,9 +29,9 @@ Fixes #312
 
 ## Testing
 
-1. Run the test suite: `./vendor/bin/pest tests/Unit/StripeWebhookTest.php`
-2. To test manually, use Stripe CLI: `stripe listen --forward-to localhost:8000/webhooks/stripe`
-3. Trigger a test event: `stripe trigger payment_intent.succeeded`
+- [ ] Run the test suite: `./vendor/bin/pest tests/Unit/StripeWebhookTest.php`
+- [ ] To test manually, use Stripe CLI: `stripe listen --forward-to localhost:8000/webhooks/stripe`
+- [ ] Trigger a test event: `stripe trigger payment_intent.succeeded`
 ```
 
 ```
@@ -117,7 +117,8 @@ This is a clean break from XPath patching with no backward compatibility. Existi
 
 ## Testing
 
-The immediate issue from logs (3 failed attempts with "Invalid patch JSON") was caused by markdown code fence wrapping. The LLM was generating valid path-based patches, but the validator couldn't parse them. This should now work.
+- [ ] Verify the immediate issue from logs (3 failed attempts with "Invalid patch JSON") is resolved — caused by markdown code fence wrapping
+- [ ] Confirm LLM-generated path-based patches are parsed correctly
 ```
 
 ## Bug Fixes
@@ -148,8 +149,8 @@ Fixes #891
 
 ## Testing
 
-1. Run `php artisan test --filter=JobRecoveryTest`
-2. To test recovery manually:
+- [ ] Run `php artisan test --filter=JobRecoveryTest`
+- [ ] To test recovery manually:
    - Start a worker: `php artisan queue:work`
    - Dispatch a slow job: `php artisan tinker` then `SlowJob::dispatch()`
    - Kill the worker mid-job: `kill -9 <pid>`
@@ -203,8 +204,8 @@ Extracts permission logic from 12 controllers into a single `PermissionGate` ser
 
 ## Testing
 
-1. Run permission tests: `./vendor/bin/pest tests/Feature/PermissionTest.php`
-2. Verify all endpoints still enforce permissions: `./vendor/bin/pest --group=authorization`
+- [ ] Run permission tests: `./vendor/bin/pest tests/Feature/PermissionTest.php`
+- [ ] Verify all endpoints still enforce permissions: `./vendor/bin/pest --group=authorization`
 ```
 
 ```
@@ -265,13 +266,13 @@ Fixes #567
 
 ## Testing
 
-1. Run cache tests: `php artisan test --filter=ProductCacheTest`
-2. Verify caching manually:
+- [ ] Run cache tests: `php artisan test --filter=ProductCacheTest`
+- [ ] Verify caching manually:
    - Clear cache: `php artisan cache:clear`
    - Hit endpoint: `curl -I /api/products?category=1`
    - Check for `X-Cache: MISS`
    - Hit again, verify `X-Cache: HIT`
-3. Verify invalidation: update a product in that category, confirm next request is MISS
+- [ ] Verify invalidation: update a product in that category, confirm next request is MISS
 ```
 
 ```
@@ -326,9 +327,9 @@ Adds Pact contract tests to verify our integration with the payment gateway API 
 
 ## Testing
 
-1. Run contract tests: `npm run test:contracts`
-2. Verify against live sandbox: `PACT_VERIFY=true npm run test:contracts`
-3. View contract UI: `npx pact-broker` (requires Docker)
+- [ ] Run contract tests: `npm run test:contracts`
+- [ ] Verify against live sandbox: `PACT_VERIFY=true npm run test:contracts`
+- [ ] View contract UI: `npx pact-broker` (requires Docker)
 ```
 
 ```
@@ -387,9 +388,9 @@ CI now validates migrations before merge to prevent destructive operations from 
 
 ## Testing
 
-1. Create a test migration with `DROP COLUMN` to verify lint catches it
-2. Check workflow runs: `.github/workflows/migration-check.yml`
-3. Test locally: `./scripts/lint-migrations.sh`
+- [ ] Create a test migration with `DROP COLUMN` to verify lint catches it
+- [ ] Check workflow runs: `.github/workflows/migration-check.yml`
+- [ ] Test locally: `./scripts/lint-migrations.sh`
 ```
 
 ## Breaking Changes
@@ -443,9 +444,9 @@ Fixes #445
 
 ## Testing
 
-1. Test API: `php artisan test --filter=UserExportApiTest`
-2. Test CLI: `php artisan test --filter=UserExportCommandTest`
-3. Manual test: `php artisan users:export 1 --format=json --output=/tmp/export.zip`
+- [ ] Test API: `php artisan test --filter=UserExportApiTest`
+- [ ] Test CLI: `php artisan test --filter=UserExportCommandTest`
+- [ ] Manual test: `php artisan users:export 1 --format=json --output=/tmp/export.zip`
 ```
 
 ```
