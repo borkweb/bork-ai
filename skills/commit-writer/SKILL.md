@@ -56,14 +56,14 @@ When asked to write a commit message:
    <breaking-changes-heading - optional if relevant>
    <breaking-changes-body - optional if relevant>
 
-   ## Testing
+   ## Testing (optional — include when changes are testable)
    - [ ] <testing step 1>
    - [ ] <testing step 2>
 
    <footer - optional>
    ```
 
-   **Note:** Summary, Why, How, and Testing are standard headings — always include them. Use `- [ ]` checkbox bullets for testing steps.
+   **Note:** Summary, Why, and How are standard headings — always include them. Include Testing only when there are meaningful steps a reviewer can take to verify the change (e.g. run a test suite, test a UI flow, hit an endpoint). Skip it for documentation, config, refactors with no behavior change, or other changes where testing steps would be trivial or obvious.
 
 4. **Follow These Rules**
    - **Subject line**: 50-72 characters max, imperative mood ("add" not "added")
