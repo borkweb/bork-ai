@@ -67,6 +67,24 @@ When another skill provides structure (e.g. superpowers:writing-plans), follow t
 | Write for someone who hasn't seen the prompt | Echo or summarize the prompt |
 | Say what you don't know (open questions) | Pretend certainty where there is none |
 
+## Anti-patterns (NEVER DO THESE)
+
+### Setup-then-reveal juxtaposition
+
+The most common AI writing tell. Any sentence that exists to manufacture a reaction — creating influence or false excitement — rather than conveying information. The fix is always the same: delete the setup sentence and lead with the fact. If the fact is significant, it'll land on its own.
+
+- **Contrastive reframes**: "This isn't about technology. It's about people." "These weren't demos. Several are now running in production." — just state the actual point.
+- **Declarative setups**: "This didn't happen by accident." "This is the biggest development in X." — declares significance instead of letting the content show it.
+- **Theatrical reveals**: "But here's the catch —" "And here's the structural insight that matters:" — stage directions before the point. Just say the point.
+- **Anticipation builders**: "The most subversive moment came when..." — builds suspense where none is needed.
+
+### "This isn't X. It's Y."
+
+Sentences where an idea is raised and then immediately contradicted and replaced with a different idea. This tries to create drama or influence but ends up confusing and wordy. Just say the actual point without the setup.
+
+- "This isn't a checkout problem. It's a content problem." → "The content is the problem."
+- "This isn't about technology. It's about people." → "This affects people more than systems."
+
 ## Common Mistakes
 
 - **Reacting to the prompt.** "You asked for X, so here's X" — readers don't have the prompt. Just write X.
