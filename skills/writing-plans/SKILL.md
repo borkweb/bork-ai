@@ -49,8 +49,8 @@ When no other skill dictates structure, use whatever sections fit. Common ones:
 - **Approach** — What will be done and how. Be specific.
 - **Scope** — What's in and what's out.
 - **Risks** — Known risks and how they'll be handled.
-- **Milestones** — Deliverables and sequence.
-- **Open questions** — Decisions not yet made.
+- **Milestones** — Deliverables and sequence. Use phase numbers or dependency order, not calendar time (no "Week 1", "Week 2", "Days 3-5"). Plans executed with AI assistance collapse timelines unpredictably, so time estimates mislead. Instead, describe what must happen before each phase can start and what it produces.
+- **Decisions** — Where the plan requires a choice that hasn't been made, don't leave it as a bare question. Give each decision a descriptive heading that summarizes what's being decided (e.g., "### Cache invalidation strategy" or "### Email delivery provider"), then propose 2-3 concrete options with tradeoffs underneath. Frame as "Option A: ... Option B: ..." with a brief recommendation if you have one. The heading lets readers scan for decisions relevant to them without reading every option. Unanswered questions stall plans; proposed options keep them moving.
 
 Skip sections that don't apply. Don't include empty or trivial sections.
 
@@ -65,7 +65,8 @@ When another skill provides structure (e.g. superpowers:writing-plans), follow t
 | Use plain adjectives (fast, small, simple) | Use inflated adjectives (robust, elegant, seamless) |
 | Cut sections that add nothing | Include every possible heading for completeness |
 | Write for someone who hasn't seen the prompt | Echo or summarize the prompt |
-| Say what you don't know (open questions) | Pretend certainty where there is none |
+| Propose options with tradeoffs for undecided points | Leave open questions dangling without recommendations |
+| Sequence milestones by dependency ("after X, do Y") | Assign calendar time ("Week 1", "Days 3-5") |
 
 ## Anti-patterns (NEVER DO THESE)
 
@@ -91,3 +92,5 @@ Sentences where an idea is raised and then immediately contradicted and replaced
 - **Padding thin sections.** If scope is obvious, skip the scope section. Don't write "Scope: Everything described above."
 - **Burying the point.** The first sentence of each section should carry the key information.
 - **Using ten words where five work.** "In order to facilitate the process of" → "To".
+- **Calendar-based milestones.** "Week 1: Setup, Week 2: Implementation" — these are fiction. Use sequenced phases tied to what each step produces and what it depends on.
+- **Dangling open questions.** "Should we use X or Y?" without a recommendation wastes the reader's time. Give each decision a heading summarizing the choice, then propose options with tradeoffs: "### Storage backend — Option A: X (faster, less flexible). Option B: Y (slower, handles edge cases). Recommend A unless edge cases are common."
