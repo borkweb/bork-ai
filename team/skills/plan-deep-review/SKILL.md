@@ -1,6 +1,6 @@
 ---
 name: plan-deep-review
-description: Deep plan review with four modes: SCOPE EXPANSION (dream big), SELECTIVE EXPANSION (hold scope + cherry-pick expansions), HOLD SCOPE (maximum rigor), SCOPE REDUCTION (strip to essentials). Challenges premises, maps failure modes, reviews architecture/security/performance/deployment, and produces structured outputs with error registries and diagrams.
+description: Deep plan review with four modes: SCOPE EXPANSION (dream big), SELECTIVE EXPANSION (hold scope + cherry-pick expansions), HOLD SCOPE (maximum rigor), SCOPE REDUCTION (strip to essentials). Supports Standard (per-section) and Batched (grouped) pacing. Detects review context (git/PR, plan document, or hybrid). Challenges premises, maps failure modes and concurrency risks, reviews architecture/security/performance/cost/deployment, evaluates API contracts, and produces structured outputs with error registries, diagrams, and a go/no-go readiness verdict.
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -11,22 +11,55 @@ allowed-tools:
   - WebSearch
 ---
 
-## Step 0: Detect base branch
+## Step 0: Detect Review Context
 
-Determine which branch this PR targets. Use the result as "the base branch" in all subsequent steps.
+Determine what kind of plan you are reviewing. This shapes the entire review flow.
 
-1. Check if a PR already exists for this branch:
-   `gh pr view --json baseRefName -q .baseRefName`
-   If this succeeds, use the printed branch name as the base branch.
+1. **Git/PR context** — There is a branch with commits, possibly an open PR.
+   - Check if a PR already exists: `gh pr view --json baseRefName -q .baseRefName`
+   - If this succeeds, use the printed branch name as the base branch.
+   - If no PR exists, detect the repo's default branch: `gh repo view --json defaultBranchRef -q .defaultBranchRef.name`
+   - If both commands fail, fall back to `main`.
+   - Print the detected base branch name. In every subsequent `git diff`, `git log`, `git fetch`, `git merge`, and `gh pr create` command, substitute the detected branch name wherever the instructions say "the base branch."
 
-2. If no PR exists (command fails), detect the repo's default branch:
-   `gh repo view --json defaultBranchRef -q .defaultBranchRef.name`
+2. **Plan document context** — The plan is in a document (TODOS.md, a design doc, or described in conversation) with no branch or commits yet.
+   - Skip git diff/log commands.
+   - Use the document content as the plan under review.
+   - System audit still applies — read CLAUDE.md, TODOS.md, and existing architecture docs for context.
 
-3. If both commands fail, fall back to `main`.
+3. **Hybrid context** — A plan document exists AND some implementation has started on a branch.
+   - Use both: review the plan document AND the branch diff for consistency.
 
-Print the detected base branch name. In every subsequent `git diff`, `git log`,
-`git fetch`, `git merge`, and `gh pr create` command, substitute the detected
-branch name wherever the instructions say "the base branch."
+Print which context type was detected before proceeding.
+
+---
+
+## Review Pacing: Standard vs. Batched Mode
+
+By default, this review pauses after every section for user feedback (**Standard mode**). This is ideal for high-stakes or complex plans.
+
+For smaller plans or faster iteration, **Batched mode** groups sections and presents findings in batches:
+
+```
+  STANDARD MODE (default)               BATCHED MODE
+  Pause after every section.            Pause after every batch.
+  Best for: complex plans,              Best for: smaller plans,
+  high-stakes reviews,                  quick iterations,
+  first-time reviews.                   familiar codebases.
+
+  Batch 1: Step 0 (always standalone — mode selection requires input)
+  Batch 2: Sections 1-4 (Architecture, Errors, Security, Data/Edge Cases)
+  Batch 3: Sections 5-8 (Code Quality, Tests, Performance, Cost)
+  Batch 4: Sections 9-12 (Observability, Deployment, Long-Term, Design)
+  Batch 5: Required Outputs + Readiness Verdict
+```
+
+In Batched mode:
+* Accumulate findings across sections in the batch.
+* Present all AskUserQuestion items at the end of the batch (still one issue per question).
+* If any finding is **CRITICAL GAP**, break the batch early and surface it immediately.
+
+AskUserQuestion to select pacing mode before starting the review. Default: Standard for plans touching >10 files or introducing >3 new classes; Batched otherwise.
 
 ---
 
@@ -85,8 +118,8 @@ These are not checklist items. They are thinking instincts. Let them shape your 
 When you evaluate architecture, think through the inversion reflex. When you challenge scope, apply focus as subtraction. When you assess timeline, use speed calibration. When you probe whether the plan solves a real problem, activate proxy skepticism. When you evaluate UI flows, apply subtraction default. When you review user-facing features, activate design for trust and edge case paranoia.
 
 ## Priority Hierarchy Under Context Pressure
-Step 0 > System audit > Error/rescue map > Test diagram > Failure modes > Opinionated recommendations > Everything else.
-Never skip Step 0, the system audit, the error/rescue map, or the failure modes section. These are the highest-leverage outputs.
+Step 0 > System audit > Error/rescue map > Test diagram > Failure modes > Concurrency/race conditions > Readiness verdict > Opinionated recommendations > Everything else.
+Never skip Step 0, the system audit, the error/rescue map, the failure modes section, or the readiness verdict. These are the highest-leverage outputs.
 
 ## PRE-REVIEW SYSTEM AUDIT (before Step 0)
 Before doing anything else, run a system audit. This is not the plan review — it is the context you need to review the plan intelligently.
@@ -110,7 +143,7 @@ Map:
 Check the git log for this branch. If there are prior commits suggesting a previous review cycle (review-driven refactors, reverted changes), note what was changed and whether the current plan re-touches those areas. Be MORE aggressive reviewing areas that were previously problematic. Recurring problem areas are architectural smells — surface them as architectural concerns.
 
 ### Frontend/UI Scope Detection
-Analyze the plan. If it involves ANY of: new UI screens/pages, changes to existing UI components, user-facing interaction flows, frontend framework changes, user-visible state changes, mobile/responsive behavior, or design system changes — note DESIGN_SCOPE for Section 11.
+Analyze the plan. If it involves ANY of: new UI screens/pages, changes to existing UI components, user-facing interaction flows, frontend framework changes, user-visible state changes, mobile/responsive behavior, or design system changes — note DESIGN_SCOPE for Section 12.
 
 ### Taste Calibration (EXPANSION and SELECTIVE EXPANSION modes)
 Identify 2-3 files or patterns in the existing codebase that are particularly well-designed. Note them as style references for the review. Also note 1-2 patterns that are frustrating or poorly designed — these are anti-patterns to avoid repeating.
@@ -229,11 +262,53 @@ Context-dependent defaults:
 After mode is selected, confirm which implementation approach (from 0C-bis) applies under the chosen mode. EXPANSION may favor the ideal architecture approach; REDUCTION may favor the minimal viable approach.
 
 Once selected, commit fully. Do not silently drift.
-**STOP.** AskUserQuestion once per issue. Do NOT batch. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds.
 
-## Review Sections (11 sections, after scope and mode are agreed)
+### Mode Quick Reference (use this to calibrate your posture throughout)
+```
+  ┌────────────────────────────────────────────────────────────────────────────────┐
+  │                            MODE COMPARISON                                     │
+  ├─────────────┬──────────────┬──────────────┬──────────────┬────────────────────┤
+  │             │  EXPANSION   │  SELECTIVE   │  HOLD SCOPE  │  REDUCTION         │
+  ├─────────────┼──────────────┼──────────────┼──────────────┼────────────────────┤
+  │ Scope       │ Push UP      │ Hold + offer │ Maintain     │ Push DOWN          │
+  │             │ (opt-in)     │              │              │                    │
+  │ Recommend   │ Enthusiastic │ Neutral      │ N/A          │ N/A                │
+  │ posture     │              │              │              │                    │
+  │ 10x check   │ Mandatory    │ Surface as   │ Optional     │ Skip               │
+  │             │              │ cherry-pick  │              │                    │
+  │ Platonic    │ Yes          │ No           │ No           │ No                 │
+  │ ideal       │              │              │              │                    │
+  │ Delight     │ Opt-in       │ Cherry-pick  │ Note if seen │ Skip               │
+  │ opps        │ ceremony     │ ceremony     │              │                    │
+  │ Complexity  │ "Is it big   │ "Is it right │ "Is it too   │ "Is it the bare    │
+  │ question    │  enough?"    │  + what else │  complex?"   │  minimum?"         │
+  │             │              │  is tempting"│              │                    │
+  │ Taste       │ Yes          │ Yes          │ No           │ No                 │
+  │ calibration │              │              │              │                    │
+  │ Temporal    │ Full (hr 1-6)│ Full (hr 1-6)│ Key decisions│ Skip               │
+  │ interrogate │              │              │  only        │                    │
+  │ Observ.     │ "Joy to      │ "Joy to      │ "Can we      │ "Can we see if     │
+  │ standard    │  operate"    │  operate"    │  debug it?"  │  it's broken?"     │
+  │ Deploy      │ Infra as     │ Safe deploy  │ Safe deploy  │ Simplest possible  │
+  │ standard    │ feature scope│ + cherry-pick│  + rollback  │  deploy            │
+  │             │              │  risk check  │              │                    │
+  │ Error map   │ Full + chaos │ Full + chaos │ Full         │ Critical paths     │
+  │             │  scenarios   │ for accepted │              │  only              │
+  │ Phase 2/3   │ Map accepted │ Map accepted │ Note it      │ Skip               │
+  │ planning    │              │ cherry-picks │              │                    │
+  │ Cost review │ 100x scale   │ If accepted  │ Monitor +    │ Skip unless        │
+  │             │ efficiency   │ cherry-picks │ flag notable │  cost is driver    │
+  │ Design      │ "Inevitable" │ If UI scope  │ If UI scope  │ Skip               │
+  │ (Sec 12)    │  UI review   │  detected    │  detected    │                    │
+  └─────────────┴──────────────┴──────────────┴──────────────┴────────────────────┘
+```
+
+**STOP (Standard mode).** AskUserQuestion once per issue. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds. *(In Batched mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
+
+## Review Sections (12 sections, after scope and mode are agreed)
 
 ### Section 1: Architecture Review
+*(Apply inversion reflex: for every "how does this work?" also ask "how does this break?")*
 Evaluate and diagram:
 * Overall system design and component boundaries. Draw the dependency graph.
 * Data flow — all four paths. For every new data flow, ASCII diagram the:
@@ -248,6 +323,12 @@ Evaluate and diagram:
 * Security architecture. Auth boundaries, data access patterns, API surfaces. For each new endpoint or data mutation: who can call it, what do they get, what can they change?
 * Production failure scenarios. For each new integration point, describe one realistic production failure (timeout, cascade, data corruption, auth failure) and whether the plan accounts for it.
 * Rollback posture. If this ships and immediately breaks, what's the rollback procedure? Git revert? Feature flag? DB migration rollback? How long?
+* **API contract & versioning.** *(Apply temporal depth here — think in 5-10 year arcs.)* For every new or changed API (REST, GraphQL, internal service interface, webhook):
+    * Is the contract explicitly defined? (OpenAPI spec, typed interface, schema?)
+    * Backward compatibility: Will existing consumers break? Can old clients call new endpoints safely? Can new clients call old endpoints during rollout?
+    * Versioning strategy: URL-based (`/v2/`), header-based, or unversioned? Is this consistent with existing APIs?
+    * Deprecation path: If this replaces an existing API, is there a sunset timeline? Are consumers notified?
+    * Contract testing: Is there a test that verifies the API contract hasn't accidentally changed? (Consumer-driven contract tests, schema snapshot tests?)
 
 **EXPANSION and SELECTIVE EXPANSION additions:**
 * What would make this architecture beautiful? Not just correct — elegant. Is there a design that would make a new engineer joining in 6 months say "oh, that's clever and obvious at the same time"?
@@ -256,9 +337,10 @@ Evaluate and diagram:
 **SELECTIVE EXPANSION:** If any accepted cherry-picks from Step 0D affect the architecture, evaluate their architectural fit here. Flag any that create coupling concerns or don't integrate cleanly — this is a chance to revisit the decision with new information.
 
 Required ASCII diagram: full system architecture showing new components and their relationships to existing ones.
-**STOP.** AskUserQuestion once per issue. Do NOT batch. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds.
+**STOP (Standard mode).** AskUserQuestion once per issue. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds. *(In Batched mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
 
 ### Section 2: Error & Rescue Map
+*(Apply paranoid scanning — assume every integration will fail in production.)*
 This is the section that catches silent failures. It is not optional.
 For every new method, service, or codepath that can fail, fill in this table:
 ```
@@ -285,9 +367,10 @@ Rules for this section:
 * Every rescued error must either: retry with backoff, degrade gracefully with a user-visible message, or re-raise with added context. "Swallow and continue" is almost never acceptable.
 * For each GAP (unrescued error that should be rescued): specify the rescue action and what the user should see.
 * For LLM/AI service calls specifically: what happens when the response is malformed? When it's empty? When it hallucinates invalid JSON? When the model returns a refusal? Each of these is a distinct failure mode.
-**STOP.** AskUserQuestion once per issue. Do NOT batch. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds.
+**STOP (Standard mode).** AskUserQuestion once per issue. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds. *(In Batched mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
 
 ### Section 3: Security & Threat Model
+*(Apply inversion reflex: "how would an attacker exploit this?")*
 Security is not a sub-bullet of architecture. It gets its own section.
 Evaluate:
 * Attack surface expansion. What new attack vectors does this plan introduce? New endpoints, new params, new file paths, new background jobs?
@@ -300,9 +383,10 @@ Evaluate:
 * Audit logging. For sensitive operations: is there an audit trail?
 
 For each finding: threat, likelihood (High/Med/Low), impact (High/Med/Low), and whether the plan mitigates it.
-**STOP.** AskUserQuestion once per issue. Do NOT batch. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds.
+**STOP (Standard mode).** AskUserQuestion once per issue. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds. *(In Batched mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
 
 ### Section 4: Data Flow & Interaction Edge Cases
+*(Apply edge case paranoia — what if the name is 47 chars? Zero results? Network fails mid-action?)*
 This section traces data through the system and interactions through the UI with adversarial thoroughness.
 
 **Data Flow Tracing:** For every new data flow, produce an ASCII diagram showing:
@@ -336,9 +420,30 @@ For each node: what happens on each shadow path? Is it tested?
                        | Queue backs up 2 hours | ?        |
 ```
 Flag any unhandled edge case as a gap. For each gap, specify the fix.
-**STOP.** AskUserQuestion once per issue. Do NOT batch. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds.
+
+**Concurrency & Race Conditions:** *(Apply paranoid scanning here.)* For every new codepath that reads-then-writes, processes shared state, or runs in parallel:
+```
+  CODEPATH                | RACE CONDITION RISK         | MITIGATION         | TESTED?
+  ------------------------|-----------------------------|--------------------|--------
+  [e.g., update balance]  | Two requests read same      | DB lock / optimis- | ?
+                          | balance, both write          | tic locking        |
+  [e.g., claim resource]  | TOCTOU: check availability  | Atomic operation / | ?
+                          | then claim — gap between     | SELECT FOR UPDATE  |
+  [e.g., batch processor] | Two workers pick same item   | Unique claim token | ?
+                          | from queue                   | / advisory lock    |
+  [e.g., cache populate]  | Thundering herd on cold     | Mutex / single-    | ?
+                          | cache                        | flight pattern     |
+```
+Evaluate:
+* **TOCTOU (Time-of-check-to-time-of-use):** Any check-then-act pattern without atomicity? Flag it.
+* **Distributed locks:** If multiple processes/servers can execute the same codepath, what prevents conflicts? Database-level locks? Redis locks? Advisory locks?
+* **Idempotency:** Can every write operation be safely retried? If a job or request is delivered twice, does the system produce the correct result?
+* **Ordering guarantees:** If events must be processed in order, what enforces that? What happens when they arrive out of order?
+* **Deadlock potential:** If multiple locks are acquired, is the acquisition order consistent across all codepaths?
+**STOP (Standard mode).** AskUserQuestion once per issue. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds. *(In Batched mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
 
 ### Section 5: Code Quality Review
+*(Apply focus as subtraction and subtraction default — every new abstraction must earn its existence.)*
 Evaluate:
 * Code organization and module structure. Does new code fit existing patterns? If it deviates, is there a reason?
 * DRY violations. Be aggressive. If the same logic exists elsewhere, flag it and reference the file and line.
@@ -348,7 +453,7 @@ Evaluate:
 * Over-engineering check. Any new abstraction solving a problem that doesn't exist yet?
 * Under-engineering check. Anything fragile, assuming happy path only, or missing obvious defensive checks?
 * Cyclomatic complexity. Flag any new method that branches more than 5 times. Propose a refactor.
-**STOP.** AskUserQuestion once per issue. Do NOT batch. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds.
+**STOP (Standard mode).** AskUserQuestion once per issue. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds. *(In Batched mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
 
 ### Section 6: Test Review
 Make a complete diagram of every new thing this plan introduces:
@@ -386,9 +491,10 @@ Test ambition check (all modes): For each new feature, answer:
 Test pyramid check: Many unit, fewer integration, few E2E? Or inverted?
 Flakiness risk: Flag any test depending on time, randomness, external services, or ordering.
 Load/stress test requirements: For any new codepath called frequently or processing significant data.
-**STOP.** AskUserQuestion once per issue. Do NOT batch. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds.
+**STOP (Standard mode).** AskUserQuestion once per issue. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds. *(In Batched mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
 
 ### Section 7: Performance Review
+*(Apply speed calibration — optimize the hot path, don't gold-plate the cold path.)*
 Evaluate:
 * N+1 queries. For every new association traversal: is there eager loading?
 * Memory usage. For every new data structure: what's the maximum size in production?
@@ -397,9 +503,27 @@ Evaluate:
 * Background job sizing. For every new job: worst-case payload, runtime, retry behavior?
 * Slow paths. Top 3 slowest new codepaths and estimated p99 latency.
 * Connection pool pressure. New DB connections, Redis connections, HTTP connections?
-**STOP.** AskUserQuestion once per issue. Do NOT batch. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds.
+**STOP (Standard mode).** AskUserQuestion once per issue. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds. *(In Batched mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
 
-### Section 8: Observability & Debuggability Review
+### Section 8: Cost & Resource Impact Review
+*(Apply proxy skepticism here — are we optimizing for the right metric, or will this quietly 3x our bill?)*
+New features cost money. This section ensures cost is a conscious decision, not a surprise.
+Evaluate:
+* **Compute:** New services, containers, or workers? Estimated resource requirements at current scale and at 10x.
+* **Storage:** New tables, indexes, file storage, or caches? Growth rate estimate — what does this look like in 6 months?
+* **Third-party APIs:** New external service calls? Per-call pricing? Volume estimate? Rate limits that could become bottlenecks?
+* **Data transfer:** Cross-region, cross-service, or client-download costs? Large payloads?
+* **Background job cost:** New jobs that run on a schedule or in response to events? What's the steady-state cost vs. burst cost?
+* **Cost scaling characteristics:** Does cost scale linearly with users, or is there a multiplier (e.g., per-user-per-day, per-event-per-integration)?
+* **Cost monitoring:** Will you know when costs spike? New budget alerts or dashboards needed?
+
+For each finding, classify: **NEGLIGIBLE** (no action) / **NOTABLE** (monitor) / **SIGNIFICANT** (needs budget approval or architectural mitigation).
+
+**EXPANSION and SELECTIVE EXPANSION addition:**
+* What would make this feature cost-efficient at 100x scale? Is there an architectural choice now that prevents expensive rework later?
+**STOP (Standard mode).** AskUserQuestion once per issue. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds. *(In Batched mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
+
+### Section 9: Observability & Debuggability Review
 New systems break. This section ensures you can see why.
 Evaluate:
 * Logging. For every new codepath: structured log lines at entry, exit, and each significant branch?
@@ -413,9 +537,9 @@ Evaluate:
 
 **EXPANSION and SELECTIVE EXPANSION addition:**
 * What observability would make this feature a joy to operate? (For SELECTIVE EXPANSION, include observability for any accepted cherry-picks.)
-**STOP.** AskUserQuestion once per issue. Do NOT batch. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds.
+**STOP (Standard mode).** AskUserQuestion once per issue. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds. *(In Batched mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
 
-### Section 9: Deployment & Rollout Review
+### Section 10: Deployment & Rollout Review
 Evaluate:
 * Migration safety. For every new DB migration: backward-compatible? Zero-downtime? Table locks?
 * Feature flags. Should any part be behind a feature flag?
@@ -428,9 +552,10 @@ Evaluate:
 
 **EXPANSION and SELECTIVE EXPANSION addition:**
 * What deploy infrastructure would make shipping this feature routine? (For SELECTIVE EXPANSION, assess whether accepted cherry-picks change the deployment risk profile.)
-**STOP.** AskUserQuestion once per issue. Do NOT batch. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds.
+**STOP (Standard mode).** AskUserQuestion once per issue. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds. *(In Batched mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
 
-### Section 10: Long-Term Trajectory Review
+### Section 11: Long-Term Trajectory Review
+*(Apply temporal depth — think in 5-10 year arcs. Apply classification instinct — which decisions here are one-way doors?)*
 Evaluate:
 * Technical debt introduced. Code debt, operational debt, testing debt, documentation debt.
 * Path dependency. Does this make future changes harder?
@@ -443,9 +568,10 @@ Evaluate:
 * What comes after this ships? Phase 2? Phase 3? Does the architecture support that trajectory?
 * Platform potential. Does this create capabilities other features can leverage?
 * (SELECTIVE EXPANSION only) Retrospective: Were the right cherry-picks accepted? Did any rejected expansions turn out to be load-bearing for the accepted ones?
-**STOP.** AskUserQuestion once per issue. Do NOT batch. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds.
+**STOP (Standard mode).** AskUserQuestion once per issue. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds. *(In Batched mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
 
-### Section 11: Design & UX Review (skip if no UI scope detected)
+### Section 12: Design & UX Review (skip if no UI scope detected)
+*(Apply subtraction default — "as little design as possible." Apply design for trust — every interface decision builds or erodes user trust.)*
 This is ensuring the plan has design intentionality, not a pixel-level audit.
 
 Evaluate:
@@ -461,7 +587,7 @@ Evaluate:
 * What 30-minute UI touches would make users think "oh nice, they thought of that"?
 
 Required ASCII diagram: user flow showing screens/states and transitions.
-**STOP.** AskUserQuestion once per issue. Do NOT batch. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds.
+**STOP (Standard mode).** AskUserQuestion once per issue. Recommend + WHY. If no issues or fix is obvious, state what you'll do and move on — don't waste a question. Do NOT proceed until user responds. *(In Batched mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
 
 ## CRITICAL RULE — How to ask questions
 * **One issue = one AskUserQuestion call.** Never combine multiple issues into one question.
@@ -529,6 +655,8 @@ List every ASCII diagram in files this plan touches. Still accurate?
   |            DEEP PLAN REVIEW — COMPLETION SUMMARY                    |
   +====================================================================+
   | Mode selected        | EXPANSION / SELECTIVE / HOLD / REDUCTION     |
+  | Pacing mode          | Standard / Batched                          |
+  | Review context       | Git/PR / Plan document / Hybrid             |
   | System Audit         | [key findings]                              |
   | Step 0               | [mode + key decisions]                      |
   | Section 1  (Arch)    | ___ issues found                            |
@@ -538,10 +666,11 @@ List every ASCII diagram in files this plan touches. Still accurate?
   | Section 5  (Quality) | ___ issues found                            |
   | Section 6  (Tests)   | Diagram produced, ___ gaps                  |
   | Section 7  (Perf)    | ___ issues found                            |
-  | Section 8  (Observ)  | ___ gaps found                              |
-  | Section 9  (Deploy)  | ___ risks flagged                           |
-  | Section 10 (Future)  | Reversibility: _/5, debt items: ___         |
-  | Section 11 (Design)  | ___ issues / SKIPPED (no UI scope)          |
+  | Section 8  (Cost)    | ___ NEGLIGIBLE, ___ NOTABLE, ___ SIGNIFICANT|
+  | Section 9  (Observ)  | ___ gaps found                              |
+  | Section 10 (Deploy)  | ___ risks flagged                           |
+  | Section 11 (Future)  | Reversibility: _/5, debt items: ___         |
+  | Section 12 (Design)  | ___ issues / SKIPPED (no UI scope)          |
   +--------------------------------------------------------------------+
   | NOT in scope         | written (___ items)                          |
   | What already exists  | written                                     |
@@ -556,6 +685,16 @@ List every ASCII diagram in files this plan touches. Still accurate?
   +====================================================================+
 ```
 
+### Readiness Verdict
+
+After completing the summary, issue one of:
+
+* **READY TO IMPLEMENT** — No CRITICAL GAPs remain. All blocking questions resolved. Ship it.
+* **READY WITH CONDITIONS** — No CRITICAL GAPs, but ___ non-blocking items should be addressed during implementation. List them as a numbered checklist.
+* **NEEDS REWORK** — ___ CRITICAL GAPs remain. List each with: what's broken, what's needed to unblock. Do NOT proceed to implementation until these are resolved.
+
+The verdict must be consistent with the data: if any row in the Failure Modes Registry shows `RESCUED=N, TEST=N, USER SEES=Silent`, the verdict cannot be READY TO IMPLEMENT.
+
 ### Unresolved Decisions
 If any AskUserQuestion goes unanswered, note it here. Never silently default.
 
@@ -566,40 +705,3 @@ If any AskUserQuestion goes unanswered, note it here. Never silently default.
 * After each section, pause and wait for feedback.
 * Use **CRITICAL GAP** / **WARNING** / **OK** for scannability.
 
-## Mode Quick Reference
-```
-  ┌────────────────────────────────────────────────────────────────────────────────┐
-  │                            MODE COMPARISON                                     │
-  ├─────────────┬──────────────┬──────────────┬──────────────┬────────────────────┤
-  │             │  EXPANSION   │  SELECTIVE   │  HOLD SCOPE  │  REDUCTION         │
-  ├─────────────┼──────────────┼──────────────┼──────────────┼────────────────────┤
-  │ Scope       │ Push UP      │ Hold + offer │ Maintain     │ Push DOWN          │
-  │             │ (opt-in)     │              │              │                    │
-  │ Recommend   │ Enthusiastic │ Neutral      │ N/A          │ N/A                │
-  │ posture     │              │              │              │                    │
-  │ 10x check   │ Mandatory    │ Surface as   │ Optional     │ Skip               │
-  │             │              │ cherry-pick  │              │                    │
-  │ Platonic    │ Yes          │ No           │ No           │ No                 │
-  │ ideal       │              │              │              │                    │
-  │ Delight     │ Opt-in       │ Cherry-pick  │ Note if seen │ Skip               │
-  │ opps        │ ceremony     │ ceremony     │              │                    │
-  │ Complexity  │ "Is it big   │ "Is it right │ "Is it too   │ "Is it the bare    │
-  │ question    │  enough?"    │  + what else │  complex?"   │  minimum?"         │
-  │             │              │  is tempting"│              │                    │
-  │ Taste       │ Yes          │ Yes          │ No           │ No                 │
-  │ calibration │              │              │              │                    │
-  │ Temporal    │ Full (hr 1-6)│ Full (hr 1-6)│ Key decisions│ Skip               │
-  │ interrogate │              │              │  only        │                    │
-  │ Observ.     │ "Joy to      │ "Joy to      │ "Can we      │ "Can we see if     │
-  │ standard    │  operate"    │  operate"    │  debug it?"  │  it's broken?"     │
-  │ Deploy      │ Infra as     │ Safe deploy  │ Safe deploy  │ Simplest possible  │
-  │ standard    │ feature scope│ + cherry-pick│  + rollback  │  deploy            │
-  │             │              │  risk check  │              │                    │
-  │ Error map   │ Full + chaos │ Full + chaos │ Full         │ Critical paths     │
-  │             │  scenarios   │ for accepted │              │  only              │
-  │ Phase 2/3   │ Map accepted │ Map accepted │ Note it      │ Skip               │
-  │ planning    │              │ cherry-picks │              │                    │
-  │ Design      │ "Inevitable" │ If UI scope  │ If UI scope  │ Skip               │
-  │ (Sec 11)    │  UI review   │  detected    │  detected    │                    │
-  └─────────────┴──────────────┴──────────────┴──────────────┴────────────────────┘
-```

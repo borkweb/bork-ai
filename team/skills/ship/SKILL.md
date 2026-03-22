@@ -36,12 +36,12 @@ You are running the `/ship` workflow. This is a **non-interactive, fully automat
 - Merge conflicts that can't be auto-resolved (stop, show conflicts)
 - Test failures (stop, show failures)
 - Pre-landing review finds ASK items that need user judgment
-- MINOR or MAJOR version bump needed (ask — see Step 4)
+- MINOR or MAJOR version bump needed (ask — see Step 5)
 
 **Never stop for:**
 - Uncommitted changes (always include them)
-- Version bump choice (auto-pick MICRO or PATCH — see Step 4)
-- CHANGELOG content (auto-generate from diff)
+- Version bump choice (auto-pick MICRO or PATCH — see Step 5)
+- CHANGELOG content (auto-generate from commits)
 - Commit message approval (auto-commit)
 - Multi-file changesets (auto-split into bisectable commits)
 - TODOS.md completed-item detection (auto-mark)
@@ -57,6 +57,14 @@ You are running the `/ship` workflow. This is a **non-interactive, fully automat
 
 3. Run `git diff <base>...HEAD --stat` and `git log <base>..HEAD --oneline` to understand what's being shipped.
 
+4. **Detect linked issues.** Scan for issue references in:
+   - Branch name (e.g., `fix/123-broken-login`, `feature/GH-45`)
+   - Commit messages (`Fixes #123`, `Closes #45`, `Relates to #78`)
+   - TODOS.md entries that reference issues
+   Collect all issue numbers — they go into the PR body in Step 9.
+
+**Recovery:** If `git status` or `git log` fails (e.g., corrupted index), run `git fsck` and report. Do not proceed.
+
 ---
 
 ## Step 2: Merge the base branch (BEFORE tests)
@@ -71,6 +79,8 @@ git fetch origin <base> && git merge origin/<base> --no-edit
 
 **If already up to date:** Continue silently.
 
+**Recovery:** If `git fetch` fails (network, auth), report the error and **STOP**. If `git merge` fails for reasons other than conflicts (e.g., unrelated histories), report and **STOP**.
+
 ---
 
 ## Step 3: Run tests (on merged code)
@@ -81,70 +91,122 @@ Detect the project's test command from the codebase (package.json scripts, Makef
 
 **If all pass:** Continue silently — just note the counts briefly.
 
+**Recovery:** If the test runner itself fails to execute (missing deps, config error), report the error clearly. Do not treat "runner crashed" as "tests passed."
+
 ---
 
-## Step 3.5: Pre-Landing Review
+## Step 3.5: Pre-Landing Review (delegated to review skill)
 
-Review the diff for structural issues that tests don't catch.
+Delegate the review to the `/review` skill's checklist rather than duplicating its logic.
 
-1. Read the `checklist.md` from the review skill directory. If not available, use built-in knowledge of common review patterns (SQL safety, race conditions, LLM trust boundaries, enum completeness).
+1. Read `checklist.md` from the review skill directory (`team/skills/review/checklist.md`). **If not found, STOP and report.**
 
-2. Run `git diff origin/<base>` to get the full diff.
+2. Read `design-checklist.md` from the review skill directory (`team/skills/review/design-checklist.md`). Keep available for Step 3.5.4.
 
-3. Apply the review in two passes:
-   - **Pass 1 (CRITICAL):** SQL & Data Safety, Race Conditions, LLM Output Trust Boundary, Enum Completeness
-   - **Pass 2 (INFORMATIONAL):** Conditional Side Effects, Dead Code, Test Gaps, Performance
+3. Run `git diff origin/<base>` to get the full diff.
 
-4. **Check for frontend changes:**
+4. Apply the review in two passes per the checklist:
+   - **Pass 1 (CRITICAL):** SQL & Data Safety, Migration & Schema Safety, Race Conditions & Concurrency, Auth & Permission Gaps, LLM Output Trust Boundary, Enum & Value Completeness, API Contract Breaking Changes
+   - **Pass 2 (INFORMATIONAL):** Error Handling Anti-Patterns, Conditional Side Effects, Magic Numbers & String Coupling, Dead Code & Consistency, LLM Prompt Issues, Test Gaps, Crypto & Entropy, Time Window Safety, Type Coercion at Boundaries, View/Frontend, Performance & Bundle Impact
+
+5. **Check for frontend changes:**
    ```bash
    git diff origin/<base> --name-only | grep -E '\.(css|scss|less|tsx|jsx|vue|svelte|html|blade\.php)$' | head -5
    ```
-   If frontend files changed, also apply design review checks (AI slop, typography, spacing, accessibility).
+   If frontend files changed, apply the design checklist (loaded in step 2). Check for DESIGN.md in the repo root first — patterns blessed there are not flagged.
 
-5. **Classify each finding as AUTO-FIX or ASK.** Critical findings lean toward ASK; informational lean toward AUTO-FIX.
+6. **Classify each finding as AUTO-FIX or ASK** per the Fix-First Heuristic in the checklist. Critical findings lean toward ASK; informational lean toward AUTO-FIX.
 
-6. **Auto-fix all AUTO-FIX items.** Output one line per fix:
+7. **Auto-fix all AUTO-FIX items.** Output one line per fix:
    `[AUTO-FIXED] [file:line] Problem → what you did`
 
-7. **If ASK items remain,** present them in ONE AskUserQuestion:
+8. **If ASK items remain,** present them in ONE AskUserQuestion:
    - List each with number, severity, problem, recommended fix
    - Per-item options: A) Fix  B) Skip
    - Overall RECOMMENDATION
 
-8. **After all fixes (auto + user-approved):**
+9. **After all fixes (auto + user-approved):**
    - If ANY fixes were applied: commit fixed files, then **re-run tests** before continuing.
    - If no fixes applied: continue to Step 4.
 
-9. Output summary: `Pre-Landing Review: N issues — M auto-fixed, K asked (J fixed, L skipped)`
+10. Output summary: `Pre-Landing Review: N issues — M auto-fixed, K asked (J fixed, L skipped)`
 
-Save the review output — it goes into the PR body in Step 8.
+Save the review output — it goes into the PR body in Step 9.
 
 ---
 
-## Step 3.7: Adversarial review (large diffs only)
+## Step 3.7: Adversarial review
 
-For diffs over 200 lines, dispatch an adversarial reviewer via the Agent tool:
+Dispatch an adversarial reviewer via the Agent tool when the diff meets **ANY** of:
+- More than 200 lines changed
+- Touches auth, payment, or security-related files
+- Introduces new external service integrations
+- Contains new cryptographic operations or secret handling
+
+For diffs under 200 lines that don't touch sensitive files, skip this step.
 
 Subagent prompt:
-"Read the diff for this branch with `git diff origin/<base>`. Think like an attacker and a chaos engineer. Find edge cases, race conditions, security holes, resource leaks, failure modes, and silent data corruption paths. Be adversarial. Be thorough. No compliments — just the problems. For each finding, classify as FIXABLE or INVESTIGATE."
+"Read the diff for this branch with `git diff origin/<base>`. Think like an attacker and a chaos engineer. Your job is to find ways this code will fail in production. Look for: edge cases, race conditions, security holes, resource leaks, failure modes, silent data corruption, logic errors that produce wrong results silently, error handling that swallows failures, and trust boundary violations. Be adversarial. Be thorough. No compliments — just the problems. For each finding, classify as FIXABLE (you know how to fix it) or INVESTIGATE (needs human judgment)."
 
-Present findings. FIXABLE findings flow into the Fix-First pipeline. INVESTIGATE findings are informational only.
+Present findings. FIXABLE findings flow into the Fix-First pipeline (auto-fix, re-run tests if code changed). INVESTIGATE findings are informational only.
 
-For diffs under 200 lines, skip this step.
+Save the adversarial review output — it goes into the PR body in Step 9.
 
 ---
 
-## Step 4: Version bump (auto-decide)
+## Step 4: Commit (bisectable chunks)
+
+**Goal:** Create small, logical commits that work well with `git bisect`.
+
+1. Group changes into logical commits. Each = one coherent change.
+
+2. **Commit ordering** — use this as a default, adapt to the project structure:
+   - **Foundation changes first:** migrations, config, schema, routes, dependencies
+   - **Core logic next:** models, services, libraries (with their tests)
+   - **Surface layer last:** controllers, views, CLI commands (with their tests)
+   - **Metadata always final:** VERSION + CHANGELOG + TODOS.md in the last commit
+
+   For libraries or CLI tools, adapt: core API → internal modules → public interface → metadata.
+   For monorepos, group by package rather than layer.
+
+3. **Rules:**
+   - A module/service and its test go in the same commit
+   - If total diff is small (< 50 lines across < 4 files), a single commit is fine
+   - Each commit must be independently valid — no broken imports
+
+4. Compose commit messages: `<type>: <summary>` (feat/fix/chore/refactor/docs)
+
+---
+
+## Step 5: Version bump (auto-decide)
 
 If a `VERSION` file exists:
 
 1. Read the current version.
 
-2. **Auto-decide the bump level based on the diff:**
-   - Count lines changed
-   - **MICRO/PATCH** (auto): < 50 lines = micro, 50+ lines = patch
-   - **MINOR:** **ASK the user** — only for major features or significant architectural changes
-   - **MAJOR:** **ASK the user** — only for milestones or breaking changes
+2. **Auto-decide the bump level based on what changed, not just how much:**
+
+   **MICRO** (auto) — internal-only changes:
+   - Bug fixes, typos, comment updates, test-only changes
+   - Refactors that don't change public API or behavior
+   - Documentation updates
+
+   **PATCH** (auto) — user-facing but non-breaking:
+   - Bug fixes that change observable behavior
+   - Performance improvements
+   - New optional parameters with defaults
+   - Dependency updates
+
+   **MINOR** (ASK) — new capability:
+   - New endpoints, commands, features, or public API methods
+   - New database tables or significant schema additions
+   - New external service integrations
+
+   **MAJOR** (ASK) — breaking changes:
+   - Removed or renamed public API methods/endpoints
+   - Changed response formats or required parameters
+   - Database migrations that require data transformation
+   - Dropped support for a runtime/platform
 
 3. Compute and write the new version.
 
@@ -152,25 +214,28 @@ If no `VERSION` file exists, skip this step.
 
 ---
 
-## Step 5: CHANGELOG (auto-generate)
+## Step 6: CHANGELOG (auto-generate)
 
 If a `CHANGELOG.md` exists:
 
 1. Read the header to know the format.
 
-2. Auto-generate the entry from **ALL commits on the branch**:
-   - Use `git log <base>..HEAD --oneline` and `git diff <base>...HEAD`
-   - Categorize: `### Added`, `### Changed`, `### Fixed`, `### Removed`
+2. Auto-generate the entry using **commit messages from Step 4** as the primary signal:
+   - Commits prefixed `feat:` → `### Added`
+   - Commits prefixed `fix:` → `### Fixed`
+   - Commits prefixed `refactor:` / `chore:` → `### Changed`
+   - Commits that remove features → `### Removed`
+   - Fall back to diff analysis for any uncategorized changes
    - Write concise, descriptive bullet points
    - Insert after the file header, dated today
 
-**Do NOT ask the user to describe changes.** Infer from the diff and commit history.
+**Do NOT ask the user to describe changes.** Infer from commits and diff.
 
 If no `CHANGELOG.md` exists, skip this step.
 
 ---
 
-## Step 5.5: TODOS.md (auto-update)
+## Step 6.5: TODOS.md (auto-update)
 
 If `TODOS.md` exists:
 
@@ -183,32 +248,11 @@ If `TODOS.md` doesn't exist, skip silently.
 
 ---
 
-## Step 6: Commit (bisectable chunks)
-
-**Goal:** Create small, logical commits that work well with `git bisect`.
-
-1. Group changes into logical commits. Each = one coherent change.
-
-2. **Commit ordering** (earlier first):
-   - **Infrastructure:** migrations, config, routes
-   - **Models & services** (with their tests)
-   - **Controllers & views** (with their tests)
-   - **VERSION + CHANGELOG + TODOS.md:** always in the final commit
-
-3. **Rules:**
-   - A model/service and its test go in the same commit
-   - If total diff is small (< 50 lines across < 4 files), a single commit is fine
-   - Each commit must be independently valid — no broken imports
-
-4. Compose commit messages: `<type>: <summary>` (feat/fix/chore/refactor/docs)
-
----
-
-## Step 6.5: Verification Gate
+## Step 7: Verification Gate
 
 **IRON LAW: NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE.**
 
-Before pushing, re-verify if code changed during Steps 4-6:
+Before pushing, re-verify if code changed during Steps 4-6.5:
 
 1. If ANY code changed after Step 3's test run (review fixes, etc.), re-run tests. Paste fresh output.
 2. If the project has a build step, run it.
@@ -216,29 +260,75 @@ Before pushing, re-verify if code changed during Steps 4-6:
 
 ---
 
-## Step 7: Push
+## Step 8: Push
 
 ```bash
 git push -u origin <branch-name>
 ```
 
+**Recovery:** If push fails:
+- **Branch protection / pre-receive hook rejection:** Report the error. Do NOT force push. Suggest what the user needs to fix (e.g., required reviewers, status checks).
+- **Authentication failure:** Report and STOP.
+- **Diverged remote (non-fast-forward):** Report and STOP. Do NOT force push. Suggest `git pull --rebase origin <branch-name>` and re-running verification.
+
 ---
 
-## Step 8: Create PR
+## Step 9: Create PR
+
+### Step 9.1: Detect PR metadata
+
+1. **Labels:** Check for repo label conventions:
+   ```bash
+   gh label list --limit 20 --json name --jq '.[].name'
+   ```
+   Auto-apply labels that match the change type:
+   - `bug` / `bugfix` for fix: commits
+   - `enhancement` / `feature` for feat: commits
+   - `dependencies` if lockfiles changed
+   - Size labels if the repo uses them (S/M/L based on diff lines)
+   If no matching labels exist, skip — don't create new labels.
+
+2. **Reviewers:** Check for CODEOWNERS:
+   ```bash
+   cat .github/CODEOWNERS 2>/dev/null || cat CODEOWNERS 2>/dev/null
+   ```
+   If CODEOWNERS exists, let GitHub auto-assign. Otherwise, skip reviewer assignment.
+
+3. **Draft mode:** Create as draft (`--draft`) if ANY of:
+   - Branch name starts with `wip/` or `draft/`
+   - Any commit message contains `[WIP]` or `[DRAFT]`
+   - TODOS.md has items marked as in-progress that relate to this branch's work
+
+### Step 9.2: Create the PR
 
 ```bash
-gh pr create --base <base> --title "<type>: <summary>" --body "$(cat <<'EOF'
+gh pr create --base <base> \
+  --title "<type>: <summary>" \
+  [--draft] \
+  [--label "<label1>" --label "<label2>"] \
+  --body "$(cat <<'EOF'
 ## Summary
 <bullet points from CHANGELOG or diff summary>
 
+<If linked issues were detected in Step 1:>
+Closes #<issue>
+<or>
+Relates to #<issue>
+
 ## Pre-Landing Review
 <findings from Step 3.5, or "No issues found.">
+
+<If adversarial review was run in Step 3.7:>
+## Adversarial Review
+<INVESTIGATE findings, or "No issues found.">
+<FIXABLE findings that were applied are noted as resolved.>
 
 ## TODOS
 <completed items, or "No TODO items completed in this PR.">
 
 ## Test plan
 - [x] All tests pass
+- [x] Verification gate passed
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF
@@ -246,6 +336,11 @@ EOF
 ```
 
 **Output the PR URL.**
+
+**Recovery:** If `gh pr create` fails:
+- **PR already exists:** Run `gh pr view --json url --jq .url` and output the existing URL. Offer to update the existing PR body instead.
+- **Missing permissions:** Report and STOP.
+- **Network error:** Retry once. If still failing, report and STOP. The code is pushed — the user can create the PR manually.
 
 ---
 
@@ -257,4 +352,5 @@ EOF
 - **Split commits for bisectability** — each commit = one logical change.
 - **TODOS.md completion detection must be conservative.** Only mark items done when the diff clearly shows it.
 - **Never push without fresh verification evidence.** If code changed after Step 3, re-run before pushing.
+- **Recovery over failure.** Each step includes recovery guidance. Follow it before giving up.
 - **The goal is: user says `/ship`, next thing they see is the PR URL.**

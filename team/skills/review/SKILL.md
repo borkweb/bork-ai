@@ -1,6 +1,6 @@
 ---
 name: review
-description: Pre-landing PR review. Analyzes diff against the base branch for SQL safety, LLM trust boundary violations, conditional side effects, and other structural issues. Use when asked to "review this PR", "code review", "pre-landing review", or "check my diff". Proactively suggest when the user is about to merge or land code changes.
+description: Pre-landing PR review. Analyzes diff against the base branch for SQL safety, migration safety, auth/permission gaps, error handling anti-patterns, API contract breaks, LLM trust boundary violations, conditional side effects, and other structural issues. Includes adversarial subagent review, design review for frontend changes, and a landing verdict (SAFE TO LAND / LAND WITH CAUTION / DO NOT LAND). Use when asked to "review this PR", "code review", "pre-landing review", or "check my diff". Proactively suggest when the user is about to merge or land code changes.
 allowed-tools:
   - Bash
   - Read
@@ -13,7 +13,7 @@ allowed-tools:
   - WebSearch
 ---
 
-## Step 0: Detect base branch
+## Step 1: Detect base branch
 
 Determine which branch this PR targets. Use the result as "the base branch" in all subsequent steps.
 
@@ -38,7 +38,7 @@ You are running the `/review` workflow. Analyze the current branch's diff agains
 
 ---
 
-## Step 1: Check branch
+## Step 2: Check branch
 
 1. Run `git branch --show-current` to get the current branch.
 2. If on the base branch, output: **"Nothing to review — you're on the base branch or have no changes against it."** and stop.
@@ -46,7 +46,7 @@ You are running the `/review` workflow. Analyze the current branch's diff agains
 
 ---
 
-## Step 1.5: Scope Drift Detection
+## Step 3: Scope Drift Detection
 
 Before reviewing code quality, check: **did they build what was requested — nothing more, nothing less?**
 
@@ -67,6 +67,11 @@ Before reviewing code quality, check: **did they build what was requested — no
    - Test coverage gaps for stated requirements
    - Partial implementations (started but not finished)
 
+   **TODOS.md cross-reference:**
+   - Does this PR close any open TODOs? Note: "This PR addresses TODO: <title>"
+   - Does this PR create work that should become a TODO? Flag as informational.
+   - Are there related TODOs that provide context for this review? Reference them when discussing related findings.
+
 5. Output (before the main review begins):
    ```
    Scope Check: [CLEAN / DRIFT DETECTED / REQUIREMENTS MISSING]
@@ -74,13 +79,15 @@ Before reviewing code quality, check: **did they build what was requested — no
    Delivered: <1-line summary of what the diff actually does>
    [If drift: list each out-of-scope change]
    [If missing: list each unaddressed requirement]
+   [If TODOs addressed: list each]
+   [If new TODOs needed: list each]
    ```
 
-6. This is **INFORMATIONAL** — does not block the review. Proceed to Step 2.
+6. This is **INFORMATIONAL** — does not block the review. Proceed to Step 4.
 
 ---
 
-## Step 2: Read the checklist
+## Step 4: Read the checklist
 
 Read the `checklist.md` file in this skill's directory.
 
@@ -88,7 +95,7 @@ Read the `checklist.md` file in this skill's directory.
 
 ---
 
-## Step 3: Get the diff
+## Step 5: Get the diff
 
 Fetch the latest base branch to avoid false positives from stale local state:
 
@@ -100,12 +107,12 @@ Run `git diff origin/<base>` to get the full diff. This includes both committed 
 
 ---
 
-## Step 4: Two-pass review
+## Step 6: Two-pass review
 
 Apply the checklist against the diff in two passes:
 
-1. **Pass 1 (CRITICAL):** SQL & Data Safety, Race Conditions & Concurrency, LLM Output Trust Boundary, Enum & Value Completeness
-2. **Pass 2 (INFORMATIONAL):** Conditional Side Effects, Magic Numbers & String Coupling, Dead Code & Consistency, LLM Prompt Issues, Test Gaps, View/Frontend, Performance & Bundle Impact
+1. **Pass 1 (CRITICAL):** SQL & Data Safety, Migration & Schema Safety, Race Conditions & Concurrency, Auth & Permission Gaps, LLM Output Trust Boundary, Enum & Value Completeness, API Contract Breaking Changes
+2. **Pass 2 (INFORMATIONAL):** Error Handling Anti-Patterns, Conditional Side Effects, Magic Numbers & String Coupling, Dead Code & Consistency, LLM Prompt Issues, Test Gaps, Crypto & Entropy, Time Window Safety, Type Coercion at Boundaries, View/Frontend, Performance & Bundle Impact
 
 **Enum & Value Completeness requires reading code OUTSIDE the diff.** When the diff introduces a new enum value, status, tier, or type constant, use Grep to find all files that reference sibling values, then Read those files to check if the new value is handled. This is the one category where within-diff review is insufficient.
 
@@ -120,7 +127,7 @@ Follow the output format specified in the checklist. Respect the suppressions �
 
 ---
 
-## Step 4.5: Design Review (conditional)
+## Step 7: Design Review (conditional)
 
 Check if the diff touches frontend files:
 
@@ -147,24 +154,43 @@ git diff origin/<base> --name-only | grep -E '\.(css|scss|less|tsx|jsx|vue|svelt
 
 ---
 
-## Step 5: Fix-First Review
+## Step 8: Adversarial Review
+
+Dispatch an adversarial reviewer via the Agent tool when the diff meets ANY of:
+- More than 200 lines changed
+- Touches auth, payment, or security-related files
+- Introduces new external service integrations
+- User explicitly requests it
+
+The subagent has fresh context — no checklist bias from the structured review.
+
+Subagent prompt:
+"Read the diff for this branch with `git diff origin/<base>`. Think like an attacker and a chaos engineer. Your job is to find ways this code will fail in production. Look for: edge cases, race conditions, security holes, resource leaks, failure modes, silent data corruption, logic errors that produce wrong results silently, error handling that swallows failures, and trust boundary violations. Be adversarial. Be thorough. No compliments — just the problems. For each finding, classify as FIXABLE (you know how to fix it) or INVESTIGATE (needs human judgment)."
+
+Present findings under an `ADVERSARIAL REVIEW:` header. **FIXABLE findings** flow into the same Fix-First pipeline. **INVESTIGATE findings** are presented as informational.
+
+For diffs under 200 lines that don't touch sensitive files — skip this step, unless the user requests it.
+
+---
+
+## Step 9: Fix-First Review
 
 **Every finding gets action — not just critical ones.**
 
 Output a summary header: `Pre-Landing Review: N issues (X critical, Y informational)`
 
-### Step 5a: Classify each finding
+### Step 9a: Classify each finding
 
 For each finding, classify as AUTO-FIX or ASK per the Fix-First Heuristic in
 checklist.md. Critical findings lean toward ASK; informational findings lean
 toward AUTO-FIX.
 
-### Step 5b: Auto-fix all AUTO-FIX items
+### Step 9b: Auto-fix all AUTO-FIX items
 
 Apply each fix directly. For each one, output a one-line summary:
 `[AUTO-FIXED] [file:line] Problem → what you did`
 
-### Step 5c: Batch-ask about ASK items
+### Step 9c: Batch-ask about ASK items
 
 If there are ASK items remaining, present them in ONE AskUserQuestion:
 
@@ -189,7 +215,7 @@ RECOMMENDATION: Fix both — #1 is a real race condition, #2 prevents silent dat
 
 If 3 or fewer ASK items, you may use individual AskUserQuestion calls instead of batching.
 
-### Step 5d: Apply user-approved fixes
+### Step 9d: Apply user-approved fixes
 
 Apply fixes for items where the user chose "Fix." Output what was fixed.
 
@@ -207,19 +233,7 @@ Before producing the final review output:
 
 ---
 
-## Step 5.5: TODOS cross-reference
-
-Read `TODOS.md` in the repository root (if it exists). Cross-reference the PR against open TODOs:
-
-- **Does this PR close any open TODOs?** If yes, note which items in your output: "This PR addresses TODO: <title>"
-- **Does this PR create work that should become a TODO?** If yes, flag it as an informational finding.
-- **Are there related TODOs that provide context for this review?** If yes, reference them when discussing related findings.
-
-If TODOS.md doesn't exist, skip this step silently.
-
----
-
-## Step 5.6: Documentation staleness check
+## Step 10: Documentation staleness check
 
 Cross-reference the diff against documentation files. For each `.md` file in the repo root (README.md, ARCHITECTURE.md, CONTRIBUTING.md, CLAUDE.md, AGENTS.md, etc.):
 
@@ -233,16 +247,71 @@ If no documentation files exist, skip this step silently.
 
 ---
 
-## Step 5.7: Adversarial review (for large diffs)
+## Step 11: Post-fix verification
 
-For diffs over 200 lines, dispatch an adversarial reviewer via the Agent tool. The subagent has fresh context — no checklist bias from the structured review.
+After all fixes (auto-fix and user-approved) are applied, verify nothing was broken:
 
-Subagent prompt:
-"Read the diff for this branch with `git diff origin/<base>`. Think like an attacker and a chaos engineer. Your job is to find ways this code will fail in production. Look for: edge cases, race conditions, security holes, resource leaks, failure modes, silent data corruption, logic errors that produce wrong results silently, error handling that swallows failures, and trust boundary violations. Be adversarial. Be thorough. No compliments — just the problems. For each finding, classify as FIXABLE (you know how to fix it) or INVESTIGATE (needs human judgment)."
+1. **Run the test suite** (if a test runner is detectable):
+   - Look for `package.json` scripts (`test`), `Makefile` targets, `composer.json` scripts, `Rakefile`, etc.
+   - Run the appropriate test command. If the suite is large, run only tests related to changed files if possible.
+   - If tests fail: report which tests failed and whether the failure is from a review fix or was pre-existing.
 
-Present findings under an `ADVERSARIAL REVIEW:` header. **FIXABLE findings** flow into the same Fix-First pipeline. **INVESTIGATE findings** are presented as informational.
+2. **Syntax/lint check** (if a linter is configured):
+   - Run the project's linter on changed files only.
+   - Report any new lint errors introduced by fixes.
 
-For diffs under 200 lines, skip this step.
+3. **Diff sanity check:**
+   - Run `git diff --stat` to show what the review changed.
+   - Verify no unintended files were modified.
+
+If no test runner or linter is detectable, skip to the diff sanity check only.
+
+If any fix introduced a test failure, flag it as a **review regression** and offer to revert that specific fix.
+
+---
+
+## Step 12: Completion Summary & Landing Verdict
+
+### Completion Summary
+
+Display a structured summary of the entire review:
+
+```
+  +====================================================================+
+  |            PRE-LANDING REVIEW — COMPLETION SUMMARY                  |
+  +====================================================================+
+  | Base branch          | [detected branch name]                      |
+  | Diff size            | ___ files changed, ___ insertions, ___ del  |
+  | Scope check          | CLEAN / DRIFT DETECTED / REQUIREMENTS MISSING|
+  +--------------------------------------------------------------------+
+  | CRITICAL findings    | ___ total (___ auto-fixed, ___ user-decided)|
+  | INFORMATIONAL finds  | ___ total (___ auto-fixed, ___ user-decided)|
+  | Design findings      | ___ total / SKIPPED (no frontend changes)   |
+  | Adversarial findings | ___ FIXABLE, ___ INVESTIGATE / SKIPPED      |
+  +--------------------------------------------------------------------+
+  | Auto-fixes applied   | ___ total                                   |
+  | User-approved fixes  | ___ total                                   |
+  | User-skipped items   | ___ total                                   |
+  | TODOs addressed      | ___ items from TODOS.md                     |
+  | New TODOs flagged    | ___ items                                   |
+  | Stale docs flagged   | ___ files                                   |
+  | Post-fix tests       | PASSED / ___ FAILED / NOT RUN               |
+  | Unresolved items     | ___ (listed below)                          |
+  +====================================================================+
+```
+
+### Landing Verdict
+
+After completing the summary, issue one of:
+
+* **SAFE TO LAND** — No unresolved CRITICAL findings. All fixes applied cleanly. Tests pass (or no regressions). Ship it.
+* **LAND WITH CAUTION** — No unresolved CRITICAL findings, but ___ items need attention. List each with a one-line description. These are non-blocking but the author should be aware.
+* **DO NOT LAND** — ___ unresolved CRITICAL findings remain. List each with: what's broken, why it's dangerous, and what's needed to fix it. Do NOT merge until these are resolved.
+
+The verdict must be consistent with the data:
+- If any CRITICAL finding was skipped by the user, the verdict cannot be SAFE TO LAND — it is LAND WITH CAUTION at best, with the skipped item noted.
+- If any CRITICAL finding is unresolved (not fixed and not explicitly skipped), the verdict is DO NOT LAND.
+- If post-fix tests fail due to a review fix, the verdict cannot be SAFE TO LAND until the regression is resolved.
 
 ---
 

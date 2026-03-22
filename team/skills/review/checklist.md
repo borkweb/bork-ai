@@ -5,7 +5,7 @@
 Review the `git diff origin/<base>` output for the issues listed below. Be specific — cite `file:line` and suggest fixes. Skip anything that's fine. Only flag real problems.
 
 **Two-pass review:**
-- **Pass 1 (CRITICAL):** Run SQL & Data Safety and LLM Output Trust Boundary first. Highest severity.
+- **Pass 1 (CRITICAL):** Run SQL & Data Safety, Migration & Schema Safety, Race Conditions & Concurrency, Auth & Permission Gaps, LLM Output Trust Boundary, Enum & Value Completeness, and API Contract Breaking Changes first. Highest severity.
 - **Pass 2 (INFORMATIONAL):** Run all remaining categories. Lower severity but still actioned.
 
 All findings get action via Fix-First Review: obvious mechanical fixes are applied automatically,
@@ -57,7 +57,40 @@ When the diff introduces a new enum value, status string, tier name, or type con
 - **Check `case`/`if-elsif` chains.** If existing code branches on the enum, does the new value fall through to a wrong default?
 To do this: use Grep to find all references to the sibling values. Read each match. This step requires reading code OUTSIDE the diff.
 
+#### Migration & Schema Safety
+- New DB migration adding a column with a NOT NULL constraint and no default — will fail on existing rows
+- Migration that locks a large table (adding an index without CONCURRENTLY, renaming columns, changing column types)
+- Migration that is not backward-compatible — old code running during deploy will break (e.g., removing a column that old code still reads)
+- Migration adding a foreign key constraint to a large table without validation separation (`ADD CONSTRAINT ... NOT VALID` + separate `VALIDATE CONSTRAINT`)
+- Irreversible migration without a documented rollback strategy
+- Data backfill in the same migration as a schema change — should be separate (schema first, backfill second)
+
+#### Auth & Permission Gaps
+- New endpoint or controller action without authorization check — any authenticated user can access
+- New data query not scoped to current user/org/tenant — user A can access user B's data by guessing IDs (IDOR)
+- Privilege escalation: action checks a lower permission than it should (e.g., viewer permission for a write action)
+- New admin/internal endpoint exposed without role check or IP restriction
+- Authorization check on the wrong model (e.g., checking permission on a parent but accessing a child without verifying relationship)
+- Mass assignment: new params permitted without whitelisting (e.g., `params.permit!` or accepting user-supplied role/admin fields)
+
+#### API Contract Breaking Changes
+- Removed or renamed field in API response that existing consumers may depend on
+- Changed field type in API response (e.g., string → integer, object → array)
+- New required parameter in API request without a default or version bump
+- Changed HTTP status code for an existing endpoint (e.g., 200 → 201)
+- Removed or renamed API endpoint without deprecation period
+- Changed authentication/authorization requirements on an existing endpoint
+- Response pagination or ordering change that could break client assumptions
+
 ### Pass 2 — INFORMATIONAL
+
+#### Error Handling Anti-Patterns
+- Catch-all exception handler (`rescue StandardError`, `catch (Exception e)`, `except Exception`) that swallows specific errors — name the specific exceptions
+- Error caught and only logged with a generic message — missing context (what was attempted, with what args, for what user/request)
+- Error handler that returns a success response — caller thinks operation succeeded when it didn't
+- Error messages exposed to users that leak internal details (stack traces, SQL, file paths, internal IDs)
+- Missing error handling on external service calls (HTTP requests, third-party APIs) — no timeout, no retry, no graceful degradation
+- `try/catch` or `begin/rescue` with an empty catch block — silent failure
 
 #### Conditional Side Effects
 - Code paths that branch on a condition but forget to apply a side effect on one branch
@@ -123,12 +156,13 @@ To do this: use Grep to find all references to the sibling values. Read each mat
 
 ```
 CRITICAL (highest severity):      INFORMATIONAL (lower severity):
-├─ SQL & Data Safety              ├─ Conditional Side Effects
+├─ SQL & Data Safety              ├─ Error Handling Anti-Patterns
+├─ Migration & Schema Safety      ├─ Conditional Side Effects
 ├─ Race Conditions & Concurrency  ├─ Magic Numbers & String Coupling
-├─ LLM Output Trust Boundary      ├─ Dead Code & Consistency
-└─ Enum & Value Completeness      ├─ LLM Prompt Issues
-                                   ├─ Test Gaps
-                                   ├─ Crypto & Entropy
+├─ Auth & Permission Gaps         ├─ Dead Code & Consistency
+├─ LLM Output Trust Boundary      ├─ LLM Prompt Issues
+├─ Enum & Value Completeness      ├─ Test Gaps
+└─ API Contract Breaking Changes  ├─ Crypto & Entropy
                                    ├─ Time Window Safety
                                    ├─ Type Coercion at Boundaries
                                    ├─ View/Frontend
@@ -152,8 +186,11 @@ AUTO-FIX (agent fixes without asking):     ASK (needs human judgment):
 ├─ Magic numbers → named constants         ├─ Large fixes (>20 lines)
 ├─ Missing LLM output validation           ├─ Enum completeness
 ├─ Version/path mismatches                 ├─ Removing functionality
-├─ Variables assigned but never read       └─ Anything changing user-visible
-└─ Inline styles, O(n*m) view lookups        behavior
+├─ Variables assigned but never read       ├─ Migration safety
+├─ Inline styles, O(n*m) view lookups      ├─ Auth/permission gaps
+├─ Empty catch blocks → add logging        ├─ API contract changes
+├─ Error messages leaking internals        └─ Anything changing user-visible
+└─ Generic error handlers → specific           behavior
 ```
 
 **Rule of thumb:** If the fix is mechanical and a senior engineer would apply it

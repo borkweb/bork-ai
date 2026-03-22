@@ -1,6 +1,6 @@
 ---
 name: plan-eng-review
-description: Eng manager-mode plan review. Lock in the execution plan — architecture, data flow, diagrams, edge cases, test coverage, performance. Walks through issues interactively with opinionated recommendations. Use when asked to "review the architecture", "engineering review", or "lock in the plan". Proactively suggest when the user has a plan or design doc and is about to start coding — to catch architecture issues before implementation.
+description: Eng manager-mode plan review. Lock in the execution plan — architecture, security, data flow, concurrency, diagrams, edge cases, test coverage, performance, observability, deployment. Supports Standard (per-section) and Quick-pass (grouped) pacing. Detects review context (git/PR, plan document, or hybrid). Walks through issues interactively with opinionated recommendations and produces a go/no-go readiness verdict. Use when asked to "review the architecture", "engineering review", or "lock in the plan". Proactively suggest when the user has a plan or design doc and is about to start coding — to catch architecture issues before implementation.
 allowed-tools:
   - Read
   - Write
@@ -16,7 +16,7 @@ allowed-tools:
 Review this plan thoroughly before making any code changes. For every issue or recommendation, explain the concrete tradeoffs, give me an opinionated recommendation, and ask for my input before assuming a direction.
 
 ## Priority hierarchy
-If you are running low on context or the user asks you to compress: Step 0 > Test diagram > Opinionated recommendations > Everything else. Never skip Step 0 or the test diagram.
+If you are running low on context or the user asks you to compress: Step 0 > Test diagram > Error/rescue map > Failure modes > Concurrency check > Readiness verdict > Opinionated recommendations > Everything else. Never skip Step 0, the test diagram, the failure modes, or the readiness verdict.
 
 ## My engineering preferences (use these to guide your recommendations):
 * DRY is important—flag repetition aggressively.
@@ -53,6 +53,44 @@ When evaluating architecture, think "boring by default." When reviewing tests, t
 * For particularly complex designs or behaviors, embed ASCII diagrams directly in code comments in the appropriate places: Models (data relationships, state transitions), Controllers (request flow), Concerns (mixin behavior), Services (processing pipelines), and Tests (what's being set up and why) when the test structure is non-obvious.
 * **Diagram maintenance is part of the change.** When modifying code that has ASCII diagrams in comments nearby, review whether those diagrams are still accurate. Update them as part of the same commit. Stale diagrams are worse than no diagrams — they actively mislead. Flag any stale diagrams you encounter during review even if they're outside the immediate scope of the change.
 
+## Review Context Detection
+
+Before anything else, determine what kind of plan you are reviewing:
+
+1. **Git/PR context** — There is a branch with commits, possibly an open PR.
+   - Detect base branch: `gh pr view --json baseRefName -q .baseRefName`
+   - If no PR: `gh repo view --json defaultBranchRef -q .defaultBranchRef.name`
+   - Fall back to `main` if both fail.
+   - Use the detected base branch for all subsequent `git diff` and `git log` commands.
+
+2. **Plan document context** — The plan is in a document (TODOS.md, design doc, or described in conversation) with no branch yet.
+   - Skip git diff/log commands. Use the document content as the plan under review.
+
+3. **Hybrid context** — A plan document exists AND some implementation has started on a branch.
+   - Review both: the plan document AND the branch diff for consistency.
+
+Print which context type was detected before proceeding.
+
+## Review Pacing
+
+By default, this review pauses after every section (**Standard mode**). For smaller plans or faster iteration, **Quick-pass mode** groups sections into two batches:
+
+```
+  STANDARD (default)                    QUICK-PASS
+  Pause after every section.            Two batches + outputs.
+  Best for: complex plans,              Best for: small plans,
+  high-stakes reviews.                  quick iterations.
+
+  Batch 1: Step 0 (always standalone — scope decisions require input)
+  Batch 2: Sections 1-4 (Architecture, Security, Code Quality, Tests)
+  Batch 3: Sections 5-8 (Performance, Observability, Deployment, Concurrency)
+  Batch 4: Required Outputs + Readiness Verdict
+```
+
+In Quick-pass mode: accumulate findings across sections in the batch. Present all AskUserQuestion items at the batch boundary (still one issue per question). Break the batch early on any **CRITICAL GAP**.
+
+Default: Standard for plans touching >8 files or introducing >2 new classes; Quick-pass otherwise.
+
 ## BEFORE YOU START:
 
 Check if there is a design doc in the project (e.g., `docs/plans/`). If one exists for this feature/branch, read it. Use it as the source of truth for the problem statement, constraints, and chosen approach.
@@ -77,23 +115,45 @@ If the complexity check triggers (8+ files or 2+ new classes/services), proactiv
 
 **Critical: Once the user accepts or rejects a scope reduction recommendation, commit fully.** Do not re-argue for smaller scope during later review sections. Do not silently reduce scope or skip planned components.
 
-Always work through the full interactive review: one section at a time (Architecture → Code Quality → Tests → Performance) with at most 8 top issues per section.
+Always work through the full interactive review: one section at a time (Architecture → Security → Code Quality → Tests → Performance → Observability → Deployment → Concurrency) with at most 8 top issues per section.
 
-## Review Sections (after scope is agreed)
+## Review Sections (8 sections, after scope is agreed)
 
 ### 1. Architecture review
+*(Apply "boring by default" — is this plan spending an innovation token? Apply "blast radius instinct" — what's the worst case?)*
 Evaluate:
 * Overall system design and component boundaries.
 * Dependency graph and coupling concerns.
 * Data flow patterns and potential bottlenecks.
 * Scaling characteristics and single points of failure.
-* Security architecture (auth, data access, API boundaries).
 * Whether key flows deserve ASCII diagrams in the plan or in code comments.
 * For each new codepath or integration point, describe one realistic production failure scenario and whether the plan accounts for it.
+* **API contract & versioning.** For every new or changed API (REST, GraphQL, internal service interface, webhook):
+    * Is the contract explicitly defined? (OpenAPI spec, typed interface, schema?)
+    * Backward compatibility: Will existing consumers break?
+    * Versioning strategy: Consistent with existing APIs?
+    * Deprecation path: If replacing an existing API, is there a sunset timeline?
+    * Contract testing: Is there a test verifying the API contract hasn't accidentally changed?
 
-**STOP.** For each issue found in this section, call AskUserQuestion individually. One issue per call. Present options, state your recommendation, explain WHY. Do NOT batch multiple issues into one AskUserQuestion. Only proceed to the next section after ALL issues in this section are resolved.
+**STOP (Standard mode).** For each issue found in this section, call AskUserQuestion individually. One issue per call. Present options, state your recommendation, explain WHY. Do NOT batch multiple issues into one AskUserQuestion. Only proceed to the next section after ALL issues in this section are resolved. *(In Quick-pass mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
 
-### 2. Code quality review
+### 2. Security review
+*(Apply "blast radius instinct" — how many users/systems are affected if this is exploited?)*
+Security is not a sub-bullet of architecture. It gets its own pass.
+Evaluate:
+* **Attack surface.** What new attack vectors does this plan introduce? New endpoints, params, file paths, background jobs?
+* **Input validation.** For every new user input: validated, sanitized, rejected loudly on failure? Check: nil, empty, wrong type, exceeds max length, unicode edge cases, injection attempts.
+* **Authorization.** For every new data access: scoped to the right user/role? Direct object reference vulnerabilities? Can user A access user B's data by manipulating IDs?
+* **Secrets.** New secrets? In env vars, not hardcoded? Rotatable?
+* **Injection vectors.** SQL, command, template, LLM prompt injection — check all that apply.
+* **Dependency risk.** New packages? Known vulnerabilities? Maintained?
+
+For each finding: threat, likelihood (High/Med/Low), impact (High/Med/Low), and whether the plan mitigates it.
+
+**STOP (Standard mode).** For each issue found in this section, call AskUserQuestion individually. One issue per call. Present options, state your recommendation, explain WHY. Do NOT batch multiple issues into one AskUserQuestion. Only proceed to the next section after ALL issues in this section are resolved. *(In Quick-pass mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
+
+### 3. Code quality review
+*(Apply "essential vs accidental complexity" — is this solving a real problem or one we created? Apply "make the change easy, then make the easy change.")*
 Evaluate:
 * Code organization and module structure.
 * DRY violations—be aggressive here.
@@ -102,21 +162,70 @@ Evaluate:
 * Areas that are over-engineered or under-engineered relative to my preferences.
 * Existing ASCII diagrams in touched files — are they still accurate after this change?
 
-**STOP.** For each issue found in this section, call AskUserQuestion individually. One issue per call. Present options, state your recommendation, explain WHY. Do NOT batch multiple issues into one AskUserQuestion. Only proceed to the next section after ALL issues in this section are resolved.
+**STOP (Standard mode).** For each issue found in this section, call AskUserQuestion individually. One issue per call. Present options, state your recommendation, explain WHY. Do NOT batch multiple issues into one AskUserQuestion. Only proceed to the next section after ALL issues in this section are resolved. *(In Quick-pass mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
 
-### 3. Test review
+### 4. Test review
+*(Apply "systems over heroes" — tests should catch bugs for the tired engineer at 3am, not just the author on day one.)*
 Make a diagram of all new UX, new data flow, new codepaths, and new branching if statements or outcomes. For each, note what is new about the features discussed in this branch and plan. Then, for each new item in the diagram, make sure there is a corresponding test.
 
-**STOP.** For each issue found in this section, call AskUserQuestion individually. One issue per call. Present options, state your recommendation, explain WHY. Do NOT batch multiple issues into one AskUserQuestion. Only proceed to the next section after ALL issues in this section are resolved.
+**STOP (Standard mode).** For each issue found in this section, call AskUserQuestion individually. One issue per call. Present options, state your recommendation, explain WHY. Do NOT batch multiple issues into one AskUserQuestion. Only proceed to the next section after ALL issues in this section are resolved. *(In Quick-pass mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
 
-### 4. Performance review
+### 5. Performance review
+*(Apply "error budgets over uptime targets" — where should we spend our performance budget?)*
 Evaluate:
 * N+1 queries and database access patterns.
 * Memory-usage concerns.
 * Caching opportunities.
 * Slow or high-complexity code paths.
+* Connection pool pressure — new DB, Redis, or HTTP connections?
 
-**STOP.** For each issue found in this section, call AskUserQuestion individually. One issue per call. Present options, state your recommendation, explain WHY. Do NOT batch multiple issues into one AskUserQuestion. Only proceed to the next section after ALL issues in this section are resolved.
+**STOP (Standard mode).** For each issue found in this section, call AskUserQuestion individually. One issue per call. Present options, state your recommendation, explain WHY. Do NOT batch multiple issues into one AskUserQuestion. Only proceed to the next section after ALL issues in this section are resolved. *(In Quick-pass mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
+
+### 6. Observability & debuggability review
+*(Apply "own your code in production" — if this breaks at 2am, can you figure out why from logs alone?)*
+New codepaths break. This section ensures you can see why.
+Evaluate:
+* **Logging.** For every new codepath: structured log lines at entry, exit, and each significant branch?
+* **Metrics.** What metric tells you this feature is working? What tells you it's broken?
+* **Alerting.** What new alerts should exist? What's the threshold and who gets paged?
+* **Debuggability.** If a bug is reported 3 weeks post-ship, can you reconstruct what happened from logs alone?
+* **Runbooks.** For each new failure mode: what's the operational response?
+
+**STOP (Standard mode).** For each issue found in this section, call AskUserQuestion individually. One issue per call. Present options, state your recommendation, explain WHY. Do NOT batch multiple issues into one AskUserQuestion. Only proceed to the next section after ALL issues in this section are resolved. *(In Quick-pass mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
+
+### 7. Deployment & rollout review
+*(Apply "incremental over revolutionary" — canary, not global rollout. Apply "reversibility preference" — feature flags, not all-or-nothing.)*
+Evaluate:
+* **Migration safety.** For every new DB migration: backward-compatible? Zero-downtime? Table locks?
+* **Feature flags.** Should any part be behind a feature flag?
+* **Deploy-time risk window.** Old code and new code running simultaneously — what breaks?
+* **Rollback plan.** If this ships and immediately breaks: git revert? Feature flag? DB migration rollback? How long to recover?
+* **Post-deploy verification.** What checks run in the first 5 minutes after deploy?
+
+**STOP (Standard mode).** For each issue found in this section, call AskUserQuestion individually. One issue per call. Present options, state your recommendation, explain WHY. Do NOT batch multiple issues into one AskUserQuestion. Only proceed to the next section after ALL issues in this section are resolved. *(In Quick-pass mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
+
+### 8. Concurrency & race condition review
+*(Apply "systems over heroes" — design for what happens when two requests arrive at the same millisecond, not just one at a time.)*
+For every new codepath that reads-then-writes, processes shared state, or runs in parallel:
+```
+  CODEPATH                | RACE CONDITION RISK         | MITIGATION         | TESTED?
+  ------------------------|-----------------------------|--------------------|--------
+  [e.g., update balance]  | Two requests read same      | DB lock / optimis- | ?
+                          | balance, both write          | tic locking        |
+  [e.g., claim resource]  | TOCTOU: check availability  | Atomic operation / | ?
+                          | then claim — gap between     | SELECT FOR UPDATE  |
+  [e.g., batch processor] | Two workers pick same item   | Unique claim token | ?
+                          | from queue                   | / advisory lock    |
+```
+Evaluate:
+* **TOCTOU bugs:** Any check-then-act pattern without atomicity?
+* **Idempotency:** Can every write operation be safely retried?
+* **Ordering guarantees:** If events must be processed in order, what enforces that?
+* **Deadlock potential:** If multiple locks are acquired, is the order consistent?
+
+If no new concurrency concerns exist, say so and move on.
+
+**STOP (Standard mode).** For each issue found in this section, call AskUserQuestion individually. One issue per call. Present options, state your recommendation, explain WHY. Do NOT batch multiple issues into one AskUserQuestion. Only proceed to the next section after ALL issues in this section are resolved. *(In Quick-pass mode, accumulate findings and continue to the next section in the batch — present all questions at batch boundary. Break early on CRITICAL GAP.)*
 
 ## CRITICAL RULE — How to ask questions
 * **One issue = one AskUserQuestion call.** Never combine multiple issues into one question.
@@ -151,25 +260,66 @@ Do NOT just append vague bullet points. A TODO without context is worse than no 
 ### Diagrams
 The plan itself should use ASCII diagrams for any non-trivial data flow, state machine, or processing pipeline. Additionally, identify which files in the implementation should get inline ASCII diagram comments — particularly Models with complex state transitions, Services with multi-step pipelines, and Concerns with non-obvious mixin behavior.
 
-### Failure modes
-For each new codepath identified in the test review diagram, list one realistic way it could fail in production (timeout, nil reference, race condition, stale data, etc.) and whether:
-1. A test covers that failure
-2. Error handling exists for it
-3. The user would see a clear error or a silent failure
+### Error & rescue map
+For every new method, service, or codepath that can fail, fill in this table:
+```
+  METHOD/CODEPATH          | WHAT CAN GO WRONG           | EXCEPTION CLASS     | RESCUED? | RESCUE ACTION          | USER SEES
+  -------------------------|-----------------------------|--------------------|----------|------------------------|------------------
+  ExampleService#call      | API timeout                 | TimeoutError        | Y        | Retry 2x, then raise   | "Temporarily unavailable"
+                           | API returns 429             | RateLimitError      | Y        | Backoff + retry         | Nothing (transparent)
+                           | Record not found            | RecordNotFound      | Y        | Return nil, log warning | "Not found" message
+                           | Malformed response          | JSONParseError      | N ← GAP  | —                      | 500 error ← BAD
+```
+Rules:
+* Catch-all error handling (`rescue StandardError`, `catch (Exception e)`, `except Exception`) is ALWAYS a smell. Name the specific exceptions.
+* Every rescued error must: retry with backoff, degrade gracefully with a user-visible message, or re-raise with context. "Swallow and continue" is almost never acceptable.
+* For each GAP: specify what the rescue action and user-facing message should be.
 
-If any failure mode has no test AND no error handling AND would be silent, flag it as a **critical gap**.
+### Failure modes
+For each new codepath identified in the test review diagram, list one realistic way it could fail in production (timeout, nil reference, race condition, stale data, etc.):
+```
+  CODEPATH       | FAILURE MODE      | RESCUED? | TEST? | USER SEES?     | LOGGED?
+  ---------------|-------------------|----------|-------|----------------|--------
+```
+If any row has RESCUED=N AND TEST=N AND USER SEES=Silent, flag it as a **CRITICAL GAP**.
 
 ### Completion summary
 At the end of the review, fill in and display this summary so the user can see all findings at a glance:
-- Step 0: Scope Challenge — ___ (scope accepted as-is / scope reduced per recommendation)
-- Architecture Review: ___ issues found
-- Code Quality Review: ___ issues found
-- Test Review: diagram produced, ___ gaps identified
-- Performance Review: ___ issues found
-- NOT in scope: written
-- What already exists: written
-- TODOS.md updates: ___ items proposed to user
-- Failure modes: ___ critical gaps flagged
+```
+  +====================================================================+
+  |            ENG PLAN REVIEW — COMPLETION SUMMARY                     |
+  +====================================================================+
+  | Review context       | Git/PR / Plan document / Hybrid             |
+  | Pacing mode          | Standard / Quick-pass                       |
+  | Step 0               | scope accepted / scope reduced              |
+  | Section 1  (Arch)    | ___ issues found                            |
+  | Section 2  (Security)| ___ issues found, ___ High severity         |
+  | Section 3  (Quality) | ___ issues found                            |
+  | Section 4  (Tests)   | diagram produced, ___ gaps identified       |
+  | Section 5  (Perf)    | ___ issues found                            |
+  | Section 6  (Observ)  | ___ gaps found                              |
+  | Section 7  (Deploy)  | ___ risks flagged                           |
+  | Section 8  (Concurr) | ___ risks found                             |
+  +--------------------------------------------------------------------+
+  | NOT in scope         | written (___ items)                          |
+  | What already exists  | written                                     |
+  | Error/rescue map     | ___ methods, ___ GAPS                       |
+  | Failure modes        | ___ total, ___ CRITICAL GAPS                |
+  | TODOS.md updates     | ___ items proposed to user                  |
+  | Diagrams produced    | ___ (list types)                            |
+  | Unresolved decisions | ___ (listed below)                          |
+  +====================================================================+
+```
+
+### Readiness verdict
+
+After completing the summary, issue one of:
+
+* **READY TO IMPLEMENT** — No CRITICAL GAPs remain. All blocking questions resolved. Ship it.
+* **READY WITH CONDITIONS** — No CRITICAL GAPs, but ___ non-blocking items should be addressed during implementation. List them as a numbered checklist.
+* **NEEDS REWORK** — ___ CRITICAL GAPs remain. List each with: what's broken, what's needed to unblock. Do NOT proceed to implementation until these are resolved.
+
+The verdict must be consistent with the data: if any row in the Failure Modes table shows `RESCUED=N, TEST=N, USER SEES=Silent`, the verdict cannot be READY TO IMPLEMENT.
 
 ## Retrospective learning
 Check the git log for this branch. If there are prior commits suggesting a previous review cycle (e.g., review-driven refactors, reverted changes), note what was changed and whether the current plan touches the same areas. Be more aggressive reviewing areas that were previously problematic.

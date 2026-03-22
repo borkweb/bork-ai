@@ -1,0 +1,25 @@
+{
+  "description": "Performance budgets for this project. Global values apply to all pages unless overridden in per_page. All byte values are in bytes. All time values are in milliseconds.",
+  "global": {
+    "fcp_ms": 1800,
+    "lcp_ms": 2500,
+    "cls": 0.1,
+    "js_bundle_bytes": 500000,
+    "css_bundle_bytes": 100000,
+    "total_transfer_bytes": 2000000,
+    "total_requests": 50
+  },
+  "per_page": {
+    "/": {
+      "description": "Landing page — tighter budget since it's the first impression",
+      "lcp_ms": 1500,
+      "total_transfer_bytes": 1500000
+    },
+    "/dashboard": {
+      "description": "Dashboard loads more data — relaxed thresholds are appropriate",
+      "lcp_ms": 3000,
+      "total_requests": 80,
+      "total_transfer_bytes": 3000000
+    }
+  }
+}

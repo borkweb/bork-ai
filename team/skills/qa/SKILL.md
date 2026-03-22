@@ -72,6 +72,8 @@ This is the **primary mode** for developers verifying their work. When the user 
    - CSS/style files → which pages include those stylesheets
    - API endpoints → test them directly
    - Static pages → navigate to them directly
+   - Migration/schema files → identify which models are affected, then trace to pages that display or mutate that data. If migrations exist in the diff, verify the app still loads correctly (schema changes can break everything).
+   - Seeder/fixture files → check if test data looks correct on relevant pages
 
    **If no obvious pages/routes are identified:** Fall back to Quick mode — navigate to the homepage, follow the top 5 navigation targets, check console for errors, and test any interactive elements found.
 
@@ -131,9 +133,11 @@ Visit pages systematically. At each page:
 2. **Interactive elements** — Click buttons, links, controls. Do they work?
 3. **Forms** — Fill and submit. Test empty, invalid, edge cases
 4. **Navigation** — Check all paths in and out
-5. **States** — Empty state, loading, error, overflow
-6. **Console** — Any new JS errors after interactions?
+5. **States** — Empty state, loading, error, overflow. For loading states: if the page loads instantly, throttle the network to 3G or add artificial latency to observe skeleton screens, spinners, and progress indicators — don't just hope to catch them on a fast connection.
+6. **Console & Network** — Check for JS errors after interactions. Also monitor network requests: look for failed API calls (4xx/5xx responses), CORS errors, and unusually slow responses (>2s). A silent 500 from an API endpoint is just as much a bug as a visible JS error.
 7. **Responsiveness** — Check mobile viewport if relevant
+8. **Accessibility** — Tab through every interactive element on the page. Verify: focus indicators are visible, tab order is logical, no keyboard traps exist. Check that images have meaningful alt text, form inputs have associated labels, and ARIA attributes are used correctly (not just present but semantically accurate). Test with color contrast in mind — text should meet WCAG AA (4.5:1 for normal text, 3:1 for large text). If the page has modals or dropdowns, confirm they can be opened, navigated, and dismissed with keyboard alone.
+9. **Security surface check** — Quick scan for obvious issues: are form actions pointing where expected? Are there open redirect parameters in URLs (`?redirect=`, `?next=`, `?return_to=`)? Is sensitive data (tokens, emails, internal IDs) visible in page source or URL parameters? Check that the page is served over HTTPS and isn't loading mixed content. This isn't a pentest — just catch the low-hanging fruit a user might stumble into.
 
 **Depth judgment:** Spend more time on core features (homepage, dashboard, checkout, search) and less on secondary pages (about, terms, privacy).
 
@@ -160,11 +164,19 @@ Document each issue **immediately when found** — don't batch them.
 
 Compute each category score (0-100), then take the weighted average.
 
-### Console (weight: 15%)
+### Console (weight: 10%)
 - 0 errors → 100
 - 1-3 errors → 70
 - 4-10 errors → 40
-- 10+ errors → 10
+- 11-20 errors → 20
+- 21-50 errors → 10
+- 50+ errors → 0
+
+### Network (weight: 5%)
+- 0 failed requests → 100
+- 1-2 failed requests → 60
+- 3-5 failed requests → 30
+- 6+ failed requests → 10
 
 ### Links (weight: 10%)
 - 0 broken → 100
@@ -181,7 +193,8 @@ Minimum 0 per category.
 ### Weights
 | Category | Weight |
 |----------|--------|
-| Console | 15% |
+| Console | 10% |
+| Network | 5% |
 | Links | 10% |
 | Visual | 10% |
 | Functional | 20% |
@@ -219,6 +232,34 @@ Minimum 0 per category.
 - Check for stale state (navigate away and back — does data refresh?)
 - Test browser back/forward — does the app handle history correctly?
 - Check for memory leaks (monitor console after extended use)
+
+---
+
+## Performance Testing
+
+Performance carries 10% of the health score, so it needs real measurement — not just subjective impressions. At minimum, check for these on every page:
+
+1. **Slow API responses** — Monitor network requests. Any XHR/fetch call taking >2s is worth flagging. Calls taking >5s are high-severity.
+2. **Oversized assets** — Look for images >500KB, JS bundles >1MB, or any single resource >2MB. These cause slow loads, especially on mobile.
+3. **Layout shifts (CLS)** — Watch the page as it loads. Does content jump around as images, fonts, or dynamic elements load in? Take a screenshot immediately on navigation and another after the page settles — compare them.
+4. **Time to interactive** — After navigating to a page, how long until buttons/links actually respond to clicks? If there's a noticeable delay (>1s), flag it.
+5. **Unnecessary requests** — Are the same API endpoints being called multiple times on a single page load? Are there requests firing for data that isn't visible on the current page?
+
+For diff-aware mode, focus performance checks on pages affected by the changes. For full/exhaustive mode, check the 5 most trafficked pages.
+
+---
+
+## Multi-Role Testing
+
+Many applications behave differently based on user permissions. Before starting the explore phase, ask: does this application have multiple user roles (e.g., admin, editor, viewer, unauthenticated)?
+
+If yes, and if credentials for multiple roles are available:
+
+1. **Test critical flows as each role.** A form that works for admins might be broken or invisible for regular users.
+2. **Check permission boundaries.** Can a regular user access admin-only URLs directly? Do restricted UI elements actually disappear or just get visually hidden?
+3. **Test role transitions.** Log out of one role and into another — does the UI fully update, or does stale state from the previous role leak through?
+
+If credentials for only one role are available, note this limitation in the report and flag any UI elements that suggest other roles exist (e.g., "Admin Panel" links, role selectors).
 
 ---
 
@@ -273,8 +314,13 @@ Navigate back to the affected page and verify the fix. Take **before/after scree
 Skip if: classification is not "verified", OR the fix is purely visual/CSS, OR no test framework exists.
 
 If applicable:
-1. Study existing test patterns (naming, imports, assertion style)
-2. Write a regression test that sets up the exact precondition that triggered the bug, performs the action, and asserts correct behavior
+1. **Study existing test patterns** (naming, imports, assertion style). If no existing tests exist as a reference, use these defaults:
+   - Name the test file to match the source file (e.g., `UserProfile.test.js` for `UserProfile.js`)
+   - Structure: set up the precondition → perform the action → assert the correct outcome
+   - For DOM/component bugs: assert the element exists/has correct content after the triggering interaction
+   - For API bugs: assert the response status and shape match expectations
+   - For state bugs: assert the state value after the sequence of actions that triggered the issue
+2. Write a regression test that recreates the exact precondition that triggered the bug, performs the action, and asserts correct behavior. The test should fail without your fix and pass with it — that's what makes it a regression test.
 3. Run the test — passes → commit, fails → fix once, still fails → delete and defer
 
 ### 8f. Self-Regulation (STOP AND EVALUATE)
@@ -343,7 +389,7 @@ If the repo has a `TODOS.md`:
 2. **Verify before documenting.** Retry the issue once to confirm it's reproducible, not a fluke.
 3. **Never include credentials.** Write `[REDACTED]` for passwords in repro steps.
 4. **Write incrementally.** Append each issue to the report as you find it. Don't batch.
-5. **Check console after every interaction.** JS errors that don't surface visually are still bugs.
+5. **Check console and network after every interaction.** JS errors and failed API calls that don't surface visually are still bugs.
 6. **Test like a user.** Use realistic data. Walk through complete workflows end-to-end.
 7. **Depth over breadth.** 5-10 well-documented issues with evidence > 20 vague descriptions.
 8. **Clean working tree required.** If dirty, offer commit/stash/abort before proceeding.

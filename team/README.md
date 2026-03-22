@@ -84,4 +84,4 @@ One sprint, one person, one feature — that takes about 30 minutes with this st
 
 ## Credits
 
-This is a port of [garrytan/gstack](https://github.com/garrytan/gstack) with the YCombinator parts genercized.
+This is a port of [garrytan/gstack](https://github.com/garrytan/gstack) with the YCombinator parts genercized and then iterated on by me after the port.
