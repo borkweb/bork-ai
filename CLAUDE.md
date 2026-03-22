@@ -86,6 +86,12 @@ Skills are invoked via the Skill tool with just the skill name (no arguments). W
    - Adapts to repository's existing commit style
    - Suggests splitting commits when changes span multiple concerns
 
+2. **writing-sql**
+   - Enforces project SQL formatting conventions for all SQL (raw files, inline PHP, migrations)
+   - Covers SELECT, INSERT, UPDATE, DELETE, CREATE TABLE, ALTER TABLE, CTEs, subqueries, CASE, window functions, UNION, EXISTS
+   - PHP integration: PDO prepared statements, heredocs, $wpdb->prepare(), Laravel DB::select()/whereRaw(), dynamic query building
+   - Strict vertical formatting — no exceptions for short queries
+
 ## Development Workflow
 
 ### Installing the Plugin
