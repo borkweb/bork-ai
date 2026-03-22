@@ -1,70 +1,38 @@
 # bork-ai
 
-A comprehensive Claude Code plugin providing specialized agents, skills, and tools for enhanced development workflows.
-
-## Features
-
-- **Specialized Agents**: Domain-specific agents for GitHub PR management, Laravel/WordPress development, code migration, and more
-- **Skills**: Reusable capabilities like commit message generation
-- **MCP Integration**: Playwright browser automation through Model Context Protocol
-- **Best Practices**: TDD, debugging patterns, and collaboration workflows
+A Claude Code plugin library providing specialized agents, skills, and commands for enhanced development workflows.
 
 ## Installation
 
-### From GitHub
+### With Claude Code CLI
 
 ```bash
-/plugin marketplace add borkweb/bork-ai
-/plugin install b@bork-ai
+claude plugin marketplace add borkweb/bork-ai
 ```
 
-### From local
+Then install individual plugins:
 
 ```bash
-git clone git@github.com:borkweb/bork-ai.git
-claude
-/plugin marketplace add bork-ai
-/plugin install b@bork-ai
+claude plugin install bork
+claude plugin install matt
 ```
 
-## Available Agents
+### With Claude Code (Desktop App)
 
-- **github-pr-manager**: Creates and updates GitHub PRs with smart context awareness
-- **laravel-rest-architect**: Designs Laravel REST API endpoints following best practices
-- **melancholic-commit-writer**: Generates commit messages with emotional depth
-- **refactorer**: Handles code migrations with backwards compatibility
+1. In Claude Code, click the + button in the Plugins panel
+2. Select Browse plugins
+3. Click the marketplace dropdown and select Add marketplace from GitHub
+4. Enter `borkweb/bork-ai`
+5. Click _Sync_
 
-## Available Skills
+The plugins will appear in your marketplace and can be installed from there.
 
-- **commit-writer**: Crafts conventional commit messages by analyzing git diffs
+## Plugins
 
-## Usage
-
-### Using Agents
-
-Agents are automatically invoked based on context. For example:
-
-```bash
-# GitHub PR management
-"create PR"
-"update PR"
-
-# Or manually invoke with Task tool
-```
-
-### Using Skills
-
-Invoke skills directly:
-
-```bash
-# Generate a commit message
-Use the commit-writer skill to analyze staged changes
-```
-
-## Requirements
-
-- Claude Code CLI
-- Node.js (for Playwright MCP server)
+| Plugin | Description |
+|--------|-------------|
+| [**bork**](bork/) | General development tools — agents, skills, and commands for everyday workflows. |
+| [**matt**](matt/) | Personal voice profile and writing style configuration. |
 
 ## License
 
