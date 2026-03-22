@@ -94,7 +94,21 @@ Skills are invoked via the Skill tool with just the skill name (no arguments). W
 
 ### Available Skills (team plugin)
 
-See [team/README.md](team/README.md) for the full list of workflow skills: plan-session, plan-deep-review, plan-eng-review, plan-design-review, design-consultation, review, investigate, design-review, qa, qa-only, ship, document-release, retro, browse, benchmark, setup-browser-cookies.
+See [team/README.md](team/README.md) for the full list of workflow skills: plan-session, plan-deep-review, plan-eng-review, plan-design-review, design-consultation, review, investigate, design-review, qa, qa-only, ship, document-release, retro, browse, benchmark, setup-browser-cookies, dependency-audit.
+
+### Available Commands (team plugin)
+
+Compound workflows that chain skills: full-review (review → design-review → qa), preflight (fast pre-merge safety check), status (branch progress report).
+
+### Available Agents (team plugin)
+
+- **workflow-orchestrator** (proactive) — Detects pipeline stage and suggests next skill
+- **triage** (proactive) — Emergency incident response, fast-tracks investigation → fix → ship
+
+### Available Hooks (team plugin)
+
+- **pre-push** — Critical-only review gate before pushes (SQL injection, auth gaps, race conditions)
+- **post-merge** — Non-blocking reminders after merging to default branch (doc updates, dependency audits)
 
 ## Development Workflow
 

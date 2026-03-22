@@ -81,6 +81,35 @@ One sprint, one person, one feature — that takes about 30 minutes with this st
 | **browse** | QA Engineer | `/browse` | Headless browser for QA testing and dogfooding. Navigate, interact, screenshot, assert. Uses Playwright MCP tools. |
 | **benchmark** | Perf Engineer | `/benchmark` | Performance regression detection. Baselines page load times, Core Web Vitals, and bundle sizes. Compares before/after with regression thresholds. Tracks trends over time. |
 | **setup-browser-cookies** | Session Manager | `/setup-browser-cookies` | Import cookies from your real browser into the headless session. Test authenticated pages without logging in every time. |
+| **dependency-audit** | Security Engineer | `/dependency-audit` | Scans dependencies for vulnerabilities, outdated packages, and license issues. Groups by risk, checks reachability, generates prioritized upgrade plans. Optionally applies safe updates. |
+
+## Commands
+
+Compound workflows that chain multiple skills together.
+
+| Command | Description |
+|---------|-------------|
+| `/full-review` | Chains `/review` → `/design-review` → `/qa` into one pipeline. Passes context forward between stages. Produces a combined ship-readiness verdict. |
+| `/preflight` | Fast pre-merge safety check. Critical-only code review + smoke test + quick test run. Under 2 minutes. For small PRs where `/full-review` is overkill. |
+| `/status` | Read-only branch status and workflow progress report. Shows what's been done, what's left, and suggests the next step. |
+
+## Agents
+
+Proactive agents that detect context and trigger automatically.
+
+| Agent | Trigger | Description |
+|-------|---------|-------------|
+| **workflow-orchestrator** | Completing a skill, "what's next?", finishing code | Detects where you are in the pipeline and suggests the next skill. Understands the full Think → Plan → Build → Review → Test → Ship → Reflect flow. |
+| **triage** | "production is broken", "urgent fix", "hotfix", "incident" | Emergency incident response. Triages severity, fast-tracks root cause investigation, creates minimal hotfix, ships via emergency PR. Streamlined for speed. |
+
+## Hooks
+
+Event-driven checks that run automatically.
+
+| Hook | Event | Description |
+|------|-------|-------------|
+| **pre-push** | Before `git push` | Runs critical-only review (SQL injection, auth gaps, race conditions) before any push. Blocks on critical issues. Under 30 seconds. |
+| **post-merge** | After `git merge` on default branch | Non-blocking reminders: nudges about `/document-release` when API/config/schema files changed, `/dependency-audit` when lockfiles changed. |
 
 ## Credits
 

@@ -20,6 +20,29 @@ Detailed guides for every team skill — philosophy, workflow, and examples.
 | [`/browse`](#browse) | **QA Engineer** | Headless browser for QA testing and dogfooding. Navigate, interact, screenshot, assert. Uses Playwright MCP tools. |
 | [`/benchmark`](#benchmark) | **Perf Engineer** | Performance regression detection. Baselines page load, Core Web Vitals, bundle sizes. Compares before/after. Tracks trends. |
 | [`/setup-browser-cookies`](#setup-browser-cookies) | **Session Manager** | Import cookies from your real browser into the headless session. Test authenticated pages without logging in every time. |
+| [`/dependency-audit`](#dependency-audit) | **Security Engineer** | Audit dependencies for vulnerabilities, outdated packages, and license issues. Prioritized upgrade plans with reachability analysis. |
+
+### Commands
+
+| Command | What it does |
+|---------|-------------|
+| [`/full-review`](#full-review) | Chains `/review` → `/design-review` → `/qa` with context passing. Combined ship-readiness verdict. |
+| [`/preflight`](#preflight) | Fast pre-merge safety check. Critical-only review + smoke test. Under 2 minutes. |
+| [`/status`](#status) | Read-only progress report. Where you are, what's done, what's next. |
+
+### Agents
+
+| Agent | What it does |
+|-------|-------------|
+| [workflow-orchestrator](#workflow-orchestrator) | Proactive pipeline navigator. Detects your stage and suggests next steps. |
+| [triage](#triage) | Emergency incident responder. Fast-tracks investigation → fix → ship for production issues. |
+
+### Hooks
+
+| Hook | What it does |
+|------|-------------|
+| [pre-push](#pre-push) | Critical-only review gate before every push. Catches catastrophic bugs in under 30 seconds. |
+| [post-merge](#post-merge) | Non-blocking reminders after merging to main. Nudges about doc updates and dependency audits. |
 
 ---
 
@@ -442,3 +465,141 @@ Claude: Which site(s) do you need to authenticate with?
         B) Import from my browser for specific domain(s)
         C) I'll log in manually through the headless browser
 ```
+
+---
+
+## `/dependency-audit`
+
+This is your **security engineer**.
+
+Most production security incidents come from dependencies, not first-party code. But blindly updating everything is just as dangerous as updating nothing — the goal is informed, prioritized upgrades.
+
+`/dependency-audit` scans every package ecosystem in your project (npm, composer, pip, go, cargo, bundler) for three things: known vulnerabilities, outdated packages, and license issues. Then it does something most audit tools don't — it checks whether each vulnerability is actually reachable in your code.
+
+A critical CVE in a function your code never calls is different from a medium CVE in your authentication path. The reachability analysis means you fix what matters first.
+
+```
+You:    /dependency-audit
+
+Claude: DEPENDENCY AUDIT REPORT
+        ══════════════════════════
+        Vulnerabilities: 3 critical (2 reachable), 5 high, 12 medium
+        Outdated: 8 major, 15 minor, 22 patch
+        License warnings: 1 (GPL-3.0 in proprietary project)
+
+        TIER 1: CRITICAL — Fix immediately
+        ──────────────────────────────────
+        lodash 4.17.15 → 4.17.21  CVE-2021-23337  REACHABLE
+          Your code calls _.template() with user input at src/email.js:42
+
+        Want me to apply safe updates?
+        A) Patch-level only    B) + security fixes
+        C) All updates         D) Report only
+```
+
+The output is a structured upgrade plan grouped by risk tier, with specific commands for each fix and a list of files to check after upgrading. It integrates with `TODOS.md` — unresolved vulnerabilities become tracked items.
+
+---
+
+## `/full-review`
+
+The complete review pipeline in one command.
+
+Instead of running `/review`, then `/design-review`, then `/qa` manually, `/full-review` chains all three with context passing between stages. Code review findings inform what to look for in design review. Design review findings inform QA testing priorities.
+
+```
+You:    /full-review http://localhost:3000
+
+Claude: [runs code review — 2 auto-fixed, 1 asked]
+        [runs design review on affected pages — grade B+]
+        [runs QA on affected pages — 1 bug found and fixed]
+
+        FULL REVIEW PIPELINE — SUMMARY
+        ═══════════════════════════════
+        Code Review:    3 issues (2 auto, 1 user)  — SAFE TO LAND
+        Design Review:  4 issues, 3 fixed           — Grade B+
+        QA:             1 bug found and fixed        — Health 92
+        Ship readiness: READY
+```
+
+Accepts `--quick` and `--exhaustive` for QA tier, `--skip-design` and `--skip-qa` to omit stages.
+
+---
+
+## `/preflight`
+
+The fast lane for small PRs.
+
+`/full-review` is thorough but takes time. `/preflight` is the 2-minute version: critical-only code review (SQL injection, auth gaps, race conditions), a quick smoke test if a browser is available, and a test suite run.
+
+It auto-escalates — if the diff is over 200 lines or touches sensitive files, it recommends `/full-review` instead.
+
+```
+You:    /preflight
+
+Claude: PREFLIGHT CHECK
+        ═══════════════
+        Diff:              3 files, +22 -8
+        Critical Review:   CLEAN
+        Smoke Test:        CLEAN (3 pages checked)
+        Tests:             PASS (142 tests)
+        Verdict:           GO
+```
+
+---
+
+## `/status`
+
+Situational awareness in 10 seconds.
+
+Read-only. Checks your branch state, PR status, which workflow skills have been run (detected from commit messages and project artifacts), and what's left before the work is shippable. Ends with specific next-step recommendations.
+
+```
+You:    /status
+
+Claude: STATUS REPORT
+        ═════════════
+        Branch: feature/auth-flow → main (8 commits, +340 -120)
+        PR:     #42 (draft, review pending, CI passing)
+
+        WORKFLOW PROGRESS
+        [✓] Plan session     [✓] Eng review
+        [✓] Code review      [ ] QA
+        [ ] Design review    [ ] Benchmark
+
+        Next up: /qa — code is reviewed, time to test
+```
+
+---
+
+## Workflow Orchestrator (agent)
+
+A proactive agent that detects where you are in the pipeline and suggests the next step. It understands the full dependency graph between skills — that `/plan-session` feeds into `/plan-eng-review`, that `/review` should come before `/qa`, that `/document-release` follows `/ship`.
+
+It triggers automatically when you complete a skill, finish writing code, or ask "what's next?" It never runs skills itself — it recommends.
+
+---
+
+## Triage (agent)
+
+Emergency incident response. Activates when you say "production is broken," "urgent fix," or "hotfix."
+
+Runs a structured triage: severity classification, blast radius assessment, timeline check. Then fast-tracks root cause investigation (checking recent deploys first — that's the cause 80% of the time). Creates the minimal fix on a hotfix branch, runs critical-only review, ships via emergency PR.
+
+After the fix lands, outputs a monitoring checklist and recommends follow-up actions to prevent recurrence.
+
+---
+
+## Pre-Push Hook
+
+A silent safety net. Runs the critical-only review checklist before every `git push` — SQL injection, auth bypasses, race conditions, API contract breaks. Under 30 seconds.
+
+Smart enough to skip docs-only and test-only changes. Blocks the push if it finds something catastrophic. One line of output when clean.
+
+---
+
+## Post-Merge Hook
+
+Non-blocking reminders after merging to the default branch. Checks whether the merge touched API routes, config files, or schema — and if docs weren't updated, nudges about running `/document-release`. If lockfiles changed, suggests `/dependency-audit`. If features were added but VERSION wasn't bumped, notes that too.
+
+Quiet when nothing needs attention.
