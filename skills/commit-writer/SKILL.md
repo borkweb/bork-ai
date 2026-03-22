@@ -1,192 +1,137 @@
 ---
 name: commit-writer
-description: Expert at crafting clear, meaningful git commit messages following conventional commit standards and repository conventions. Use when user asks to create commit messages, write commits, or needs help with git commit text. Analyzes git diffs and repository history to generate contextual, well-structured commit messages.
+description: "Use this skill to create git commits and write commit messages. Invoke it for ANY of these user goals: committing code changes, crafting or suggesting commit messages, describing diffs for commit purposes, or formatting commits in conventional/angular style. Common triggers: 'commit this', 'commit them', 'write a commit message', 'what should the commit message be', 'help me with the commit', or any variant where the user has finished coding and wants to record their changes in git. Also invoke when users mention pushing code and need the commit authored first, when they ask to split changes into separate commits, or when they ask to summarize what changed for a commit. Exclude: pull requests, code review, changelogs, reverting commits, git log analysis, writing docs about commit conventions."
 allowed-tools: [Bash, Read, Grep, Glob]
 ---
 
 # Commit Message Writer
 
-You are an expert at writing clear, meaningful, and conventional git commit messages.
+You write clear, accurate git commit messages that help future developers understand what changed and why.
 
-## Core Principles
+## How to analyze changes
 
-1. **Clarity over Cleverness**: Messages should clearly explain WHAT changed and WHY
-2. **Conventional Commits**: Follow the Conventional Commits specification by default
-3. **Repository Style**: Adapt to the existing commit message style in the repository
-4. **Atomic Focus**: Each commit should represent one logical change
-5. **Context-Aware**: Use git history and diffs to inform message content
+Run these commands to understand what you're working with:
 
-## Process
-
-When asked to write a commit message:
-
-1. **Analyze the Changes**
-   - Run `git status` to see what files are staged
-   - Run `git diff --staged` to see the actual changes
-   - Run `git log --oneline -10` to understand repository commit style
-
-2. **Determine Commit Type**
-   Use conventional commit types:
-   - `feat`: New feature
-   - `fix`: Bug fix
-   - `docs`: Documentation only
-   - `style`: Code style/formatting (no logic change)
-   - `refactor`: Code restructuring (no behavior change)
-   - `perf`: Performance improvement
-   - `test`: Adding or updating tests
-   - `build`: Build system or dependencies
-   - `ci`: CI/CD configuration
-   - `chore`: Maintenance tasks
-
-3. **Structure the Message**
-   ```
-   <type>(<scope>): <short summary>
-
-   ## Summary
-   <body>
-
-   <fixes - optional if relevant>
-
-   ## Why
-   <why-body>
-
-   ## How
-   <how-body>
-
-   <breaking-changes-heading - optional if relevant>
-   <breaking-changes-body - optional if relevant>
-
-   ## Testing (optional — include when changes are testable)
-   - [ ] <testing step 1>
-   - [ ] <testing step 2>
-
-   <footer - optional>
-   ```
-
-   **Note:** Summary, Why, and How are standard headings — always include them. Include Testing only when there are meaningful steps a reviewer can take to verify the change (e.g. run a test suite, test a UI flow, hit an endpoint). Skip it for documentation, config, refactors with no behavior change, or other changes where testing steps would be trivial or obvious.
-
-4. **Follow These Rules**
-   - **Subject line**: 50-72 characters max, imperative mood ("add" not "added")
-   - **Body**: Explain WHY and provide context. No need to limit line length.
-   - **Separate** subject from body with blank line
-   - **No period** at end of subject line
-   - **Capitalize** first letter of subject
-   - **No Claude attribution**. We don't need to attribute anything as AI generated.
-
-A good pull request should contain the following:
-
-* Title: A descriptive, yet concise, title.
-* Issue: Link to the GitHub issue that the PR addresses (if appropriate).
-* Description: Write a brief summary about this PR. Consider and address: Why is this change needed? What does this change do? Were there other solutions you considered? Why did you choose to pursue this solution? Describe any trade-offs you might have had to make. If the change is looking to be a bit bigger, it’s often a good idea to share your plan for tackling it before writing a lot of code.
-* Testing instructions: How should this be tested, and how can a reviewer test the end-user functionality? Are there known issues that you plan to address in a future PR? Are there any side effects that readers should be aware of?.
-
-## Examples
-
-### Good Commit Messages
-
-```
-feat(admin): OpenCode Admin UI Enhancement and usage tracking
-
-## Summary
-
-Enhance the `/admin` agent interface with real-time usage cost tracking, token statistics display, and improved visual feedback. Also fixes Docker workspace permissions for bind-mounted directories.
-
-Fixes #234
-
-## Why
-
-* Users need visibility into API costs and token usage during agent sessions
-* Tool execution status was unclear during streaming responses
-* Docker containers couldn't write to bind-mounted workspace directories due to permission issues
-* Navigation was broken when pressing back button
-
-## How
-
-* Parse usage_cost events from OpenCode stream (both message.updated and step-finish parts)
-* Accumulate and display cost/tokens in the UI header
-* Add tool status cards with visual states (pending → running → completed)
-* Replace "streaming" pulse animation with "Thinking..." indicator
-* Set 0777 permissions on workspace directories and 0666 on files for Docker compatibility
-* Fix back button URL from `/admin` to `./` for relative navigation
+```bash
+git diff --staged          # what's actually being committed
+git diff                   # unstaged changes (might need staging)
+git status                 # overall picture
+git log --oneline -10      # recent commit style in this repo
 ```
 
+Read the diff carefully. Understand the *intent* behind the changes — not just which lines moved, but what problem they solve or what capability they add. If the diff is large or touches unfamiliar code, use `Read` or `Grep` to look at surrounding context.
+
+Check `git log` output closely. If the repo uses a specific convention (emoji prefixes, Jira ticket format, lowercase subjects, Angular-style), match it. Repository convention always wins over the defaults below.
+
+## Choosing the commit type
+
+Use Conventional Commits types by default:
+
+| Type | When to use |
+|------|------------|
+| `feat` | New user-facing functionality |
+| `fix` | Bug fix |
+| `refactor` | Restructuring without behavior change |
+| `perf` | Performance improvement |
+| `docs` | Documentation only |
+| `test` | Adding or updating tests |
+| `build` | Build system or dependency changes |
+| `ci` | CI/CD pipeline changes |
+| `style` | Formatting, whitespace (no logic change) |
+| `chore` | Maintenance that doesn't fit above |
+
+Pick the type that best describes the *primary* intent. If changes genuinely span multiple types, suggest splitting into separate commits.
+
+## Structuring the message
+
+Scale the message to the change. Not every commit needs a five-section essay.
+
+### Small changes (single-concern, obvious intent)
+
+A subject line is often enough:
+
 ```
-fix(api): prevent race condition in user creation
-
-## Summary
-Added database-level unique constraint and proper error handling.
-
-## Why
-
-The previous implementation didn't properly lock during user creation, leading to duplicate users under high load.
-
-## How
-
-* Add unique constraint on `users.email` column
-* Wrap creation in database transaction with row-level locking
-* Return existing user on duplicate key instead of erroring
-
-## Testing
-
-- [ ] Run `php artisan test --filter=UserCreationTest`
-- [ ] Verify concurrent requests don't create duplicates
+fix(auth): prevent token refresh loop on expired sessions
 ```
+
+Or subject + a brief body if the "why" isn't obvious from context:
 
 ```
 refactor(database): extract query builder to separate module
 
-Improves maintainability by separating query building logic from repository classes. No functional changes.
+Improves maintainability by separating query building logic
+from repository classes. No functional changes.
 ```
 
-### Poor Commit Messages (Avoid These)
+### Larger changes (multi-file, non-obvious motivation)
+
+Use the full structure. The goal of each section is to answer a distinct question a reviewer or future developer would have:
 
 ```
-❌ "fixed stuff"
-❌ "WIP"
-❌ "updates"
-❌ "changed files"
-❌ "Fixed bug"  (not imperative, no context)
+<type>(<scope>): <subject>
+
+## Summary
+What changed, at a high level. 1-3 sentences.
+
+Fixes #123 (if applicable)
+
+## Why
+What motivated this change? What was broken, missing, or insufficient?
+
+## How
+The approach taken — key implementation decisions, trade-offs made.
+
+## Testing (only when there are meaningful verification steps)
+- [ ] Concrete steps a reviewer can take to verify
 ```
 
-## Scope Guidelines
+**Subject line rules:**
+- 50-72 characters, imperative mood ("add" not "added")
+- Capitalize first letter, no trailing period
+- No AI attribution — never include "Co-Authored-By" or similar
 
-Scopes should be specific but not too granular:
-- ✅ `(auth)`, `(database)`, `(api)`, `(ui/dashboard)`
-- ❌ `(file123)`, `(bugfix)`, `(code)`
+**When to include Testing:** Include it when there are specific, non-obvious steps a reviewer should take — running a test suite, hitting an endpoint, testing a UI flow. Skip it for docs, config changes, refactors with no behavior change, or anything where the verification is self-evident.
 
-## Special Cases
+## Scope guidelines
 
-### Multiple Changes
-If changes span multiple concerns, consider suggesting separate commits:
-"I notice these changes address both authentication and logging. Would you like to split these into separate commits?"
+Scopes describe the area of the codebase affected. Good scopes are specific but not too granular:
 
-### Breaking Changes
-Add `## Breaking changes` footer to indicate breaking changes:
+- `auth`, `api`, `database`, `ui/dashboard`, `payments` — these are informative
+- `code`, `files`, `bugfix` — these add nothing, skip the scope instead
+
+When changes touch multiple areas, use comma-separated scopes like `(api,cli)` or pick the primary area.
+
+## Handling multi-concern changes
+
+If the staged changes address multiple unrelated concerns (e.g., a feature + an unrelated formatting fix), suggest splitting them:
+
+> "These changes include both the new caching layer and an unrelated linting fix. Want me to help split these into separate commits?"
+
+Only suggest this when the concerns are genuinely separate. Related changes (a feature + its tests, a fix + the migration it needs) belong together.
+
+## Output
+
+### Single commit
+
+Present the commit message in a code block. Then offer to either create the commit directly or adjust the message first.
+
+### Multiple commits (after suggesting a split)
+
+When you've recommended splitting into separate commits, present each commit message in its own code block with a brief label. Then offer to walk the user through staging and committing each one in sequence. For example:
+
+**Commit 1 — docs fix:**
 ```
-feat(api): change user endpoint response format
-
-## Breaking changes
-User API now returns `userId` instead of `id`
+docs(readme): fix typo in application description
 ```
 
-### Repository Style Adaptation
-If repository uses different conventions (e.g., emojis, different format), detect this from `git log` and adapt accordingly.
-
-## Output Format
-
-Present the commit message in a code block for easy copying:
-
+**Commit 2 — database refactor:**
 ```
-Your suggested commit message here
+refactor(database): enhance connection pool configuration
+...
 ```
 
-Then offer to create the commit directly or ask if adjustments are needed.
+Each code block should contain *only* the commit message text — no wrapper headings, no analysis preamble. The surrounding conversation provides the context; the code blocks are what would actually go into `git commit -m`.
 
-## Tools Usage
+For more examples of well-structured commit messages across different types (features, fixes, refactors, performance, breaking changes, etc.), see `examples.md` in this skill's directory.
 
-- Use `Bash` for git commands (`git status`, `git diff`, `git log`)
-- Use `Read` if you need to examine specific changed files for context
-- Use `Grep` to search for related code patterns if needed
-- Use `Glob` to understand file structure if scope is unclear
-
-Remember: A great commit message helps future developers (including the author) understand the history and reasoning behind changes.
+For reference material on Conventional Commits spec details, scope conventions, footer formats, and anti-patterns, see `reference.md`.
