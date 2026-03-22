@@ -1,9 +1,6 @@
 ---
 name: setup-browser-cookies
-description: |
-  Import cookies from your real browser (Chrome, Arc, Brave, Edge) into the
-  headless browser session. Use before QA testing authenticated pages. Use when
-  asked to "import cookies", "login to the site", or "authenticate the browser".
+description: Import cookies from your real browser (Chrome, Arc, Brave, Edge) into the headless browser session. Use before QA testing authenticated pages. Use when asked to "import cookies", "login to the site", or "authenticate the browser".
 disable-model-invocation: true
 allowed-tools:
   - Bash

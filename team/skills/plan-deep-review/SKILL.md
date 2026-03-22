@@ -1,11 +1,6 @@
 ---
 name: plan-deep-review
-description: |
-  Deep plan review with four modes: SCOPE EXPANSION (dream big), SELECTIVE
-  EXPANSION (hold scope + cherry-pick expansions), HOLD SCOPE (maximum rigor),
-  SCOPE REDUCTION (strip to essentials). Challenges premises, maps failure modes,
-  reviews architecture/security/performance/deployment, and produces structured
-  outputs with error registries and diagrams.
+description: Deep plan review with four modes: SCOPE EXPANSION (dream big), SELECTIVE EXPANSION (hold scope + cherry-pick expansions), HOLD SCOPE (maximum rigor), SCOPE REDUCTION (strip to essentials). Challenges premises, maps failure modes, reviews architecture/security/performance/deployment, and produces structured outputs with error registries and diagrams.
 disable-model-invocation: true
 allowed-tools:
   - Read

@@ -1,11 +1,6 @@
 ---
 name: browse
-description: |
-  Headless browser for QA testing and site dogfooding. Navigate any URL, interact with
-  elements, verify page state, take screenshots, check responsive layouts, test forms,
-  handle dialogs, and assert element states. Use when you need to test a feature, verify
-  a deployment, dogfood a user flow, or file a bug with evidence. Use when asked to
-  "open in browser", "test the site", "take a screenshot", or "dogfood this".
+description: Headless browser for QA testing and site dogfooding. Navigate any URL, interact with elements, verify page state, take screenshots, check responsive layouts, test forms, handle dialogs, and assert element states. Use when you need to test a feature, verify a deployment, dogfood a user flow, or file a bug with evidence. Use when asked to "open in browser", "test the site", "take a screenshot", or "dogfood this".
 allowed-tools:
   - Bash
   - Read
