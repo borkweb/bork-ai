@@ -15,6 +15,7 @@ Then install individual plugins:
 ```bash
 claude plugin install bork
 claude plugin install matt
+claude plugin install team
 ```
 
 ### With Claude Code (Desktop App)
@@ -33,6 +34,7 @@ The plugins will appear in your marketplace and can be installed from there.
 |--------|-------------|
 | [**bork**](bork/) | General development tools — agents, skills, and commands for everyday workflows. |
 | [**matt**](matt/) | Personal voice profile and writing style configuration. |
+| [**team**](team/) | Development workflow skills — planning, review, QA, shipping, and retrospectives. |
 
 ## License
 

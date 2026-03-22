@@ -78,7 +78,7 @@ Agents are markdown files with YAML frontmatter defining:
 
 Skills are invoked via the Skill tool with just the skill name (no arguments). When invoked, the skill's SKILL.md prompt expands into the conversation.
 
-### Available Skills
+### Available Skills (bork plugin)
 
 1. **commit-writer**
    - Crafts conventional commit messages by analyzing git diffs and history
@@ -91,6 +91,10 @@ Skills are invoked via the Skill tool with just the skill name (no arguments). W
    - Covers SELECT, INSERT, UPDATE, DELETE, CREATE TABLE, ALTER TABLE, CTEs, subqueries, CASE, window functions, UNION, EXISTS
    - PHP integration: PDO prepared statements, heredocs, $wpdb->prepare(), Laravel DB::select()/whereRaw(), dynamic query building
    - Strict vertical formatting — no exceptions for short queries
+
+### Available Skills (team plugin)
+
+See [team/README.md](team/README.md) for the full list of workflow skills: plan-session, plan-deep-review, plan-eng-review, plan-design-review, design-consultation, review, investigate, design-review, qa, qa-only, ship, document-release, retro, browse, benchmark, setup-browser-cookies.
 
 ## Development Workflow
 

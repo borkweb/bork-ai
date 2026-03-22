@@ -12,6 +12,10 @@
     {
       "name": "matt",
       "source": "./matt"
+    },
+    {
+      "name": "team",
+      "source": "./team"
     }
   ]
 }
