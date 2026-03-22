@@ -1,0 +1,9 @@
+{
+	"name": "matt",
+	"description": "Personal settings for me",
+	"version": "1.0.0",
+	"author": {
+		"name": "Matthew Batchelder",
+		"email": "borkweb@gmail.com"
+	}
+}

@@ -6,9 +6,12 @@
   },
   "plugins": [
     {
-      "name": "b",
-      "source": "./",
-      "description": "Core skills library for Claude Code: TDD, debugging, collaboration patterns, and proven techniques. Includes specialized agents for GitHub PR management, Laravel/WordPress development, code migration, and commit message writing."
+      "name": "bork",
+      "source": "./bork"
+    },
+    {
+      "name": "matt",
+      "source": "./matt"
     }
   ]
 }
