@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+
+# tmux-config-parser: Reads ~/.bork-ai/tmux-config.yml and provides
+# directory lists for the t and tc scripts.
+#
+# Source this file, then call:
+#   tmux_config_dirs        - outputs all project directories (one per line)
+#   tmux_config_worktrees   - outputs all worktree directories (one per line)
+#   tmux_config_extras      - outputs extra static entries (one per line)
+
+TMUX_CONFIG_FILE="$HOME/.bork-ai/tmux-config.yml"
+
+if [[ ! -f "$TMUX_CONFIG_FILE" ]]; then
+    echo "Warning: $TMUX_CONFIG_FILE not found" >&2
+    return 1 2>/dev/null || exit 1
+fi
+
+# Parse the config file into structured data.
+# Returns lines like: dir|<expanded-path>|<depth>|<worktrees: true/false>
+_tmux_parse_directories() {
+    awk '
+    /^directories:/ { section="dirs"; next }
+    /^extras:/      { section="extras"; next }
+    /^[a-z]/ && !/^  / { section=""; next }
+
+    section == "dirs" && /- path:/ {
+        gsub(/.*- path:[[:space:]]*/, "")
+        path = $0
+        depth = 1
+        worktrees = "false"
+        next
+    }
+    section == "dirs" && /depth:/ {
+        gsub(/.*depth:[[:space:]]*/, "")
+        depth = $0 + 0
+        next
+    }
+    section == "dirs" && /worktrees:/ {
+        gsub(/.*worktrees:[[:space:]]*/, "")
+        worktrees = $0
+        # Print the complete entry
+        printf "dir|%s|%d|%s\n", path, depth, worktrees
+        next
+    }
+    # Handle entries without worktrees field (print when next entry starts or section ends)
+    section == "dirs" && /- path:/ {
+        if (path != "") printf "dir|%s|%d|%s\n", path, depth, worktrees
+    }
+
+    section == "extras" && /^  - / {
+        gsub(/^  - /, "")
+        printf "extra|%s\n", $0
+    }
+    ' "$TMUX_CONFIG_FILE"
+}
+
+# Expand ~ in paths
+_tmux_expand_path() {
+    echo "${1/#\~/$HOME}"
+}
+
+# Output all project directories found by searching configured paths.
+tmux_config_dirs() {
+    while IFS='|' read -r type path depth worktrees; do
+        [[ "$type" != "dir" ]] && continue
+        path=$(_tmux_expand_path "$path")
+        [[ -d "$path" ]] && find "$path" -maxdepth "$depth" -mindepth "$depth" -type d 2>/dev/null
+    done < <(_tmux_parse_directories)
+}
+
+# Output all worktree directories for paths that have worktrees enabled.
+tmux_config_worktrees() {
+    while IFS='|' read -r type path depth worktrees; do
+        [[ "$type" != "dir" ]] && continue
+        [[ "$worktrees" != "true" ]] && continue
+        path=$(_tmux_expand_path "$path")
+        worktree_depth=$(( depth + 3 ))  # .claude/worktrees/<name> = 3 extra levels
+        [[ -d "$path" ]] && find "$path" -maxdepth "$worktree_depth" -mindepth "$worktree_depth" \
+            -path '*/.claude/worktrees/*' -type d 2>/dev/null
+    done < <(_tmux_parse_directories)
+}
+
+# Output extra static entries.
+tmux_config_extras() {
+    while IFS='|' read -r type path; do
+        [[ "$type" != "extra" ]] && continue
+        echo "$(_tmux_expand_path "$path")"
+    done < <(_tmux_parse_directories)
+}

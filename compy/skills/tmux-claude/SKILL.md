@@ -8,58 +8,72 @@ description: >
   session with Claude Code in a specific project directory. Also triggers
   for phrases like "spin up claude on my-project", "work on my-project
   with claude", or "open a terminal for a project with claude".
-  This skill requires Computer Use to be enabled since it interacts
-  with the host machine's terminal.
 ---
 
 # tmux + Claude Code Launcher
 
 This skill launches a tmux session for a given project and starts Claude Code
-in a dedicated window. It relies on `~/bin/tc`, a shell script that searches
-the user's project directories for a match by name.
+in a dedicated window. It works by writing a trigger file that a launchd agent
+on the host machine picks up and executes.
 
 ## How it works
 
-The user has a script at `~/bin/tc` that:
-1. Takes a project name as an argument
-2. Searches `~/projects` (depth 2), `~/git`, and `~/sites` (depth 1) for a matching directory
-3. Creates or attaches to a tmux session named after the project
-4. Opens a new tmux window named "claude" and starts `claude` (Claude Code CLI) in it
+The system has three parts:
 
-Matching is done in priority order: exact basename match, then substring, then case-insensitive substring.
+1. **`~/bin/tc`** — A shell script that takes a project name, searches the
+   user's project directories for a match, creates/attaches a tmux session,
+   and starts Claude Code in a new window.
 
-## Requirements
+2. **`~/bin/tc-handler`** — A helper script invoked by launchd. It reads the
+   project name from `~/bin/.tc-trigger`, deletes the trigger file, and uses
+   AppleScript to open Terminal and run `tc` with that project name.
 
-- **Computer Use must be enabled.** The sandbox shell cannot interact with the host's tmux. This skill uses Computer Use to open Terminal.app and run the command on the host machine.
-- The user must have `claude` (Claude Code CLI) installed and on their PATH.
-- tmux must be installed on the host.
+3. **`com.borkweb.tc-handler` launchd agent** — Watches `~/bin/.tc-trigger`
+   for changes and runs `tc-handler` when the file appears.
+
+Project directory matching (done by `tc`) uses this priority: exact basename
+match, then substring, then case-insensitive substring. It searches
+`~/projects` (depth 2), `~/git`, and `~/sites` (depth 1).
 
 ## Steps to execute
 
-1. **Extract the project name** from the user's request. They'll say something like "start claude for stellar-theme" — the project name is "stellar-theme".
+1. **Extract the project name** from the user's request. They'll say something
+   like "start claude for stellar-theme" — the project name is "stellar-theme".
 
-2. **Check that Computer Use is available.** If the `computer` tool or Chrome/desktop interaction tools are not available, inform the user:
-   > "I need Computer Use enabled to interact with your terminal. You can enable it at Settings > Desktop app > Computer use. Once that's on, just ask me again!"
+2. **Write the trigger file.** Use the **Write** file tool (not bash) to create
+   the trigger file. The Write tool uses the host filesystem path directly,
+   so this works regardless of session mount paths:
 
-3. **Open Terminal.app** using Computer Use. If a Terminal window is already open and visible, you can use that instead.
-
-4. **Run the command** in the terminal:
    ```
-   ~/bin/tc <project-name>
+   Write to: /Users/matt/bin/.tc-trigger
+   Content:  PROJECT_NAME
    ```
 
-5. **Confirm to the user** that the tmux session has been started and Claude is launching in the "claude" window.
+   Replace `PROJECT_NAME` with the actual project name extracted from the
+   user's request. The file content should be just the project name, nothing
+   else.
+
+3. **Confirm to the user** that the trigger has been sent and their tmux
+   session with Claude Code should be starting up momentarily.
+
+That's it — just extract the name and write one file. The launchd agent on the
+host detects the new file, reads the project name, opens Terminal, and runs
+`~/bin/tc` which creates the tmux session and starts Claude.
 
 ## Example interactions
 
 **User (via Dispatch):** "Start a claude session for stellar-theme"
-**Action:** Open Terminal, run `~/bin/tc stellar-theme`
-**Response:** "Done! I've started a tmux session for stellar-theme and launched Claude Code in a dedicated window."
+**Action:** Write "stellar-theme" to `/Users/matt/bin/.tc-trigger`
+**Response:** "Done! Your tmux session for stellar-theme is starting up with Claude Code in a dedicated window."
 
 **User (via Dispatch):** "Open claude on flavor-customizer"
-**Action:** Open Terminal, run `~/bin/tc flavor-customizer`
-**Response:** "Your tmux session for flavor-customizer is up with Claude Code ready to go."
+**Action:** Write "flavor-customizer" to `/Users/matt/bin/.tc-trigger`
+**Response:** "On it — tmux session for flavor-customizer is launching with Claude Code ready to go."
 
 ## Troubleshooting
 
-If the `tc` script reports "No project found matching: X", relay the error to the user and list the available projects if shown in the output.
+If the user reports nothing happened, check that:
+- The launchd agent is loaded: `launchctl list | grep tc-handler`
+- The trigger file was written: `cat ~/bin/.tc-trigger`
+- The tc script can find the project: `~/bin/tc PROJECT_NAME`
+- Terminal.app has permission to be controlled via AppleScript (System Settings > Privacy & Security > Automation)
