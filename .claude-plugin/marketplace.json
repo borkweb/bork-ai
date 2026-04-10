@@ -16,6 +16,10 @@
     {
       "name": "team",
       "source": "./team"
+    },
+    {
+      "name": "compy",
+      "source": "./compy"
     }
   ]
 }
