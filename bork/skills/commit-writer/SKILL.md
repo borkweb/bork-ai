@@ -59,8 +59,7 @@ Or subject + a brief body if the "why" isn't obvious from context:
 ```
 refactor(database): extract query builder to separate module
 
-Improves maintainability by separating query building logic
-from repository classes. No functional changes.
+Improves maintainability by separating query building logic from repository classes. No functional changes.
 ```
 
 ### Larger changes (multi-file, non-obvious motivation)
@@ -89,6 +88,12 @@ The approach taken — key implementation decisions, trade-offs made.
 - 50-72 characters, imperative mood ("add" not "added")
 - Capitalize first letter, no trailing period
 - No AI attribution — never include "Co-Authored-By" or similar
+
+**Body line wrapping rules:**
+- **Do NOT hard wrap body lines.** Write each paragraph as a single continuous line. Do not insert manual newlines mid-sentence or mid-paragraph to enforce a column width (no 72-column wrap, no 80-column wrap, no wrap at all). Let the git viewer, terminal, or editor soft-wrap as needed.
+- Use blank lines only to separate distinct paragraphs, sections, or list items — never to wrap a single thought across multiple lines.
+- Bullet and numbered list items are each a single unwrapped line.
+- This applies to every part of the body: summary paragraphs, "Why"/"How" sections, footers, and breaking-change descriptions.
 
 **When to include Testing:** Include it when there are specific, non-obvious steps a reviewer should take — running a test suite, hitting an endpoint, testing a UI flow. Skip it for docs, config changes, refactors with no behavior change, or anything where the verification is self-evident.
 

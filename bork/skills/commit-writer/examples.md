@@ -160,9 +160,7 @@ Fixes #891
 ```
 fix(auth): resolve session hijacking vulnerability
 
-Previous implementation stored session tokens in localStorage,
-making them accessible to XSS attacks. Moved to httpOnly
-cookies with SameSite=Strict.
+Previous implementation stored session tokens in localStorage, making them accessible to XSS attacks. Moved to httpOnly cookies with SameSite=Strict.
 
 ## Security
 All users should rotate tokens after deployment.
@@ -173,9 +171,7 @@ All users should rotate tokens after deployment.
 ```
 fix(ui): correct date picker timezone handling
 
-Dates were being converted to UTC incorrectly, causing
-off-by-one-day errors for users in certain timezones.
-Now preserves local timezone throughout the selection flow.
+Dates were being converted to UTC incorrectly, causing off-by-one-day errors for users in certain timezones. Now preserves local timezone throughout the selection flow.
 
 Fixes #423, #467
 ```
@@ -211,9 +207,7 @@ Extracts permission logic from 12 controllers into a single `PermissionGate` ser
 ```
 refactor(api): migrate from Express to Fastify
 
-Improves request throughput by ~40% in benchmarks.
-All endpoints maintain backward compatibility.
-Updated tests and documentation to reflect new framework.
+Improves request throughput by ~40% in benchmarks. All endpoints maintain backward compatibility. Updated tests and documentation to reflect new framework.
 
 Migration guide: docs/fastify-migration.md
 ```
@@ -221,9 +215,7 @@ Migration guide: docs/fastify-migration.md
 ```
 refactor(models): extract validation logic to JSON Schema
 
-Removes ~500 lines of manual validation code.
-Validation is now declarative and generates API docs automatically.
-No changes to validation behavior.
+Removes ~500 lines of manual validation code. Validation is now declarative and generates API docs automatically. No changes to validation behavior.
 ```
 
 ## Documentation
@@ -232,6 +224,7 @@ No changes to validation behavior.
 docs(api): add OpenAPI 3.0 specification
 
 Complete API documentation in OpenAPI format with:
+
 - All endpoints documented
 - Request/response schemas
 - Authentication flows
@@ -279,6 +272,7 @@ Fixes #567
 perf(database): add indexes for common query patterns
 
 Analysis of slow query log revealed missing indexes on:
+
 - users.email
 - orders.created_at
 - products.category_id
@@ -291,16 +285,13 @@ Reduces average query time from 250ms to 12ms.
 ```
 chore(deps): upgrade React from 17 to 18
 
-Update React and React DOM to version 18.2.0.
-All components tested with new concurrent rendering.
-No breaking changes required in application code.
+Update React and React DOM to version 18.2.0. All components tested with new concurrent rendering. No breaking changes required in application code.
 ```
 
 ```
 chore(ci): add automated dependency security scanning
 
-Configure Dependabot to check for vulnerabilities weekly
-and create PRs for security updates automatically.
+Configure Dependabot to check for vulnerabilities weekly and create PRs for security updates automatically.
 ```
 
 ## Test Commits
@@ -336,6 +327,7 @@ Adds Pact contract tests to verify our integration with the payment gateway API 
 test(auth): add integration tests for OAuth flow
 
 Covers complete OAuth authentication flow:
+
 - Authorization code exchange
 - Token refresh
 - Revocation
@@ -350,6 +342,7 @@ Achieves 100% coverage of auth service.
 build(docker): optimize production image size
 
 Reduces image from 1.2GB to 180MB:
+
 - Use multi-stage build
 - Switch to Alpine base
 - Remove dev dependencies
@@ -361,9 +354,7 @@ Faster deployments with no functionality changes.
 ```
 ci(github): add pull request preview deployments
 
-PRs now automatically deploy to temporary environments.
-Preview URL added as comment on each PR.
-Environments auto-deleted after PR close/merge.
+PRs now automatically deploy to temporary environments. Preview URL added as comment on each PR. Environments auto-deleted after PR close/merge.
 ```
 
 ```
@@ -399,6 +390,7 @@ CI now validates migrations before merge to prevent destructive operations from 
 feat(api): standardize error response format
 
 BREAKING CHANGE: All API errors now return consistent format:
+
 {
   "error": {
     "code": "ERROR_CODE",
@@ -407,8 +399,7 @@ BREAKING CHANGE: All API errors now return consistent format:
   }
 }
 
-Previous format used top-level "message" and "status" fields.
-Clients must update error handling logic.
+Previous format used top-level "message" and "status" fields. Clients must update error handling logic.
 
 Migration guide: docs/error-format-migration.md
 ```
@@ -453,11 +444,13 @@ Fixes #445
 feat(api,ui): add user profile customization
 
 Backend:
+
 - New /users/:id/profile endpoint
 - Avatar upload with image processing
 - Bio and social links fields
 
 Frontend:
+
 - Profile editor component
 - Image cropping interface
 - Real-time preview
@@ -471,6 +464,7 @@ Closes #234
 style: apply Prettier formatting to entire codebase
 
 No functional changes. Configures Prettier with:
+
 - 2 space indentation
 - Single quotes
 - Trailing commas
@@ -485,6 +479,7 @@ Pre-commit hook added to enforce formatting.
 chore(deps): update dependencies to latest stable versions
 
 Major updates:
+
 - typescript: 4.9 → 5.3
 - vite: 4.5 → 5.0
 - vitest: 0.34 → 1.0
@@ -499,8 +494,7 @@ revert: "feat(search): implement full-text search"
 
 This reverts commit a1b2c3d4e5f6.
 
-Elasticsearch integration causing memory issues in production.
-Reverting to investigate and optimize before re-deploying.
+Elasticsearch integration causing memory issues in production. Reverting to investigate and optimize before re-deploying.
 
 Refs: #789
 ```

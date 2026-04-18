@@ -10,12 +10,18 @@
 
 ## Subject Line Rules
 
-- **Length**: 50 characters ideal, 72 hard limit
+- **Length**: 50 characters ideal, 72 hard limit (applies to the subject line ONLY)
 - **Mood**: Imperative ("Add feature" not "Added feature")
 - **Formatting**: Capitalize first letter, no trailing period
 - **Separation**: Blank line between subject and body
 - **Focus**: Explain what and why, not how (the diff shows how)
 - **No AI attribution**: Never include Co-Authored-By or similar
+
+## Body Rules
+
+- **Do NOT hard wrap body lines.** Each paragraph is a single continuous line — no manual newlines mid-sentence or mid-paragraph to enforce a column width. The 50/72 rule above is for the subject only.
+- Use blank lines to separate paragraphs, sections, and list items.
+- Bullet/numbered list items are each a single unwrapped line.
 
 ## Scope Conventions
 
