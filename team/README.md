@@ -71,6 +71,7 @@ One sprint, one person, one feature — that takes about 30 minutes with this st
 | **plan-design-review** | Senior Designer | `/plan-design-review` | Designer's eye plan review. Rates 7 design dimensions 0-10, explains what would make each a 10, then fixes the plan to get there. Covers info architecture, interaction states, user journey, AI slop risk, responsive, and accessibility. |
 | **design-consultation** | Design Partner | `/design-consultation` | Design system consultation — proposes aesthetic, typography, color, layout, spacing, and motion as a coherent package. Generates font+color preview pages and writes DESIGN.md. |
 | **review** | Staff Engineer | `/review` | Pre-landing PR review. Two-pass analysis (critical + informational) for SQL safety, race conditions, LLM trust boundaries, enum completeness, and more. Fix-first: auto-fixes mechanical issues, asks about ambiguous ones. |
+| **security-review** | Security Auditor | `/security-review` | Deep security review grounded in 20 CVE-based pattern libraries (Heartbleed, Log4Shell, Next.js bypass, runc escape, xz backdoor, etc.). Bounds, injection, auth, crypto, races, memory lifecycle, error handling, supply chain, type safety, state machines, integer arithmetic, config, trust boundaries, regressions, API contracts, web, canonicalization, sandboxing, logging, DoS. Callable standalone or as a reference from `/review`. |
 | **investigate** | Debugger | `/investigate` | Systematic debugging with root cause investigation. Five phases: collect symptoms, pattern analysis, hypothesis testing, implementation, verification. Iron Law: no fixes without root cause. |
 | **design-review** | Designer Who Codes | `/design-review` | Designer's eye QA on live sites. 10-category audit (~80 items), letter grades, AI slop detection. Fixes issues in source code with atomic commits and before/after verification. |
 | **qa** | QA Lead | `/qa` | Systematic QA testing with fix loop. Three tiers (Quick/Standard/Exhaustive), diff-aware mode, health scoring, framework-specific guidance. Fixes bugs atomically with before/after evidence. |
@@ -89,7 +90,7 @@ Compound workflows that chain multiple skills together.
 
 | Command | Description |
 |---------|-------------|
-| `/full-review` | Chains `/review` → `/design-review` → `/qa` into one pipeline. Passes context forward between stages. Produces a combined ship-readiness verdict. |
+| `/full-review` | Chains `/review` → `/design-review` → `/qa` into one pipeline. Passes context forward between stages. Produces a combined ship-readiness verdict. Pass `--security` to insert `/security-review` as Stage 2 for auth/crypto/parser/dependency-heavy PRs. |
 | `/preflight` | Fast pre-merge safety check. Critical-only code review + smoke test + quick test run. Under 2 minutes. For small PRs where `/full-review` is overkill. |
 | `/status` | Read-only branch status and workflow progress report. Shows what's been done, what's left, and suggests the next step. |
 

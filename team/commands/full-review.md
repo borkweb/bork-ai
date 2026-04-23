@@ -1,6 +1,6 @@
 ---
 name: full-review
-description: Chains /review + /design-review + /qa into a single workflow. Runs pre-landing code review, then live design audit, then QA testing — passing context forward between each stage. Use when you want the complete review pipeline in one command. Accepts optional URL and tier arguments.
+description: Chains /review + /design-review + /qa into a single workflow, with optional /security-review stage. Runs pre-landing code review, then live design audit, then QA testing — passing context forward between each stage. Use when you want the complete review pipeline in one command. Accepts optional URL, tier, and security flag arguments.
 allowed-tools:
   - Bash
   - Read
@@ -15,7 +15,7 @@ allowed-tools:
 
 # Full Review Pipeline
 
-You are running the `/full-review` command. This chains three skills into a single workflow: `/review` → `/design-review` → `/qa`. Each stage feeds context to the next.
+You are running the `/full-review` command. This chains three skills into a single workflow: `/review` → `/design-review` → `/qa`. Each stage feeds context to the next. An optional `--security` flag inserts a deep CVE-pattern-based security audit as Stage 2.
 
 ## Arguments
 
@@ -23,6 +23,7 @@ You are running the `/full-review` command. This chains three skills into a sing
 - `/full-review <url>` — use the given URL for design-review and QA
 - `/full-review --quick` — quick tier for QA (critical/high only)
 - `/full-review --exhaustive` — exhaustive tier for QA (all severities)
+- `/full-review --security` — insert `/security-review` as Stage 2 (deep CVE-pattern audit). Use for auth/crypto/parser/dependency-heavy PRs, release audits, or any diff you want pattern-library-grounded security coverage on.
 - `/full-review --skip-design` — skip the design review stage
 - `/full-review --skip-qa` — skip the QA stage
 
@@ -60,9 +61,12 @@ Full Review Pipeline
 Branch:          [current branch] → [base branch]
 Diff size:       N files, +X -Y
 Frontend files:  [yes/no]
-Stages:          Review → Design Review → QA
+Stages:          Review → [Security Review →] Design Review → QA
 QA Tier:         [Standard/Quick/Exhaustive]
+Security audit:  [yes (--security) / no]
 ```
+
+(Drop "Security Review" from the Stages line if `--security` is not set.)
 
 ---
 
@@ -72,7 +76,7 @@ Read the `/review` skill's `SKILL.md` from `team/skills/review/SKILL.md`. Execut
 
 - Scope drift detection
 - Two-pass checklist review (critical + informational)
-- Design review (if frontend files changed — this is the in-diff design review, distinct from Stage 2's live-site review)
+- Design review (if frontend files changed — this is the in-diff design review, distinct from Stage 3's live-site review)
 - Adversarial review (if diff qualifies)
 - Fix-first pipeline (auto-fix + ask)
 - Post-fix verification
@@ -97,14 +101,52 @@ If the user chooses B, stop and output the review summary.
 
 ---
 
-## Step 3: Stage 2 — Design Review (/design-review)
+## Step 3: Stage 2 — Security Review (/security-review) [conditional]
+
+**Skip conditions:**
+- `--security` flag was NOT passed (this stage is opt-in by design — see `team/skills/security-review/SKILL.md` for rationale)
+
+If skipping, output nothing for this stage — proceed directly to Stage 3. Do not include a "SKIPPED" line in the summary.
+
+**Otherwise:**
+
+1. Read the `/security-review` skill's `SKILL.md` from `team/skills/security-review/SKILL.md`. Execute its full workflow:
+   - Scope the review (same diff as Stage 1)
+   - Pick relevant pattern files from the Change Type → Primary Patterns table
+   - Apply each selected pattern to the diff (Read the pattern file, walk its "What To Check" list, cite `file:line` + the matched Red Flag)
+   - Adversarial pass (if diff qualifies)
+   - Fix-First output with CRITICAL/HIGH/INFORMATIONAL severity
+   - Verdict: PASS / PASS WITH REMEDIATIONS / FAIL
+
+2. **Capture the security review output.** Save:
+   - Number of findings (critical/high/informational)
+   - Patterns applied (e.g. "03, 02, 16")
+   - Number auto-fixed
+   - Number user-decided
+   - Security verdict
+   - Any unresolved CRITICAL or HIGH findings
+
+**If security verdict is FAIL:** Ask the user:
+```
+The security review found unresolved CRITICAL or HIGH findings:
+  [list each with pattern reference]
+
+A) Continue with design review and QA anyway — I want the full picture
+B) Stop here — these need to be fixed before anything lands
+```
+
+If the user chooses B, stop and output the review + security summary.
+
+---
+
+## Step 4: Stage 3 — Design Review (/design-review)
 
 **Skip conditions:**
 - `--skip-design` flag was passed
 - No frontend files changed in the diff
 - No browser tool is available
 
-If skipping, output: `Stage 2: Design Review — SKIPPED (no frontend changes)` and proceed to Stage 3.
+If skipping, output: `Stage 3: Design Review — SKIPPED (no frontend changes)` and proceed to Stage 4.
 
 **Otherwise:**
 
@@ -121,17 +163,17 @@ If skipping, output: `Stage 2: Design Review — SKIPPED (no frontend changes)` 
 
 ---
 
-## Step 4: Stage 3 — QA Testing (/qa)
+## Step 5: Stage 4 — QA Testing (/qa)
 
 **Skip conditions:**
 - `--skip-qa` flag was passed
 - No browser tool is available
 
-If skipping, output: `Stage 3: QA — SKIPPED` and proceed to summary.
+If skipping, output: `Stage 4: QA — SKIPPED` and proceed to summary.
 
 **Otherwise:**
 
-1. Use the same URL from Stage 2 (or detect/ask if Stage 2 was skipped).
+1. Use the same URL from Stage 3 (or detect/ask if Stage 3 was skipped).
 
 2. Read the `/qa` skill's `SKILL.md` from `team/skills/qa/SKILL.md`. Execute its workflow in **diff-aware mode** with the selected tier.
 
@@ -144,9 +186,9 @@ If skipping, output: `Stage 3: QA — SKIPPED` and proceed to summary.
 
 ---
 
-## Step 5: Final Verification
+## Step 6: Final Verification
 
-After all three stages, run a final check:
+After all stages, run a final check:
 
 1. Run the project's test suite. If tests fail, report which stage's fixes broke them.
 2. Run `git log origin/<base>..HEAD --oneline` to show the full commit history including all fixes.
@@ -154,9 +196,9 @@ After all three stages, run a final check:
 
 ---
 
-## Step 6: Pipeline Summary
+## Step 7: Pipeline Summary
 
-Output a combined summary of all three stages:
+Output a combined summary of all stages. Include the Security Review block only if `--security` was passed.
 
 ```
 +====================================================================+
@@ -170,12 +212,20 @@ STAGE 1: CODE REVIEW
 ├─ Landing verdict:  SAFE TO LAND / LAND WITH CAUTION / DO NOT LAND
 └─ Unresolved:       N items
 
-STAGE 2: DESIGN REVIEW
+STAGE 2: SECURITY REVIEW                             [only if --security]
+├─ Patterns applied: NN, NN, NN
+├─ Findings:         N (X critical, Y high, Z informational)
+├─ Auto-fixed:       N
+├─ User-decided:     N (M fixed, K skipped)
+├─ Security verdict: PASS / PASS WITH REMEDIATIONS / FAIL
+└─ Unresolved:       N critical/high items
+
+STAGE 3: DESIGN REVIEW
 ├─ Design issues:    N found, M fixed
 ├─ Grade:            [A-F]
 └─ Status:           COMPLETE / SKIPPED
 
-STAGE 3: QA TESTING
+STAGE 4: QA TESTING
 ├─ Bugs found:       N
 ├─ Fixed:            N (verified: X, best-effort: Y, reverted: Z)
 ├─ Deferred:         N
@@ -192,9 +242,11 @@ OVERALL
 ```
 
 **Ship readiness logic:**
-- **READY** — Code review SAFE TO LAND, design grade C or above, QA health ≥ 70, tests pass
-- **READY WITH CAVEATS** — Code review LAND WITH CAUTION, or design grade D, or QA health 50-69
-- **NOT READY** — Code review DO NOT LAND, or design grade F, or QA health < 50, or tests fail
+- **READY** — Code review SAFE TO LAND, security verdict PASS or PASS WITH REMEDIATIONS (if security ran), design grade C or above, QA health ≥ 70, tests pass
+- **READY WITH CAVEATS** — Code review LAND WITH CAUTION, or design grade D, or QA health 50-69, or security PASS WITH REMEDIATIONS when unresolved HIGH findings exist
+- **NOT READY** — Code review DO NOT LAND, or security FAIL, or design grade F, or QA health < 50, or tests fail
+
+Security verdict FAIL overrides all other signals — NOT READY regardless of other stages.
 
 ---
 
