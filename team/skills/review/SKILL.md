@@ -114,6 +114,23 @@ Apply the checklist against the diff in two passes:
 1. **Pass 1 (CRITICAL):** SQL & Data Safety, Migration & Schema Safety, Race Conditions & Concurrency, Auth & Permission Gaps, LLM Output Trust Boundary, Enum & Value Completeness, API Contract Breaking Changes
 2. **Pass 2 (INFORMATIONAL):** Error Handling Anti-Patterns, Conditional Side Effects, Magic Numbers & String Coupling, Dead Code & Consistency, LLM Prompt Issues, Test Gaps, Crypto & Entropy, Time Window Safety, Type Coercion at Boundaries, View/Frontend, Performance & Bundle Impact
 
+**Security pattern references:** For deeper CVE-grounded patterns on any of the areas below, read the matching file from `../security-review/patterns/` BEFORE flagging. These calibrate findings against real incidents (Heartbleed, Log4Shell, Next.js CVE-2025-29927, runc escape, etc.) and catch failure modes the checklist's one-liners miss.
+
+| Diff touches…                       | Read pattern(s)                        |
+|-------------------------------------|----------------------------------------|
+| Buffer/array handling (C/C++)       | 01 Bounds, 11 Integer Arithmetic       |
+| New/changed auth or middleware      | 03 Auth                                |
+| Crypto ops (hashing, signing, RNG)  | 04 Crypto Hygiene                      |
+| Parsers / deserialization / uploads | 17 Canonicalization, 02 Injection, 01  |
+| Concurrency / goroutines / locks    | 05 Race Conditions                     |
+| Error paths on privileged ops       | 07 Error Handling                      |
+| Dependency / lockfile / CI config   | 08 Supply Chain                        |
+| Web / browser / frontend            | 16 Web App Security                    |
+| New HTTP endpoint                   | 03 Auth, 02 Injection, 16 Web          |
+| Refactors of security-sensitive code| 14 Regression Prevention               |
+
+Read the pattern file, apply its "What To Check" list to the diff, cite the specific Red Flag when flagging.
+
 **Enum & Value Completeness requires reading code OUTSIDE the diff.** When the diff introduces a new enum value, status, tier, or type constant, use Grep to find all files that reference sibling values, then Read those files to check if the new value is handled. This is the one category where within-diff review is insufficient.
 
 **Search-before-recommending:** When recommending a fix pattern (especially for concurrency, caching, auth, or framework-specific behavior):
