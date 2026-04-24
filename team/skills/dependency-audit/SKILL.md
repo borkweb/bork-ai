@@ -1,6 +1,13 @@
 ---
 name: dependency-audit
-description: Dependency audit and upgrade planning. Scans project dependencies for outdated packages, known vulnerabilities, and license issues. Groups upgrades by risk level, generates a prioritized upgrade plan, and optionally applies safe updates. Use when asked to "audit dependencies", "check for vulnerabilities", "update packages", "dependency review", "outdated packages", or "security audit". Proactively suggest when lockfiles are stale or vulnerability advisories are relevant.
+description: >
+  Dependency audit and upgrade planning. Scans project dependencies for
+  outdated packages, known vulnerabilities, and license issues. Groups upgrades
+  by risk level, generates a prioritized upgrade plan, and optionally applies
+  safe updates. Use when asked to "audit dependencies", "check for
+  vulnerabilities", "update packages", "dependency review", "outdated
+  packages", or "security audit". Proactively suggest when lockfiles are stale
+  or vulnerability advisories are relevant.
 allowed-tools:
   - Bash
   - Read

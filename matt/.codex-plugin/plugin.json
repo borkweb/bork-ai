@@ -1,0 +1,40 @@
+{
+  "name": "matt",
+  "version": "1.0.1",
+  "description": "Personal writing and voice-profile configuration",
+  "author": {
+    "name": "Matthew Batchelder",
+    "email": "borkweb@gmail.com",
+    "url": "https://github.com/borkweb"
+  },
+  "homepage": "https://github.com/borkweb/bork-ai/tree/main/matt",
+  "repository": "https://github.com/borkweb/bork-ai",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "plugin",
+    "writing",
+    "voice",
+    "style"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "matt",
+    "shortDescription": "Personal writing and voice-profile configuration",
+    "longDescription": "A personal Codex plugin with Matt-specific writing behavior and voice-profile guidance, packaged from this repository's existing skill set.",
+    "developerName": "Matthew Batchelder",
+    "category": "Writing",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/borkweb/bork-ai/tree/main/matt",
+    "privacyPolicyURL": "https://github.com/borkweb/bork-ai",
+    "termsOfServiceURL": "https://github.com/borkweb/bork-ai/blob/main/LICENSE",
+    "defaultPrompt": [
+      "Rewrite this draft in Matt's voice"
+    ],
+    "brandColor": "#7C3AED",
+    "screenshots": []
+  }
+}

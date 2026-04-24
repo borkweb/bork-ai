@@ -1,6 +1,15 @@
 ---
 name: plan-eng-review
-description: Eng manager-mode plan review. Lock in the execution plan — architecture, security, data flow, concurrency, diagrams, edge cases, test coverage, performance, observability, deployment. Supports Standard (per-section) and Quick-pass (grouped) pacing. Detects review context (git/PR, plan document, or hybrid). Walks through issues interactively with opinionated recommendations and produces a go/no-go readiness verdict. Use when asked to "review the architecture", "engineering review", or "lock in the plan". Proactively suggest when the user has a plan or design doc and is about to start coding — to catch architecture issues before implementation.
+description: >
+  Eng manager-mode plan review. Lock in the execution plan — architecture,
+  security, data flow, concurrency, diagrams, edge cases, test coverage,
+  performance, observability, deployment. Supports Standard (per-section) and
+  Quick-pass (grouped) pacing. Detects review context (git/PR, plan document,
+  or hybrid). Walks through issues interactively with opinionated
+  recommendations and produces a go/no-go readiness verdict. Use when asked to
+  "review the architecture", "engineering review", or "lock in the plan".
+  Proactively suggest when the user has a plan or design doc and is about to
+  start coding — to catch architecture issues before implementation.
 allowed-tools:
   - Read
   - Write

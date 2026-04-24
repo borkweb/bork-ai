@@ -1,6 +1,14 @@
 ---
 name: plan-deep-review
-description: Deep plan review with four modes: SCOPE EXPANSION (dream big), SELECTIVE EXPANSION (hold scope + cherry-pick expansions), HOLD SCOPE (maximum rigor), SCOPE REDUCTION (strip to essentials). Supports Standard (per-section) and Batched (grouped) pacing. Detects review context (git/PR, plan document, or hybrid). Challenges premises, maps failure modes and concurrency risks, reviews architecture/security/performance/cost/deployment, evaluates API contracts, and produces structured outputs with error registries, diagrams, and a go/no-go readiness verdict.
+description: >
+  Deep plan review with four modes: SCOPE EXPANSION (dream big), SELECTIVE
+  EXPANSION (hold scope + cherry-pick expansions), HOLD SCOPE (maximum rigor),
+  SCOPE REDUCTION (strip to essentials). Supports Standard (per-section) and
+  Batched (grouped) pacing. Detects review context (git/PR, plan document, or
+  hybrid). Challenges premises, maps failure modes and concurrency risks,
+  reviews architecture/security/performance/cost/deployment, evaluates API
+  contracts, and produces structured outputs with error registries, diagrams,
+  and a go/no-go readiness verdict.
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -704,4 +712,3 @@ If any AskUserQuestion goes unanswered, note it here. Never silently default.
 * One sentence max per option.
 * After each section, pause and wait for feedback.
 * Use **CRITICAL GAP** / **WARNING** / **OK** for scannability.
-

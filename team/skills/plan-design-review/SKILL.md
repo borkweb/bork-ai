@@ -1,6 +1,18 @@
 ---
 name: plan-design-review
-description: Designer's eye plan review — interactive, like the deep and eng reviews. Rates each design dimension 0-10, explains what would make it a 10, then fixes the plan to get there. Covers information architecture, interaction states, motion/micro-interactions, user journey, AI slop risk, content/copy quality, design system alignment, responsive/a11y, perceived performance, theming, and unresolved decisions. Supports Standard (per-pass) and Quick-pass (grouped) pacing. Detects review context (git/PR, plan document, or hybrid). Produces a go/no-go design readiness verdict. Works in plan mode. For live site visual audits, use /design-review. Use when asked to "review the design plan" or "design critique". Proactively suggest when the user has a plan with UI/UX components that should be reviewed before implementation.
+description: >
+  Designer's eye plan review — interactive, like the deep and eng reviews.
+  Rates each design dimension 0-10, explains what would make it a 10, then
+  fixes the plan to get there. Covers information architecture, interaction
+  states, motion/micro-interactions, user journey, AI slop risk,
+  content/copy quality, design system alignment, responsive/a11y, perceived
+  performance, theming, and unresolved decisions. Supports Standard (per-pass)
+  and Quick-pass (grouped) pacing. Detects review context (git/PR, plan
+  document, or hybrid). Produces a go/no-go design readiness verdict. Works in
+  plan mode. For live site visual audits, use /design-review. Use when asked to
+  "review the design plan" or "design critique". Proactively suggest when the
+  user has a plan with UI/UX components that should be reviewed before
+  implementation.
 allowed-tools:
   - Read
   - Edit
