@@ -1,0 +1,43 @@
+{
+  "name": "team",
+  "version": "1.2.1",
+  "description": "Planning, review, QA, shipping, and retrospective workflows",
+  "author": {
+    "name": "Matthew Batchelder",
+    "email": "borkweb@gmail.com",
+    "url": "https://github.com/borkweb"
+  },
+  "homepage": "https://github.com/borkweb/bork-ai/tree/main/team",
+  "repository": "https://github.com/borkweb/bork-ai",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "plugin",
+    "planning",
+    "review",
+    "qa",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "team",
+    "shortDescription": "Planning, review, QA, shipping, and retrospective workflows",
+    "longDescription": "A Codex workflow stack for planning, engineering review, design review, debugging, QA, shipping, and retrospectives. The plugin packages the repository's reusable process skills, commands, hooks, and agents for end-to-end software delivery.",
+    "developerName": "Matthew Batchelder",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/borkweb/bork-ai/tree/main/team",
+    "privacyPolicyURL": "https://github.com/borkweb/bork-ai",
+    "termsOfServiceURL": "https://github.com/borkweb/bork-ai/blob/main/LICENSE",
+    "defaultPrompt": [
+      "Run an engineering review on this implementation plan",
+      "QA this feature and fix what you find",
+      "Review this branch before I ship it"
+    ],
+    "brandColor": "#0F766E",
+    "screenshots": []
+  }
+}

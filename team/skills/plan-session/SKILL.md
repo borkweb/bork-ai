@@ -1,6 +1,9 @@
 ---
 name: plan-session
-description: Product design session — structured questioning that ensures the problem is understood before solutions are proposed. Explores demand, status quo, target users, and the narrowest useful wedge. Produces a design document, not code.
+description: >
+  Product design session — structured questioning that ensures the problem is
+  understood before solutions are proposed. Explores demand, status quo, target
+  users, and the narrowest useful wedge. Produces a design document, not code.
 disable-model-invocation: true
 allowed-tools:
   - Bash

@@ -1,6 +1,11 @@
 ---
 name: setup-browser-cookies
-description: Import cookies from your real browser into the Claude in Chrome browser session for authenticated testing. Use before QA testing authenticated pages. Use when asked to "import cookies", "set up cookies", "login to the site", "authenticate the browser", "set up auth", or when another skill (like /qa, /browse, /design-review) needs an authenticated session.
+description: >
+  Import cookies from your real browser into the Claude in Chrome browser
+  session for authenticated testing. Use before QA testing authenticated pages.
+  Use when asked to "import cookies", "set up cookies", "login to the site",
+  "authenticate the browser", "set up auth", or when another skill (like /qa,
+  /browse, /design-review) needs an authenticated session.
 allowed-tools:
   - Bash
   - Read

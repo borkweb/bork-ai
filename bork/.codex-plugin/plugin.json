@@ -1,0 +1,43 @@
+{
+  "name": "bork",
+  "version": "1.4.2",
+  "description": "General development tools for coding workflows",
+  "author": {
+    "name": "Matthew Batchelder",
+    "email": "borkweb@gmail.com",
+    "url": "https://github.com/borkweb"
+  },
+  "homepage": "https://github.com/borkweb/bork-ai/tree/main/bork",
+  "repository": "https://github.com/borkweb/bork-ai",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "plugin",
+    "agents",
+    "skills",
+    "development",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "bork",
+    "shortDescription": "General development tools for coding workflows",
+    "longDescription": "General development tools for Codex projects, including reusable skills for commit writing, SQL formatting, plan writing, humanizing text, and trimming agent instructions, plus supporting agents and commands already used in this repository.",
+    "developerName": "Matthew Batchelder",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/borkweb/bork-ai/tree/main/bork",
+    "privacyPolicyURL": "https://github.com/borkweb/bork-ai",
+    "termsOfServiceURL": "https://github.com/borkweb/bork-ai/blob/main/LICENSE",
+    "defaultPrompt": [
+      "Write a commit message for these staged changes",
+      "Review this SQL and reformat it to project style",
+      "Trim redundant instructions from this AGENTS.md"
+    ],
+    "brandColor": "#1F2937",
+    "screenshots": []
+  }
+}

@@ -1,6 +1,14 @@
 ---
 name: review
-description: Pre-landing PR review. Analyzes diff against the base branch for SQL safety, migration safety, auth/permission gaps, error handling anti-patterns, API contract breaks, LLM trust boundary violations, conditional side effects, and other structural issues. Includes adversarial subagent review, design review for frontend changes, and a landing verdict (SAFE TO LAND / LAND WITH CAUTION / DO NOT LAND). Use when asked to "review this PR", "code review", "pre-landing review", or "check my diff". Proactively suggest when the user is about to merge or land code changes.
+description: >
+  Pre-landing PR review. Analyzes diff against the base branch for SQL safety,
+  migration safety, auth/permission gaps, error handling anti-patterns, API
+  contract breaks, LLM trust boundary violations, conditional side effects, and
+  other structural issues. Includes adversarial subagent review, design review
+  for frontend changes, and a landing verdict (SAFE TO LAND / LAND WITH
+  CAUTION / DO NOT LAND). Use when asked to "review this PR", "code review",
+  "pre-landing review", or "check my diff". Proactively suggest when the user
+  is about to merge or land code changes.
 allowed-tools:
   - Bash
   - Read

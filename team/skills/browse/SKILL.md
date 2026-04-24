@@ -1,6 +1,13 @@
 ---
 name: browse
-description: Browser-based QA testing and site dogfooding via Claude in Chrome. Navigate any URL, interact with elements, verify page state, take screenshots, record GIFs, check responsive layouts, test forms, run accessibility audits, monitor network performance, and assert element states. Use when you need to test a feature, verify a deployment, dogfood a user flow, or file a bug with evidence. Use when asked to "open in browser", "test the site", "take a screenshot", "dogfood this", or "check this page".
+description: >
+  Browser-based QA testing and site dogfooding via Claude in Chrome. Navigate
+  any URL, interact with elements, verify page state, take screenshots, record
+  GIFs, check responsive layouts, test forms, run accessibility audits, monitor
+  network performance, and assert element states. Use when you need to test a
+  feature, verify a deployment, dogfood a user flow, or file a bug with
+  evidence. Use when asked to "open in browser", "test the site", "take a
+  screenshot", "dogfood this", or "check this page".
 allowed-tools:
   - Bash
   - Read

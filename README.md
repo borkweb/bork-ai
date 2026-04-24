@@ -1,6 +1,6 @@
 # bork-ai
 
-A Claude Code plugin library providing specialized agents, skills, and commands for enhanced development workflows.
+A plugin library for Claude Code, Gemini, and Codex, providing specialized agents, skills, and commands for enhanced development workflows.
 
 ## Installation
 
@@ -27,6 +27,41 @@ claude plugin install team
 5. Click _Sync_
 
 The plugins will appear in your marketplace and can be installed from there.
+
+### With Codex
+
+Codex manifests live alongside each plugin package:
+
+- `bork/.codex-plugin/plugin.json`
+- `team/.codex-plugin/plugin.json`
+- `matt/.codex-plugin/plugin.json`
+
+This repo also includes a repo-owned Codex marketplace bundle at `.agents/bork-ai/`.
+
+The Codex marketplace definition lives at `.agents/bork-ai/codex.marketplace.json` and is intended to be symlinked to `~/.agents/bork-ai/marketplace.json` so the marketplace definition and plugin wiring stay versioned in this repository.
+
+Setup:
+
+```bash
+mkdir -p ~/.agents/bork-ai
+ln -sfn /Users/matt/git/bork-ai/.agents/bork-ai/plugins ~/.agents/bork-ai/plugins
+ln -sfn /Users/matt/git/bork-ai/.agents/bork-ai/codex.marketplace.json ~/.agents/bork-ai/marketplace.json
+```
+
+Then enable the plugins in `~/.codex/config.toml`:
+
+```toml
+[plugins."bork@bork-ai"]
+enabled = true
+
+[plugins."team@bork-ai"]
+enabled = true
+
+[plugins."matt@bork-ai"]
+enabled = true
+```
+
+Restart Codex after updating the symlinks and config.
 
 ## Plugins
 
