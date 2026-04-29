@@ -61,7 +61,7 @@ Perspective: feasibility, sequencing, constraints, trade-offs.
 Ask:
 - What is the smallest useful proof?
 - What is the true bottleneck?
-- What has to be sacrificed to move now?
+- What has to be sacrificed to move now, and what will be sacrificed in 3-5 years if this ships as drafted?
 - What decision changes the trajectory first?
 
 Rules:
@@ -115,9 +115,11 @@ Use only when `-f` names a focus or the user asks for specialist review.
 Common focus areas:
 - `technical`: architecture, scalability, maintainability, performance, debt
 - `business`: market, pricing, unit economics, competition, go-to-market
-- `UX`: usability, adoption, accessibility, research, workflow fit
+- `UX`: third-person discipline — usability research, methods, accessibility standards, workflow fit, evaluation heuristics
+- `user`: first-person friction — speak *as* the user encountering this; ground "I'm confused" or "I'd abandon here" in mechanism (mental model mismatch, missing affordance, expectation violation, prior context). Distinct from `UX`: UX is the discipline, `user` is the person. If both are invoked and the findings overlap, collapse to one.
 - `security`: threat model, attack surface, compliance, data protection
 - `writing`: audience, argument, clarity, credibility, editorial risk
+- `steward`: long-term cost-of-ownership, precedent, institutional memory, who has tried this before and what happened, the 5-year maintenance and reversibility cost
 - `custom`: infer the domain from the user request
 
 Rules:

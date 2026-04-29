@@ -54,6 +54,8 @@ Default roster:
 - Add Ethicist when values, public impact, consent, harm, trust, or power asymmetry matter
 - Add Jester when framing feels rigid, over-serious, derivative, or creatively blocked
 - Add a temporary Domain Expert when `-f` names a domain that none of the five seats covers
+- For decisions with long lifespans (architecture, public commitments, infrastructure, institutional precedent), invoke `-f steward` to add the long-horizon lens covering cost-of-ownership and prior art
+- For product, feature, or interface decisions, invoke `-f user` to add the first-person friction lens (the user's experience, grounded in mechanism — not pure roleplay)
 
 ## Seats
 
