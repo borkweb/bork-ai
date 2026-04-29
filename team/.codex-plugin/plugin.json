@@ -1,6 +1,6 @@
 {
   "name": "team",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Planning, review, QA, shipping, and retrospective workflows",
   "author": {
     "name": "Matthew Batchelder",

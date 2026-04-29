@@ -28,6 +28,20 @@ claude plugin install team
 
 The plugins will appear in your marketplace and can be installed from there.
 
+### Optional Claude Agent Teams
+
+Some skills, such as `bork: council`, can use Claude Code Agent Teams for delegated multi-agent analysis when the runtime supports it. To enable Agent Teams, add this to `~/.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}
+```
+
+Restart Claude Code after changing the setting. Skills that support Agent Teams should still work without this setting by running internally in a single assistant response.
+
 ### With Codex
 
 Codex manifests live alongside each plugin package:

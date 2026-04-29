@@ -90,6 +90,14 @@ Compound workflows that chain multiple skills together.
 
 | Command | Description |
 |---------|-------------|
+| `/plan-session` | Structured product design session — reframes the problem before implementation. |
+| `/plan-deep-review` | Deep plan review with scope, architecture, risk, and readiness analysis. |
+| `/plan-eng-review` | Engineering plan review focused on architecture, delivery, and execution risk. |
+| `/plan-design-review` | Design plan review focused on UX, interaction, and visual readiness. |
+| `/review` | Pre-landing code review for correctness, safety, and regressions. |
+| `/security-review` | Deep security review grounded in the security pattern library. |
+| `/qa` | QA workflow that tests and fixes issues. |
+| `/qa-only` | Report-only QA workflow that does not apply fixes. |
 | `/full-review` | Chains `/review` → `/design-review` → `/qa` into one pipeline. Passes context forward between stages. Produces a combined ship-readiness verdict. Pass `--security` to insert `/security-review` as Stage 2 for auth/crypto/parser/dependency-heavy PRs. |
 | `/preflight` | Fast pre-merge safety check. Critical-only code review + smoke test + quick test run. Under 2 minutes. For small PRs where `/full-review` is overkill. |
 | `/status` | Read-only branch status and workflow progress report. Shows what's been done, what's left, and suggests the next step. |

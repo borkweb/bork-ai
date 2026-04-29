@@ -15,6 +15,7 @@ General development tools for Claude Code projects.
 | Skill | Command | Description |
 |-------|---------|-------------|
 | **commit-writer** | `/commit` | Analyzes staged changes and generates conventional commit messages matching repository style. |
+| **council** | — | Runs structured adversarial assessment of ideas, plans, and proposals through selected lenses, debate rounds, risk mapping, and a verdict. |
 | **humanizer** | `/humanize` | Detects and removes AI writing patterns (inflated language, em dash overuse, rule of three, etc.) to make text sound natural. |
 | **writing-sql** | — | Enforces strict vertical SQL formatting conventions for raw files, inline PHP, migrations, and framework query builders. |
 | **writing-plans** | — | Applies concise writing style to plan documents — strips filler, bans inflated adjectives, requires structured decisions. |

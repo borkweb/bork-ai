@@ -22,7 +22,7 @@ This repository contains custom Claude Code extensions including agents, skills,
 
 - **hooks/**: Event-driven shell commands (currently placeholder)
 
-- **commands/**: Custom slash commands (currently placeholder)
+- **commands/**: Custom slash commands that route to plugin skills and compound workflows
 
 - **.claude-plugin/**: Plugin metadata and configuration
   - Contains plugin.json with package information
@@ -97,6 +97,8 @@ Skills are invoked via the Skill tool with just the skill name (no arguments). W
 See [team/README.md](team/README.md) for the full list of workflow skills: plan-session, plan-deep-review, plan-eng-review, plan-design-review, design-consultation, review, investigate, design-review, qa, qa-only, ship, document-release, retro, browse, benchmark, setup-browser-cookies, dependency-audit.
 
 ### Available Commands (team plugin)
+
+Skill entrypoints: plan-session, plan-deep-review, plan-eng-review, plan-design-review, review, security-review, qa, qa-only.
 
 Compound workflows that chain skills: full-review (review → design-review → qa), preflight (fast pre-merge safety check), status (branch progress report).
 
