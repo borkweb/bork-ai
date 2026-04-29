@@ -72,13 +72,22 @@ Default roster:
 
 For deeper role prompts and confidence scales, use `references/roles.md`.
 
+All seats use the same vertical labeled-bullet format. Confidence label sits next to the seat name. Each bullet is one or two sentences — keep density per field, not horizontal jamming.
+
 ### Visionary
 - Map the 5-10 year path if the premise scales, succeeds, or becomes normalized.
 - Separate observable signals from speculation.
 - Name the strategic inflection point where category, audience, economics, or power changes.
 - Include a plausible counterforce. Avoid vague "future of X" language.
 
-Format: `Visionary | Trajectory | Observable Signals | Strategic Inflection Point | Leverage Point`
+Format:
+```
+**Visionary** — `STRONG ADVOCATE` | `MODERATE ADVOCATE` | `QUALIFIED SUPPORT`
+- *Trajectory*: ...
+- *Signals*: ...
+- *Inflection point*: ...
+- *Leverage*: ...
+```
 
 ### Devil's Advocate
 - Hunt for the weakest structural link in logic, data, or execution.
@@ -86,7 +95,13 @@ Format: `Visionary | Trajectory | Observable Signals | Strategic Inflection Poin
 - Map concrete failure scenarios, not generic risks.
 - If no flaw exists, say: `No structural vulnerability detected under current framing.`
 
-Format: `Devil's Advocate | Core Vulnerability | Falsifying Evidence | Key Question to Answer`
+Format:
+```
+**Devil's Advocate** — `STRONG OPPOSITION` | `MODERATE CONCERNS` | `CONDITIONAL ACCEPTANCE`
+- *Core vulnerability*: ...
+- *Falsifying evidence*: ...
+- *Key question*: ...
+```
 
 ### Ethicist
 - Map who benefits, who bears cost, and who is excluded.
@@ -94,15 +109,27 @@ Format: `Devil's Advocate | Core Vulnerability | Falsifying Evidence | Key Quest
 - Evaluate against stated values. If values are unstated and important, ask for them.
 - Name mitigation pathways; do not dismiss harm as merely unintended.
 
-Format: `Ethicist | Principle at Stake | Impact Mapping | Guardrail Recommendation`
+Format:
+```
+**Ethicist** — `ETHICALLY SOUND` | `CONCERNS ADDRESSABLE` | `ETHICAL RISKS UNACCEPTABLE`
+- *Principle at stake*: ...
+- *Impact map*: ...
+- *Guardrail*: ...
+```
 
 ### Pragmatist
 - Define the smallest executable step that proves core value.
 - Name the primary bottleneck: time, capital, skill, access, policy, attention, or trust.
 - Identify the first decision that changes the trajectory.
-- Always name what must be sacrificed to proceed.
+- Always name what must be sacrificed to proceed, both now and at the 3-5 year horizon.
 
-Format: `Pragmatist | Minimum Viable Step | Key Constraint | Trade-off to Acknowledge`
+Format:
+```
+**Pragmatist** — `FEASIBLE AS-IS` | `FEASIBLE WITH MODIFICATIONS` | `NOT FEASIBLE`
+- *Minimum viable step*: ...
+- *Key constraint*: ...
+- *Trade-off*: ...
+```
 
 ### Jester
 - Invert the premise or exaggerate it to expose hidden assumptions.
@@ -110,14 +137,26 @@ Format: `Pragmatist | Minimum Viable Step | Key Constraint | Trade-off to Acknow
 - Do not give literal implementation advice.
 - If the idea already contains its own subversion, say so and reframe from there.
 
-Format: `Jester | Provocation/Inversion | What This Exposes | Reframed Question`
+Format:
+```
+**Jester** — `ORIGINAL FRAME HOLDS` | `REFRAME USEFUL` | `PREMISE SUBVERTED`
+- *Provocation*: ...
+- *What this exposes*: ...
+- *Reframed question*: ...
+```
 
 ### Domain Expert
 - Use only when `-f` provides a domain or the user explicitly requests specialist review.
 - Ground the critique in domain mechanisms, not generic expertise theater.
 - Name one specialized constraint, one validation test, and one likely blind spot.
 
-Format: `Domain Expert | Domain Constraint | Validation Test | Likely Blind Spot`
+Format:
+```
+**Domain Expert (<focus>)** — `DOMAIN-APPROVED` | `DOMAIN CONCERNS` | `DOMAIN RISKS CRITICAL`
+- *Domain constraint*: ...
+- *Validation test*: ...
+- *Likely blind spot*: ...
+```
 
 ## Council Flow
 
@@ -135,41 +174,80 @@ For strict debate mechanics, use `references/debate-protocol.md`.
 
 ## Output Shape
 
-Use this structure unless the user asks for a shorter response:
+Use this structure unless the user asks for a shorter response. Always separate major phases with a horizontal rule (`---`) and leave a blank line between every seat in opening positions. The goal is scannable structure, not packed prose.
 
 ```text
-Frame: ...
-Seats: ...
+**Frame**: ...
+**Seats**: ...
 
-Opening Positions
-- Visionary | ...
-- Devil's Advocate | ...
+---
 
-Cross-Examination
-- Round 1: ...
-- Round 2: ...
+**Opening Positions**
 
-Position Movement
+**Visionary** — `MODERATE ADVOCATE`
+- *Trajectory*: ...
+- *Signals*: ...
+- *Inflection point*: ...
+- *Leverage*: ...
+
+**Devil's Advocate** — `MODERATE CONCERNS`
+- *Core vulnerability*: ...
+- *Falsifying evidence*: ...
+- *Key question*: ...
+
+**Pragmatist** — `FEASIBLE WITH MODIFICATIONS`
+- *Minimum viable step*: ...
+- *Key constraint*: ...
+- *Trade-off*: ...
+
+---
+
+**Cross-Examination**
+
+*Round 1*
+- Devil's Advocate → Visionary: ...
+- Pragmatist → Devil's Advocate: ...
+- Visionary → Pragmatist: ...
+
+*Round 2*
 - ...
 
-Tension Map
+---
+
+**Position Movement**
 - ...
 
-Risk Matrix
+---
+
+**Tension Map**
+1. ...
+2. ...
+
+---
+
+**Risk Matrix**
+
 | Risk | Likelihood | Impact | Mitigation |
 |------|------------|--------|------------|
+| ... | ... | ... | ... |
 
-Steelman
+---
+
+**Steelman**
+
 ...
 
-Verdict: PROCEED WITH CONDITIONS
-Confidence: Medium
-Next Move: ...
+---
+
+**Verdict**: `PROCEED WITH CONDITIONS`
+**Confidence**: Medium
+**Next Move**: ...
 ```
 
 ## Guardrails
 
-- Keep each seat concise: one dense paragraph or compact bullet.
+- Keep each seat concise: one or two sentences per labeled bullet, never wall-of-text paragraphs.
+- Use vertical labeled bullets, not pipe-separated inline fields. Whitespace is part of the analysis.
 - Do not blend voices into a generic balanced answer.
 - Prefer mechanisms, evidence, and trade-offs over vibe checks.
 - Do not force consensus. The useful output is often the unresolved tension.
