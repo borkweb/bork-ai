@@ -1,6 +1,6 @@
 # bork-ai
 
-A plugin library for Claude Code, Gemini, and Codex, providing specialized agents, skills, and commands for enhanced development workflows.
+Agents, skills, and commands for Claude Code, Gemini, and Codex.
 
 ## Installation
 
@@ -10,7 +10,7 @@ A plugin library for Claude Code, Gemini, and Codex, providing specialized agent
 claude plugin marketplace add borkweb/bork-ai
 ```
 
-Then install individual plugins:
+Then install the plugins you want:
 
 ```bash
 claude plugin install bork
@@ -30,7 +30,7 @@ The plugins will appear in your marketplace and can be installed from there.
 
 ### Optional Claude Agent Teams
 
-Some skills, such as `bork: council`, can use Claude Code Agent Teams for delegated multi-agent analysis when the runtime supports it. To enable Agent Teams, add this to `~/.claude/settings.json`:
+Some skills, such as `bork: council`, benefit from Claude Code Agent Teams, which lets them dispatch work to multiple subagents at once. To enable Agent Teams, add this to `~/.claude/settings.json`:
 
 ```json
 {
@@ -40,7 +40,7 @@ Some skills, such as `bork: council`, can use Claude Code Agent Teams for delega
 }
 ```
 
-Restart Claude Code after changing the setting. Skills that support Agent Teams should still work without this setting by running internally in a single assistant response.
+Restart Claude Code after changing the setting. Skills that support Agent Teams also work without this setting by running internally in a single assistant response.
 
 ### With Codex
 
@@ -52,7 +52,7 @@ Codex manifests live alongside each plugin package:
 
 This repo also includes a repo-owned Codex marketplace bundle at `.agents/bork-ai/`.
 
-The Codex marketplace definition lives at `.agents/bork-ai/codex.marketplace.json` and is intended to be symlinked to `~/.agents/bork-ai/marketplace.json` so the marketplace definition and plugin wiring stay versioned in this repository.
+The Codex marketplace definition lives at `.agents/bork-ai/codex.marketplace.json`. Symlink it to `~/.agents/bork-ai/marketplace.json` so the marketplace definition and plugin wiring stay versioned in this repository.
 
 Setup:
 
