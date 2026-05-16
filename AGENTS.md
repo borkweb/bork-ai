@@ -80,37 +80,41 @@ Skills are invoked via the Skill tool with just the skill name (no arguments). W
 
 ### Available Skills (bork plugin)
 
-1. **writing-commits**
-   - Crafts conventional commit messages by analyzing git diffs and history
-   - Follows Conventional Commits specification
-   - Adapts to repository's existing commit style
-   - Suggests splitting commits when changes span multiple concerns
+Skills are organized into two buckets under `bork/skills/`:
 
-2. **writing-sql**
-   - Enforces project SQL formatting conventions for all SQL (raw files, inline PHP, migrations)
-   - Covers SELECT, INSERT, UPDATE, DELETE, CREATE TABLE, ALTER TABLE, CTEs, subqueries, CASE, window functions, UNION, EXISTS
-   - PHP integration: PDO prepared statements, heredocs, $wpdb->prepare(), Laravel DB::select()/whereRaw(), dynamic query building
-   - Strict vertical formatting — no exceptions for short queries
+**`bork/skills/core/`** (my Original) — skills I wrote or substantially extended:
+- **writing-commits** — Crafts conventional commit messages by analyzing git diffs and history. Follows Conventional Commits, adapts to repo style, suggests splitting commits across concerns.
+- **writing-sql** — Enforces vertical SQL formatting for raw files, inline PHP, migrations, and framework query builders. No exceptions for short queries.
+- **writing-plans** — Concise writing style for plan documents. Strips filler, bans inflated adjectives, requires structured decisions.
+- **agents-md-lint** — Audits AI agent instruction files and removes facts discoverable from code.
+- **council** — Structured adversarial assessment with lenses, debate rounds, risk mapping, verdict.
+- **handoff** — Writes handoff documentation for picking up where you left off.
+- **humanize** — Detects and removes AI writing patterns (inflated language, em dash overuse, hollow rhythm punches, etc.) on text or files in place.
+- **prototype** — Scaffolds a frontend prototype or a backend prototype with a disposable state machine.
+- **red-pen** — Strict editorial reviewer applying Orwell's rules and Practical Typography.
 
-### Available Skills (team plugin)
+**`bork/skills/gstack/`** (Collected) — workflow stack ported from gstack:
 
-See [team/README.md](team/README.md) for the full list of workflow skills: plan-session, plan-deep-review, plan-eng-review, plan-design-review, design-consultation, review, investigate, design-review, qa, qa-only, ship, document-release, retro, browse, benchmark, setup-browser-cookies, dependency-audit.
+See [bork/README.md](bork/README.md) for the full list: plan-session, plan-deep-review, plan-eng-review, plan-design-review, plan-devex-review, autoplan, design-consultation, review, review-security, investigate, design-review, qa, qa-only, ship, document-release.
 
-### Available Commands (team plugin)
+### Available Commands (bork plugin)
 
-Skill entrypoints: plan-session, plan-deep-review, plan-eng-review, plan-design-review, review, security-review, qa, qa-only.
+Skill entrypoints: commit, handoff, humanize, prototype, plan-session, plan-deep-review, plan-eng-review, plan-design-review, plan-devex-review, autoplan, review, review-security, qa, qa-only.
 
-Compound workflows that chain skills: full-review (review → design-review → qa), preflight (fast pre-merge safety check), status (branch progress report).
+Compound workflows: full-review (review → design-review → qa, with optional --security stage), preflight (fast pre-merge safety check), status (branch progress report).
 
-### Available Agents (team plugin)
+### Available Agents (bork plugin)
 
+- **github-pr-manager** (proactive) — Creates and updates GitHub PRs with context awareness
+- **laravel-rest-architect** — Laravel REST endpoint design with thin controllers, Form Request validation, API Resources
+- **refactorer** — Code/API migrations with backwards compatibility and phased rollouts
 - **workflow-orchestrator** (proactive) — Detects pipeline stage and suggests next skill
 - **triage** (proactive) — Emergency incident response, fast-tracks investigation → fix → ship
 
-### Available Hooks (team plugin)
+### Available Hooks (bork plugin)
 
 - **pre-push** — Critical-only review gate before pushes (SQL injection, auth gaps, race conditions)
-- **post-merge** — Non-blocking reminders after merging to default branch (doc updates, dependency audits)
+- **post-merge** — Non-blocking reminders after merging to default branch (doc updates, missed VERSION bumps, open TODOS)
 
 ## Development Workflow
 

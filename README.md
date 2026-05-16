@@ -15,7 +15,6 @@ Then install the plugins you want:
 ```bash
 claude plugin install bork
 claude plugin install matt
-claude plugin install team
 ```
 
 ### With Claude Code (Desktop App)
@@ -47,7 +46,6 @@ Restart Claude Code after changing the setting. Skills that support Agent Teams 
 Codex manifests live alongside each plugin package:
 
 - `bork/.codex-plugin/plugin.json`
-- `team/.codex-plugin/plugin.json`
 - `matt/.codex-plugin/plugin.json`
 
 This repo also includes a repo-owned Codex marketplace bundle at `.agents/bork-ai/`.
@@ -68,9 +66,6 @@ Then enable the plugins in `~/.codex/config.toml`:
 [plugins."bork@bork-ai"]
 enabled = true
 
-[plugins."team@bork-ai"]
-enabled = true
-
 [plugins."matt@bork-ai"]
 enabled = true
 ```
@@ -81,9 +76,8 @@ Restart Codex after updating the symlinks and config.
 
 | Plugin | Description |
 |--------|-------------|
-| [**bork**](bork/) | General development tools — agents, skills, and commands for everyday workflows. |
+| [**bork**](bork/) | My Original and Collected skills, agents, commands, and hooks. Writing, reviewing, planning, QA, and shipping across the dev cycle. |
 | [**matt**](matt/) | Personal voice profile and writing style configuration. |
-| [**team**](team/) | Development workflow skills — planning, review, QA, shipping, and retrospectives. |
 
 ## License
 

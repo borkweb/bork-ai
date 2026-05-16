@@ -57,7 +57,7 @@ DIFF_STAT=$(git diff origin/$BASE --shortstat)
 
 ## Step 3: Critical-only review
 
-Read the review checklist from `team/skills/review/checklist.md`.
+Read the review checklist from `bork/skills/gstack/review/checklist.md`.
 
 Run **ONLY the CRITICAL categories** against the diff:
 

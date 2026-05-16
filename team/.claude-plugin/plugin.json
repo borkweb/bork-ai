@@ -1,9 +1,0 @@
-{
-	"name": "team",
-	"description": "Development workflow skills — planning, review, QA, and shipping. Includes compound commands, proactive agents, and safety hooks.",
-	"version": "1.4.1",
-	"author": {
-		"name": "Matthew Batchelder",
-		"email": "borkweb@gmail.com"
-	}
-}

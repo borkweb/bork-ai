@@ -152,12 +152,11 @@ Print the detected base branch name.
 
 Output: "Here's what I'm working with: [plan summary]. UI scope: [yes/no]. DX scope: [yes/no]. Starting full review pipeline with auto-decisions."
 
-### Step 4: Locate the team plan-* skill files
+### Step 4: Locate the bork plan-* skill files
 
-Each phase below follows a plan-* skill at full depth. Find the team plugin's skill files so you can read the methodology if needed. Common locations:
-- `~/.claude/plugins/team/skills/<skill-name>/SKILL.md`
-- `~/.claude/plugins/bork/team/skills/<skill-name>/SKILL.md`
-- Detect via: `find ~/.claude -type f -path '*team/skills/plan-eng-review/SKILL.md' 2>/dev/null | head -1`
+Each phase below follows a plan-* skill at full depth. Find the bork plugin's gstack skill files so you can read the methodology if needed. Common locations:
+- `~/.claude/plugins/bork/skills/gstack/<skill-name>/SKILL.md`
+- Detect via: `find ~/.claude -type f -path '*bork/skills/gstack/plan-eng-review/SKILL.md' 2>/dev/null | head -1`
 
 For each phase that runs, read the corresponding SKILL.md if you can locate it; otherwise, follow the methodology you already know from the skill description and the phase override rules below.
 
