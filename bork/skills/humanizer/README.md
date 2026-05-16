@@ -27,7 +27,7 @@ The skill also includes a final "obviously AI generated" audit pass and a second
 
 > "LLMs use statistical algorithms to guess what should come next. The result tends toward the most statistically likely result that applies to the widest variety of cases."
 
-## 28 Patterns Detected (with Before/After Examples)
+## 31 Patterns Detected (with Before/After Examples)
 
 ### Content Patterns
 
@@ -88,6 +88,14 @@ These add the shape of confident writing without adding content. Diagnostic: cov
 | 26 | **Verdict openers** | "The Telex speedrun delivered. Over three days we shipped..." | "Three days ago we holed up to see how much we could ship..." |
 | 27 | **Restatement kickers** | "...rewrote the auth middleware in five days. That's the big one." | Replace with a sentence that names *why*, or delete |
 | 28 | **Manufactured punch fragments** | "The setup script took an afternoon. Worth it." | "The setup script took an afternoon and I haven't thought about port juggling since." |
+
+### Additional Patterns
+
+| # | Pattern | Before | After |
+|---|---------|--------|-------|
+| 29 | **Dual-adjective padding** | "innovative and comprehensive solution with a dynamic and robust architecture" | Pick one adjective or replace with concrete specifics |
+| 30 | **Cliched openings** | "In today's fast-paced world, teams are under pressure..." | "Teams are under pressure to ship faster..." |
+| 31 | **Formal signpost transitions** | "Moreover... Furthermore... That being said..." | Use simple conjunctions or drop the signpost |
 
 ## Full Example
 

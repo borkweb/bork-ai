@@ -1,6 +1,6 @@
 ---
 name: humanizer
-version: 2.4.0
+version: 2.5.0
 description: |
   Remove signs of AI-generated writing from text. Use when editing or reviewing
   text to make it sound more natural and human-written. Based on Wikipedia's
@@ -31,6 +31,16 @@ When given text to humanize:
 4. **Maintain voice** - Match the intended tone (formal, casual, technical, etc.)
 5. **Add soul** - Don't just remove bad patterns; inject actual personality
 6. **Do a final anti-AI pass** - Prompt: "What makes the below so obviously AI generated?" Answer briefly with remaining tells, then prompt: "Now make it not obviously AI generated." and revise
+
+
+## Constraints (Non-Negotiable)
+
+These guardrails protect the rewrite from introducing new problems while fixing old ones.
+
+- **Preserve coverage.** Do not drop list items, options, or qualifiers unless they are truly redundant. Removing one option from a four-item list to avoid "rule of three" is wrong — vary the count, don't shrink the content.
+- **Don't add facts.** No new dates, names, quotes, statistics, or citations that are not already in the input or supplied by the user. Don't imply a source ("according to a 2024 study…") unless the input names that source. When the input is vague, leave it vague — don't invent specificity.
+- **Don't rewrite quoted material.** Direct quotes from people, documents, or sources stay exactly as written, even if they contain AI-pattern words. Only rewrite a quote if the user explicitly asked you to.
+- **Your rewrite must pass the same rules you're applying.** Common traps to watch for in the cleanup pass: introducing "Here's the thing:" / "Look:" / "The reality is:" prefaces, sneaking in a new "It's not about X, it's about Y" reframe, forcing a new rule-of-three list, or replacing one set of AI-vocabulary words with another. Audit your draft against the patterns below before delivering.
 
 
 ## PERSONALITY AND SOUL
@@ -432,6 +442,53 @@ The fragments fail the diagnostic on all three counts:
 The "After" tells you *why* it was worth it. The "Before" just asserts a generic verdict that a reader could already infer.
 
 **Contrast with what's allowed:** "Very cool." after a sentence about a specific tool the writer just discovered passes the test — it's the writer's actual reaction to a specific thing, and removing it loses that reaction. "Worth it." after a sentence about a setup script fails the test — the previous sentence already implies the verdict, so the fragment carries no new content.
+
+
+## ADDITIONAL PATTERNS
+
+### 29. Dual-Adjective Padding
+
+**Problem:** AI pads sentences with paired adjectives that sound polished but say nothing. Each adjective is generic, and the pair adds a vague positive halo without any concrete content. A human would either pick one or replace both with something specific.
+
+**Words to watch:** innovative and comprehensive, dynamic and robust, seamless and intuitive, powerful and flexible, simple and effective, scalable and secure, modern and elegant, fast and reliable, clean and maintainable
+
+**Before:**
+> We built an innovative and comprehensive solution with a dynamic and robust architecture, delivering a seamless and intuitive experience.
+
+**After:**
+> We rebuilt the indexer on top of a worker pool. Search now returns in under 80ms at p95, and the API supports the four export formats the data team asked for.
+
+**Fix:** Keep one adjective and only if it's earning its place, or — better — replace both with a concrete detail (what it does, how it works, what changed).
+
+### 30. Cliched Openings
+
+**Problem:** AI opens with generic scene-setting or rhetorical throat-clearing instead of starting on the first real claim. The opening is interchangeable with any other piece on any other topic, which is the tell. Pairs with #26 (verdict openers) — both pollute the first sentence of a piece, but #26 asserts a verdict while this pattern asserts a vibe.
+
+**Words to watch:** In today's fast-paced world, In today's digital world, In the ever-evolving landscape of, In the realm of, As we navigate the complexities of, Have you ever wondered, Picture this, Let's dive into, Let's unpack this, As we embark on this journey, Buckle up, Spoiler alert, Here's the thing, Here's the deal, Here's what matters, The truth is, The reality is, Let me be clear, Look, The thing is
+
+Also watch the preface-with-a-colon variants: "Here's the thing:", "The thing is:", "Look:", "The reality is:", "Here's what matters:".
+
+**Before:**
+> In today's fast-paced world, teams are under constant pressure to ship faster than ever. Here's the thing: speed without quality is just expensive failure.
+
+**After:**
+> Teams are under pressure to ship faster, and a lot of them are paying for it in the bug tracker.
+
+**Fix:** Delete the prefatory throat-clearing and start with the first real claim. If the opening sentence would work as the opening of an unrelated article, rewrite it until it would only work for this one.
+
+### 31. Formal Signpost Transitions
+
+**Problem:** AI overuses formal signpost transitions ("moreover", "furthermore", "additionally", "that being said") that make prose feel like a graded essay. Humans rarely string these together; AI does it as a default rhythm. Distinct from #7 (AI vocabulary) — that rule catches the words inside sentences; this one catches the signpost role at the start of paragraphs.
+
+**Words to watch:** Moreover, Furthermore, Additionally, In addition, Consequently, Subsequently, That being said, With this in mind, On the other hand, It's important to note that, It's worth noting (that), It's worth mentioning, It bears mentioning, Firstly / Secondly / Thirdly / Lastly
+
+**Before:**
+> Moreover, it's important to note that the new API reduces latency. Furthermore, the migration path is well-documented. That being said, there are trade-offs.
+
+**After:**
+> The new API reduces latency and the migration path is documented, but there are trade-offs.
+
+**Fix:** Remove the signpost. If you genuinely need a transition, use a simple conjunction — "and", "but", "so", "also". When three short signpost-headed sentences could collapse into one longer sentence with conjunctions, collapse them.
 
 ---
 
