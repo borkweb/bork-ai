@@ -1,6 +1,7 @@
 ---
 name: design-review
 description: "Designer's eye QA: finds visual inconsistency, spacing issues, hierarchy problems, AI slop patterns, and slow interactions — then fixes them. Iteratively fixes issues in source code, committing each fix atomically and re-verifying with before/after screenshots. For plan-mode design review (before implementation), use /plan-design-review. Use when asked to \"audit the design\", \"visual QA\", \"check if it looks good\", \"design polish\", \"does this look AI-generated\", or \"review the UI\"."
+disable-model-invocation: true
 allowed-tools:
   - Bash
   - Read
@@ -117,10 +118,10 @@ Look for `DESIGN.md`, `design-system.md`, or similar in the repo root. If found,
 **Check for clean working tree:**
 
 ```bash
-git status --porcelain
+bash "$CLAUDE_PLUGIN_ROOT/scripts/clean-tree-check.sh"
 ```
 
-If the output is non-empty (working tree is dirty), **STOP** and use AskUserQuestion:
+If it exits non-zero (working tree is dirty — output shows the offending files), **STOP** and use AskUserQuestion:
 
 "Your working tree has uncommitted changes. /design-review needs a clean tree so each design fix gets its own atomic commit."
 
@@ -158,12 +159,7 @@ Comprehensive review: 10-15 pages, every interaction flow, exhaustive checklist.
 
 ### Diff-aware (automatic when on a feature branch with no URL)
 When on a feature branch, scope to pages affected by the branch changes:
-1. Detect base branch:
-   ```bash
-   BASE=$(gh pr view --json baseRefName -q .baseRefName 2>/dev/null \
-     || gh repo view --json defaultBranchRef -q .defaultBranchRef.name 2>/dev/null \
-     || echo main)
-   ```
+1. Detect base branch: `BASE=$(bash "$CLAUDE_PLUGIN_ROOT/scripts/detect-base-branch.sh")`
 2. Analyze the branch diff: `git diff $BASE...HEAD --name-only`
 3. Map changed files to affected pages/routes
 4. Detect running app on common local ports (3000, 4000, 8080)

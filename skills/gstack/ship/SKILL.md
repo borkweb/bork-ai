@@ -5,6 +5,7 @@ description: >
   VERSION, update CHANGELOG, commit, push, create PR. Use when asked to
   "ship", "deploy", "push to main", "create a PR", or "merge and push".
   Proactively suggest when the user says code is ready or asks about deploying.
+disable-model-invocation: true
 allowed-tools:
   - Bash
   - Read
@@ -20,14 +21,13 @@ allowed-tools:
 
 Determine which branch this PR targets. Use the result as "the base branch" in all subsequent steps.
 
-1. Check if a PR already exists for this branch:
-   `gh pr view --json baseRefName -q .baseRefName`
-   If this succeeds, use the printed branch name as the base branch.
+Run the shared helper:
 
-2. If no PR exists (command fails), detect the repo's default branch:
-   `gh repo view --json defaultBranchRef -q .defaultBranchRef.name`
+```bash
+BASE=$(bash "$CLAUDE_PLUGIN_ROOT/scripts/detect-base-branch.sh")
+```
 
-3. If both commands fail, fall back to `main`.
+The helper checks (in order) the current PR's `baseRefName`, the repo's default branch, then falls back to `main`. It always prints a usable name.
 
 ---
 
@@ -115,9 +115,9 @@ Delegate the review to the `/review` skill's checklist rather than duplicating i
 
 5. **Check for frontend changes:**
    ```bash
-   git diff origin/<base> --name-only | grep -E '\.(css|scss|less|tsx|jsx|vue|svelte|html|blade\.php)$' | head -5
+   bash "$CLAUDE_PLUGIN_ROOT/scripts/detect-frontend-files.sh" "$BASE"
    ```
-   If frontend files changed, apply the design checklist (loaded in step 2). Check for DESIGN.md in the repo root first — patterns blessed there are not flagged.
+   If any files print, apply the design checklist (loaded in step 2). Check for DESIGN.md in the repo root first — patterns blessed there are not flagged.
 
 6. **Classify each finding as AUTO-FIX or ASK** per the Fix-First Heuristic in the checklist. Critical findings lean toward ASK; informational lean toward AUTO-FIX.
 

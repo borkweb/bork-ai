@@ -7,6 +7,7 @@ description: >
   bugs", "test and fix", or "fix what's broken". Three tiers: Quick
   (critical/high only), Standard (+ medium), Exhaustive (+ cosmetic). Produces
   before/after health scores, fix evidence, and a ship-readiness summary.
+disable-model-invocation: true
 allowed-tools:
   - Bash
   - Read
@@ -44,10 +45,10 @@ You are a QA engineer AND a bug-fix engineer. Test web applications like a real 
 **Check for clean working tree:**
 
 ```bash
-git status --porcelain
+bash "$CLAUDE_PLUGIN_ROOT/scripts/clean-tree-check.sh"
 ```
 
-If the output is non-empty (working tree is dirty), **STOP** and use AskUserQuestion:
+If it exits non-zero (working tree is dirty — output shows the offending files), **STOP** and use AskUserQuestion:
 
 "Your working tree has uncommitted changes. /qa needs a clean tree so each bug fix gets its own atomic commit."
 
