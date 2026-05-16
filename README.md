@@ -72,23 +72,12 @@ Each skill feeds into the next. `plan-session` writes a design doc that `plan-de
 
 ## Commands
 
+Skills get an auto-generated invocation from the host agent — these commands are the extras: aliases and compound workflows that don't map one-to-one to a single skill.
+
 | Command | Description |
 |---------|-------------|
-| `/commit` | Check for unstaged changes, optionally stage them, then invoke writing-commits to craft the message. |
-| `/handoff` | Write handoff documentation for picking up where you left off. |
-| `/humanize` | Run the humanize skill on text or a file. |
-| `/prototype` | Scaffold a throwaway prototype. |
-| `/plan-session` | Structured product design session — reframes the problem before implementation. |
-| `/plan-deep-review` | Deep plan review with scope, architecture, risk, and readiness analysis. |
-| `/plan-eng-review` | Engineering plan review focused on architecture, delivery, and execution risk. |
-| `/plan-design-review` | Design plan review focused on UX, interaction, and visual readiness. |
-| `/plan-devex-review` | DX plan review focused on developer experience, getting started, API/CLI ergonomics, error quality, and adoption friction. |
-| `/autoplan` | Auto-review pipeline that runs all four plan-* reviews end-to-end with auto-decisions, surfacing taste decisions and user challenges at one final gate. |
-| `/review` | Pre-landing code review for correctness, safety, and regressions. |
-| `/review-security` | Deep security review grounded in the security pattern library. |
-| `/qa` | QA workflow that tests and fixes issues. |
-| `/qa-only` | Report-only QA workflow that does not apply fixes. |
-| `/full-review` | Chains `/review` → `/design-review` → `/qa` into one pipeline. Passes context forward between stages. Produces a combined ship-readiness verdict. Pass `--security` to insert `/review-security` as Stage 2 for auth/crypto/parser/dependency-heavy PRs. |
+| `/commit` | Alias for `writing-commits`. Checks for unstaged changes, optionally stages them, then crafts the message. |
+| `/full-review` | Chains `review` → `design-review` → `qa` into one pipeline. Passes context forward between stages. Produces a combined ship-readiness verdict. Pass `--security` to insert `review-security` as Stage 2 for auth/crypto/parser/dependency-heavy PRs. |
 | `/preflight` | Fast pre-merge safety check. Critical-only code review + smoke test + quick test run. Under 2 minutes. For small PRs where `/full-review` is overkill. |
 | `/status` | Read-only branch status and workflow progress report. Shows what's been done, what's left, and suggests the next step. |
 
