@@ -1,6 +1,6 @@
 ---
 name: full-review
-description: Chains /review + /design-review + /qa into a single workflow, with optional /review-security stage. Runs pre-landing code review, then live design audit, then QA testing — passing context forward between each stage. Use when you want the complete review pipeline in one command. Accepts optional URL, tier, and security flag arguments.
+description: Chains /review + /design-review + /qa into a single workflow. /review-security runs as Stage 2 when the diff touches security-sensitive code (auto-detected) or when --security is passed; skip with --no-security. Runs pre-landing code review, then live design audit, then QA testing — passing context forward between each stage. Use when you want the complete review pipeline in one command. Accepts optional URL, tier, and security flag arguments.
 allowed-tools:
   - Bash
   - Read
@@ -15,15 +15,16 @@ allowed-tools:
 
 # Full Review Pipeline
 
-You are running the `/full-review` command. This chains three skills into a single workflow: `/review` → `/design-review` → `/qa`. Each stage feeds context to the next. An optional `--security` flag inserts a deep CVE-pattern-based security audit as Stage 2.
+You are running the `/full-review` command. This chains three skills into a single workflow: `/review` → `/design-review` → `/qa`. Each stage feeds context to the next. A deep CVE-pattern-based security audit (`/review-security`) auto-inserts as Stage 2 when the diff touches security-sensitive code; `--security` forces it on, `--no-security` forces it off.
 
 ## Arguments
 
-- `/full-review` — run all three stages, auto-detect URL
+- `/full-review` — run all three stages, auto-detect URL, auto-detect security trigger
 - `/full-review <url>` — use the given URL for design-review and QA
 - `/full-review --quick` — quick tier for QA (critical/high only)
 - `/full-review --exhaustive` — exhaustive tier for QA (all severities)
-- `/full-review --security` — insert `/review-security` as Stage 2 (deep CVE-pattern audit). Use for auth/crypto/parser/dependency-heavy PRs, release audits, or any diff you want pattern-library-grounded security coverage on.
+- `/full-review --security` — force `/review-security` to run as Stage 2 even if auto-detect didn't flag the diff. Use for release audits or when you want pattern-library coverage on a diff that doesn't obviously touch sensitive code.
+- `/full-review --no-security` — skip `/review-security` even if auto-detect would have triggered it
 - `/full-review --skip-design` — skip the design review stage
 - `/full-review --skip-qa` — skip the QA stage
 
@@ -54,7 +55,26 @@ Determine which branch this PR targets. Use the result as "the base branch" in a
    ```
    Record whether frontend files changed — this determines whether design-review runs.
 
-Output a brief summary:
+4. **Auto-detect security signals.** Scan the diff for security-sensitive changes. Stage 2 auto-triggers if any signal hits (unless `--no-security` is passed). Skip this step entirely if `--security` was passed (forced on) or `--no-security` was passed (forced off). Signals that count:
+
+   **File-path signals** (`git diff origin/<base> --name-only`):
+   - Auth/session/permissions: paths matching `auth`, `session`, `login`, `jwt`, `oauth`, `permission`, `csrf`, `cors`, `bearer`, `middleware`
+   - Crypto/secrets: `crypto`, `cert`, `signing`, `secret`, `vault`, `kms` (excluding `keyboard`/`keystroke`)
+   - Lockfiles (supply chain): `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `composer.lock`, `Gemfile.lock`, `Cargo.lock`, `go.sum`, `Pipfile.lock`, `poetry.lock`, `requirements*.txt`
+   - CI/build/container: `.github/workflows/*`, `.gitlab-ci.yml`, `Dockerfile*`, `docker-compose*`, `Containerfile*`
+   - Public API contracts: `openapi*`, `swagger*`, `*.proto`, `*.graphql`
+
+   **Diff-content signals** (run a few targeted greps over `git diff origin/<base>` — don't try to regex the entire diff at once):
+   - Code execution sinks: `exec(`, `eval(`, `unserialize(`, `pickle.loads(`, `subprocess`, `shell_exec`, `system(`, `Function(`
+   - DOM injection sinks: `innerHTML`, `dangerouslySetInnerHTML`, `v-html`, `bypassSecurityTrust`
+   - Crypto primitives in code: `crypto.`, `bcrypt`, `argon2`, `hashlib`, `RSA`, `AES`, `HMAC`, `createHash`, `createCipher`
+   - Buffer ops (C/C++/unsafe Rust): `memcpy`, `strcpy`, `sprintf`, `strcat`, `unsafe {`
+   - SQL constructed from variables: template-literal queries (`` `SELECT … ${…}` ``) or string-concat queries (`"SELECT … " + …`)
+
+   Record which categories hit (e.g. `auto: auth + crypto`). This drives both the Stage 2 decision and the summary output.
+
+Output a brief summary. Resolve the **Security audit** line based on flags + auto-detect, and drop "Security Review" from the **Stages** line if the audit row resolves to a "no":
+
 ```
 Full Review Pipeline
 ────────────────────
@@ -63,10 +83,8 @@ Diff size:       N files, +X -Y
 Frontend files:  [yes/no]
 Stages:          Review → [Security Review →] Design Review → QA
 QA Tier:         [Standard/Quick/Exhaustive]
-Security audit:  [yes (--security) / no]
+Security audit:  [yes (--security) / yes (auto: <categories>) / no (--no-security) / no (no signals)]
 ```
-
-(Drop "Security Review" from the Stages line if `--security` is not set.)
 
 ---
 
@@ -103,8 +121,13 @@ If the user chooses B, stop and output the review summary.
 
 ## Step 3: Stage 2 — Security Review (/review-security) [conditional]
 
-**Skip conditions:**
-- `--security` flag was NOT passed (this stage is opt-in by design — see `skills/core/review-security/SKILL.md` for rationale)
+**Skip conditions** (any of):
+- `--no-security` flag was passed (explicit force-off), OR
+- `--security` flag was NOT passed AND Step 1 auto-detect found no security signals
+
+**Run conditions** (any of):
+- `--security` flag was passed (explicit force-on), OR
+- Step 1 auto-detect found at least one security signal AND `--no-security` was NOT passed
 
 If skipping, output nothing for this stage — proceed directly to Stage 3. Do not include a "SKIPPED" line in the summary.
 
@@ -198,7 +221,7 @@ After all stages, run a final check:
 
 ## Step 7: Pipeline Summary
 
-Output a combined summary of all stages. Include the Security Review block only if `--security` was passed.
+Output a combined summary of all stages. Include the Security Review block only if Stage 2 actually ran (either `--security` was passed or auto-detect triggered it).
 
 ```
 +====================================================================+
@@ -212,7 +235,7 @@ STAGE 1: CODE REVIEW
 ├─ Landing verdict:  SAFE TO LAND / LAND WITH CAUTION / DO NOT LAND
 └─ Unresolved:       N items
 
-STAGE 2: SECURITY REVIEW                             [only if --security]
+STAGE 2: SECURITY REVIEW                             [only if Stage 2 ran]
 ├─ Patterns applied: NN, NN, NN
 ├─ Findings:         N (X critical, Y high, Z informational)
 ├─ Auto-fixed:       N
