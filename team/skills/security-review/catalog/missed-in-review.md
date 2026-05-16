@@ -2420,7 +2420,7 @@ service tokens)? Network segmentation is not authentication."
 
 ---
 
-## Supply Chain & Build System (20 entries)
+## Supply Chain & Build System (25 entries)
 
 ### S1. xz Backdoor (CVE-2024-3094)
 **Project:** xz-utils | **Severity:** Critical | **Discovered:** 2024
@@ -2564,6 +2564,97 @@ trusted registry? Are base image updates automated?"
 **The Bug:** Security checks in pre-commit hooks bypassed with `--no-verify`.
 **Review Pattern:** SERVER_SIDE_CHECKS — "Are security checks enforced server-side (CI/CD),
 not just in client-side hooks that can be bypassed?"
+
+### S21. Shai-Hulud v1 — npm Worm (September 2025)
+**Project:** npm ecosystem | **Severity:** Critical | **Discovered:** September 2025
+**The Bug:** First self-replicating npm worm. A poisoned package's preinstall hook
+exfiltrated the developer's npm token + GitHub token, then used those tokens to publish
+poisoned versions of every package the victim had write access to. Each new infection
+became a new propagation source.
+**Root Cause:** npm's Trusted Publishing / OIDC and long-lived `NPM_TOKEN`s were treated as
+single trust decisions — once on the dev machine, the token could mint publish rights
+across the maintainer's entire package surface. Lifecycle scripts (`preinstall`) executed
+unconditionally on `npm install`.
+**Why Missed:** Standard advice ("pin versions, review lockfile diffs") doesn't help when
+a legitimate maintainer's account publishes a poisoned version of a package you've trusted
+for years. The worm spread faster than per-package advisories could be written.
+**Review Pattern:** WORM_TOKEN_BLAST — "Can any single dev-machine compromise mint
+publish rights across the maintainer's entire package portfolio? Is Trusted Publishing
+scoped per job and gated behind a protected environment?"
+
+### S22. Shai-Hulud 2.0 / Sha1-Hulud (November 24, 2025)
+**Project:** npm ecosystem | **Severity:** Critical | **Discovered:** November 2025
+**The Bug:** Second wave compromised ~1,000 npm packages and leaked credentials for
+25,000+ GitHub repositories. The malware injected two files (`setup_bun.js`,
+`bun_environment.js`) into legitimate packages and triggered them via a new `preinstall`
+script. Exfiltrated credentials were published to public GitHub repos described as
+"Sha1-Hulud: The Second Coming."
+**Root Cause:** Same `preinstall` execution surface as S21, with refined payload delivery.
+The public-repo exfiltration channel was novel — it abused GitHub's own infrastructure as
+C2 by creating attacker-readable repos under each victim's account.
+**Why Missed:** `ignore-scripts=true` defenses rolled out after S21 were incomplete in
+practice (default config in most CI images had `ignore-scripts=false`), and lockfile
+review didn't catch versions published by legitimate, trusted maintainer accounts.
+**Review Pattern:** PREINSTALL_INJECTION — "Does any installed package inject new
+`preinstall`/`postinstall` scripts that weren't in the prior version? Is the project's
+GitHub account configured to require review on new public-repo creation by automation?"
+
+### S23. Mini Shai-Hulud — SAP / Packagist (April 2026)
+**Project:** npm + Packagist | **Severity:** Critical | **Discovered:** April 2026
+**The Bug:** Variant dubbed "Mini Shai-Hulud" targeted SAP's npm packages with Bun-based
+payloads, then jumped ecosystems: an Intercom PHP package on Packagist spread the worm via
+a malicious Composer plugin. First confirmed cross-ecosystem reach.
+**Root Cause:** Build-time code execution surfaces in *every* package registry, not just
+npm. Composer plugins are functionally equivalent to npm lifecycle scripts, and PyPI
+`setup.py` had similar reach.
+**Why Missed:** Teams thought of Shai-Hulud as an "npm problem" and missed that the same
+attacker (TeamPCP) was generalising. Composer plugin review is rare; PyPI `setup.py`
+review is rarer.
+**Review Pattern:** CROSS_ECOSYSTEM_WORM — "Are install-time execution surfaces in *all*
+package managers used by the project audited the same way (Composer plugins, PyPI
+`setup.py`, npm lifecycle scripts, RubyGems extension build)?"
+
+### S24. Mini Shai-Hulud — TanStack / OpenAI (May 11, 2026)
+**Project:** npm ecosystem | **Severity:** Critical | **Discovered:** May 2026
+**The Bug:** TeamPCP compromised TanStack's release infrastructure via a chained GitHub
+Actions attack: `pull_request_target` running fork code, Actions cache poisoning, and
+runtime extraction of the OIDC token from the GitHub Actions runner process memory. Used
+the stolen OIDC token to mint npm publish credentials and ship 84 malicious versions
+across 42 `@tanstack/*` packages in six minutes. The campaign also infected two OpenAI
+employees' devices, forcing rotation of OpenAI's macOS-product signing certificates. The
+payload included a `gh-token-monitor` daemon that polled GitHub every 60s and attempted
+`rm -rf ~/` on token revocation (auto-exit after 24h).
+**Root Cause:** Three independent GitHub Actions design flaws chained: (1) `pull_request_target`
+gives fork code write permissions, (2) Actions cache persists across triggers without trust
+isolation, (3) OIDC tokens live in runner process memory long enough to be read by
+co-located workloads. Together they bypass every per-step permission scope.
+**Why Missed:** Each of the three primitives was individually known and individually
+"acceptable risk"; their chain was not in the published threat models. The wipe-on-revoke
+daemon also reframed incident response: rotating a token is no longer obviously safe.
+**Review Pattern:** OIDC_CACHE_CHAIN — "Does any `pull_request_target` workflow run fork
+code in a job that has `id-token: write` or shares a cache key with a publishable job?
+Does the incident-response playbook for credential theft assume the credential might be
+guarding a destructive handler?"
+
+### S25. TeamPCP Source-Code Leak (May 12, 2026)
+**Project:** Public threat-actor framework | **Severity:** Critical | **Discovered:** May 2026
+**The Bug:** TeamPCP published the complete Shai-Hulud framework to GitHub under the MIT
+License with deployment instructions; commits dated 2099-01-01 for obfuscation. The
+framework is a modular TypeScript/Bun toolkit for credential harvesting, registry
+poisoning, and encrypted exfiltration. Notably includes code that modifies Claude Code's
+`settings.json` to register hooks that execute the malware on agent start. GitHub removed
+the repos within hours; forks spread immediately and independent actors began iterating on
+the codebase.
+**Root Cause:** Not a code bug — a threat-actor amplification event. Open-sourcing the
+framework moves it from "one crew's tool" to a commodity supply-chain attack platform.
+**Why Missed:** N/A — defensive implication is the relevant takeaway: any future review
+should now assume the attacker has the full framework, including the AI-agent-config
+persistence module. Defenders should add AI-agent-config files
+(`~/.claude/settings.json`, `~/.cursor/`, `~/.continue/`, MCP server configs) to their
+inventory of credential-equivalent surfaces.
+**Review Pattern:** AI_AGENT_CONFIG_WRITE — "Does any installed package or install hook
+read from or write to AI agent config directories? Are agent hooks, MCP servers, and
+skills auto-loaded from disk treated as executable trust decisions and reviewed as such?"
 
 ---
 

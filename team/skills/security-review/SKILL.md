@@ -70,7 +70,11 @@ Do not read all 20. Map the changed surface area to 1–4 patterns using the tab
 | Network protocol                    | 10, 01                    | 05, 17                    |
 | Configuration changes               | 12, 14                    | 18, 03                    |
 | Dependency updates                  | 08, 14                    | 15                        |
+| Lockfile drift (no package.json Δ)  | 08                        | 13, 14                    |
+| Registry / install config           | 08, 13                    | 12, 18                    |
 | CI/CD workflow changes              | 08                        | 13, 18                    |
+| GitHub Actions cache / OIDC scope   | 08, 13                    | 18, 19                    |
+| AI agent config (Claude/Cursor/etc) | 08, 13                    | 12, 18                    |
 | Refactoring/cleanup                 | 14, 07                    | 06, 05                    |
 | Error handling                      | 07                        | 06, 19, 03                |
 | Logging changes                     | 19                        | 02, 12                    |
