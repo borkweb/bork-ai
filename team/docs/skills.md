@@ -16,7 +16,6 @@ Detailed guides for every team skill — philosophy, workflow, and examples.
 | [`/qa-only`](#qa-only) | **QA Reporter** | Same methodology as /qa but report only. Use when you want a pure bug report without code changes. |
 | [`/ship`](#ship) | **Release Engineer** | Sync main, run tests, audit coverage, push, open PR. One command. |
 | [`/document-release`](#document-release) | **Doc Editor** | Update all project docs to match what you just shipped. Catches stale READMEs automatically. |
-| [`/benchmark`](#benchmark) | **Perf Engineer** | Performance regression detection. Baselines page load, Core Web Vitals, bundle sizes. Compares before/after. Tracks trends. |
 
 ### Commands
 
@@ -341,38 +340,6 @@ Claude: Analyzing 21 files changed across 3 commits. Found 8 documentation files
 
 ---
 
-## `/benchmark`
-
-This is **performance engineer mode**.
-
-Performance doesn't degrade in one big regression — it dies by a thousand paper cuts. Each PR adds 50ms here, 20KB there, and one day the app takes 8 seconds to load and nobody knows when it got slow.
-
-`/benchmark` uses the browser's Performance API to collect real timing data — TTFB, FCP, LCP, DOM timings, resource sizes, and bundle weights. It establishes baselines, compares before/after on PRs, and tracks trends over time.
-
-### Example
-
-```
-You:   /benchmark https://myapp.com
-
-Claude: PERFORMANCE REPORT — myapp.com
-        Branch: feature/new-dashboard vs baseline (main)
-
-        Metric              Baseline    Current     Delta    Status
-        TTFB                120ms       135ms       +15ms    OK
-        LCP                 800ms       1600ms      +800ms   REGRESSION
-        JS Bundle           450KB       720KB       +270KB   REGRESSION
-
-        REGRESSIONS DETECTED: 2
-        [1] LCP doubled — likely a new blocking resource
-        [2] JS bundle +60% — new dependency or missing tree-shaking
-
-        Grade: B (4/6 budget checks passing)
-```
-
-Run `/benchmark --baseline` before making changes to capture the starting point. Then `/benchmark` again after to see what moved.
-
----
-
 ## `/full-review`
 
 The complete review pipeline in one command.
@@ -437,7 +404,7 @@ Claude: STATUS REPORT
         WORKFLOW PROGRESS
         [✓] Plan session     [✓] Eng review
         [✓] Code review      [ ] QA
-        [ ] Design review    [ ] Benchmark
+        [ ] Design review
 
         Next up: /qa — code is reviewed, time to test
 ```

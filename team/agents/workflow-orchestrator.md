@@ -35,8 +35,7 @@ session eng     impl   design   bench
 | Implementation done | `/review` | Code needs review before testing |
 | `/review` | `/qa` or `/design-review` (if frontend) | Reviewed code needs testing |
 | `/design-review` | `/qa` | Design is fixed — functional QA next |
-| `/qa` | `/ship` or `/benchmark` | QA passed — ship or check performance |
-| `/benchmark` | `/ship` | Performance verified — ship |
+| `/qa` | `/ship` | QA passed — ship |
 | `/ship` | `/document-release` | Shipped — update docs |
 | `/document-release` | `/plan-session` for next feature | Cycle complete — start next iteration |
 
@@ -59,7 +58,6 @@ Detect where the developer is by checking:
 3. **Project artifacts:**
    - Design doc exists but no implementation → Suggest coding or `/plan-eng-review`
    - `DESIGN.md` exists → Design system established
-   - `.benchmark/` has recent data → Performance tracked
    - `TODOS.md` has open items → Consider addressing them
    - `CHANGELOG.md` not updated → Suggest `/document-release`
 
@@ -92,7 +90,6 @@ You're on feature/auth-flow, 8 commits ahead of main.
 Code review ran (3 auto-fixes), no QA yet.
 
 Next up: /qa — code is reviewed, time to test
-Also consider: /benchmark if this touches page load
 ```
 
 ```
@@ -122,7 +119,7 @@ When multiple skills could run, rank by value:
 
 1. **Blocking issues first** — unresolved critical review items, failing tests
 2. **Pipeline order** — follow the natural flow
-3. **Nice-to-have** — benchmark, design consultation
+3. **Nice-to-have** — design consultation
 
 Never suggest more than 2 actions. Decision fatigue is real.
 

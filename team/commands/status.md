@@ -68,7 +68,6 @@ Detect which workflow skills have been run by scanning for their artifacts:
 | `/review` | Commit messages contain `[AUTO-FIXED]` or PR body contains "Pre-Landing Review" |
 | `/design-review` | Commit messages contain `fix(design):` |
 | `/qa` | Commit messages contain `fix(qa):` |
-| `/benchmark` | `.benchmark/` directory exists with recent reports |
 | `/ship` | PR exists and is not draft |
 | `/document-release` | Commit messages contain `docs:` after the last feature commit |
 
@@ -81,7 +80,6 @@ Also check:
 # Check for workflow artifacts
 git log origin/$BASE..HEAD --oneline --format="%s" | head -30
 ls TODOS.md CHANGELOG.md VERSION DESIGN.md 2>/dev/null
-ls -d .benchmark 2>/dev/null
 ```
 
 ---
@@ -109,8 +107,6 @@ WORKFLOW PROGRESS
 [ ] Design review      — not detected
 [✓] Code review        — N auto-fix commits found
 [✓] QA                 — N fix(qa) commits found
-[ ] Benchmark          — no performance data
-[ ] Dependency audit   — not run
 [ ] Ship               — PR is still draft
 
 OPEN ITEMS

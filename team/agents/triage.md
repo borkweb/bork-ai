@@ -182,7 +182,7 @@ Run ONLY the critical review pass (same as `/preflight`):
 - Auth gaps
 - Race conditions
 
-**Skip:** Informational review, design review, adversarial review, benchmark.
+**Skip:** Informational review, design review, adversarial review.
 
 ### 4b. Commit and push
 

@@ -79,7 +79,6 @@ One sprint, one person, one feature — that takes about 30 minutes with this st
 | **qa-only** | QA Reporter | `/qa-only` | Report-only QA testing — finds and documents bugs with screenshots and health scores but never fixes anything. Same modes and rubric as /qa. |
 | **ship** | Release Engineer | `/ship` | Fully automated ship workflow: merge base, run tests, pre-landing review, version bump, CHANGELOG, bisectable commits, push, create PR. |
 | **document-release** | Doc Editor | `/document-release` | Post-ship documentation sync. Reads all project docs, cross-references the diff, auto-updates factual content, polishes CHANGELOG voice, cleans up TODOS, and optionally bumps VERSION. |
-| **benchmark** | Perf Engineer | `/benchmark` | Performance regression detection. Baselines page load times, Core Web Vitals, and bundle sizes. Compares before/after with regression thresholds. Tracks trends over time. |
 | **autoplan** | Plan Pipeline | `/autoplan` | Auto-review pipeline. Chains plan-deep-review → plan-design-review → plan-eng-review → plan-devex-review at full depth, auto-deciding intermediate AskUserQuestion calls via 6 principles. Surfaces taste decisions and user challenges at one Final Approval Gate. Independent Claude subagent voice per phase for cross-model consensus. |
 
 ## Commands

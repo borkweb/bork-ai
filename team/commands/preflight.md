@@ -1,6 +1,6 @@
 ---
 name: preflight
-description: Quick pre-merge safety check. Runs the critical-only pass from /review, a smoke-test QA (homepage + affected pages), and a quick benchmark comparison. Designed for small PRs where /full-review is overkill. Use when asked to "preflight", "quick check", "safe to merge?", "sanity check", or "pre-merge check".
+description: Quick pre-merge safety check. Runs the critical-only pass from /review, a smoke-test QA (homepage + affected pages), and a quick test run. Designed for small PRs where /full-review is overkill. Use when asked to "preflight", "quick check", "safe to merge?", "sanity check", or "pre-merge check".
 allowed-tools:
   - Bash
   - Read
