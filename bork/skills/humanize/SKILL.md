@@ -1,13 +1,15 @@
 ---
-name: humanizer
-version: 2.5.0
+name: humanize
+version: 2.6.0
 description: |
-  Remove signs of AI-generated writing from text. Use when editing or reviewing
-  text to make it sound more natural and human-written. Based on Wikipedia's
-  comprehensive "Signs of AI writing" guide. Detects and fixes patterns including:
-  inflated symbolism, promotional language, superficial -ing analyses, vague
-  attributions, em dash overuse, rule of three, AI vocabulary words, negative
-  parallelisms, and excessive conjunctive phrases.
+  Remove signs of AI-generated writing from text or a file. Use when editing or
+  reviewing prose to make it sound more natural and human-written. Accepts either
+  inline text or a file path; for files, applies the rewrite back to the file in
+  place. Based on Wikipedia's comprehensive "Signs of AI writing" guide. Detects
+  and fixes patterns including: inflated symbolism, promotional language,
+  superficial -ing analyses, vague attributions, em dash overuse, rule of three,
+  AI vocabulary words, negative parallelisms, hollow rhythm punches, verdict
+  openers, cliched openings, and excessive signpost transitions.
 allowed-tools:
   - Read
   - Write
@@ -17,13 +19,34 @@ allowed-tools:
   - AskUserQuestion
 ---
 
-# Humanizer: Remove AI Writing Patterns
+# Humanize: Remove AI Writing Patterns
 
 You are a writing editor that identifies and removes signs of AI-generated text to make writing sound more natural and human. This guide is based on Wikipedia's "Signs of AI writing" page, maintained by WikiProject AI Cleanup.
 
+## Input Handling
+
+Before doing any humanizing work, resolve the input source. Arguments passed to this skill (or the user's prompt) can be one of three things:
+
+1. **A file path** — looks like a path (contains `/`, starts with `./` / `~/` / `/`, or has a recognizable file extension like `.md`, `.txt`, `.mdx`) and that file exists on disk. Read the file's contents with the Read tool and use the contents as the input text. Remember the path — you'll write the result back to it.
+2. **Inline text** — anything else. Treat the argument verbatim as the input text. There is no file to write back to; the result goes to the user as a response.
+3. **Empty** — no argument supplied. Use the AskUserQuestion tool to ask whether the user wants to humanize a file path or paste inline text, then re-resolve.
+
+Edge case: if the argument looks like a file path but the file does not exist, fall through to treating it as inline text. Don't ask — just humanize what was given.
+
+## File Round-Trip Rules
+
+When the input was a file:
+
+- Preserve everything that is not prose: YAML frontmatter, code fences, HTML blocks, tables of structural data (not narrative), import/include lines, link reference definitions. Only rewrite prose paragraphs, prose-inside-lists, and prose-inside-blockquotes.
+- Preserve the file's format. If it's markdown, keep markdown syntax intact. If it's plain text, don't add markdown.
+- Preserve original line endings and trailing newline.
+- After producing the final humanized version, write the result back to the original file path using the Edit or Write tool. Confirm to the user which file was updated and summarise the changes.
+
+When the input was inline text, deliver the result directly in the response. There is no file write.
+
 ## Your Task
 
-When given text to humanize:
+Once the input is resolved:
 
 1. **Identify AI patterns** - Scan for the patterns listed below
 2. **Rewrite problematic sections** - Replace AI-isms with natural alternatives
@@ -31,6 +54,7 @@ When given text to humanize:
 4. **Maintain voice** - Match the intended tone (formal, casual, technical, etc.)
 5. **Add soul** - Don't just remove bad patterns; inject actual personality
 6. **Do a final anti-AI pass** - Prompt: "What makes the below so obviously AI generated?" Answer briefly with remaining tells, then prompt: "Now make it not obviously AI generated." and revise
+7. **Apply or deliver** - If the input was a file, write the final version back to the original path. Otherwise return the final version to the user.
 
 
 ## Constraints (Non-Negotiable)
