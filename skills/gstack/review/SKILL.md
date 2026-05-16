@@ -25,18 +25,11 @@ allowed-tools:
 
 Determine which branch this PR targets. Use the result as "the base branch" in all subsequent steps.
 
-1. Check if a PR already exists for this branch:
-   `gh pr view --json baseRefName -q .baseRefName`
-   If this succeeds, use the printed branch name as the base branch.
+```bash
+BASE=$(bash "$CLAUDE_PLUGIN_ROOT/scripts/detect-base-branch.sh")
+```
 
-2. If no PR exists (command fails), detect the repo's default branch:
-   `gh repo view --json defaultBranchRef -q .defaultBranchRef.name`
-
-3. If both commands fail, fall back to `main`.
-
-Print the detected base branch name. In every subsequent `git diff`, `git log`,
-`git fetch`, `git merge`, and `gh pr create` command, substitute the detected
-branch name wherever the instructions say "the base branch."
+The helper checks PR target → repo default → `main`. It always prints a usable name. Substitute `$BASE` wherever the instructions say "the base branch."
 
 ---
 
@@ -157,10 +150,10 @@ Follow the output format specified in the checklist. Respect the suppressions �
 Check if the diff touches frontend files:
 
 ```bash
-git diff origin/<base> --name-only | grep -E '\.(css|scss|less|tsx|jsx|vue|svelte|html|blade\.php)$' | head -5
+bash "$CLAUDE_PLUGIN_ROOT/scripts/detect-frontend-files.sh" "$BASE"
 ```
 
-**If no frontend files changed:** Skip design review silently. No output.
+**If output is empty:** Skip design review silently. No output.
 
 **If frontend files changed:**
 
