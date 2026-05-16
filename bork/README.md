@@ -14,7 +14,7 @@ General development tools for Claude Code projects.
 
 | Skill | Command | Description |
 |-------|---------|-------------|
-| **commit-writer** | `/commit` | Analyzes staged changes and generates conventional commit messages matching repository style. |
+| **writing-commits** | `/commit` | Analyzes staged changes and generates conventional commit messages matching repository style. |
 | **council** | — | Runs structured adversarial assessment of ideas, plans, and proposals through selected lenses, debate rounds, risk mapping, and a verdict. |
 | **handoff** | `/handoff` | Writes handoff documentation so agents can communicate with relevant context and pick up from an optimal place. |
 | **humanize** | `/humanize` | Detects and removes AI writing patterns (inflated language, em dash overuse, rule of three, hollow rhythm punches, etc.) on inline text or a file path; rewrites files in place. |
@@ -27,7 +27,7 @@ General development tools for Claude Code projects.
 
 | Command | Description |
 |---------|-------------|
-| `/commit` | Check for unstaged changes, optionally stage them, then invoke commit-writer to craft the message. |
+| `/commit` | Check for unstaged changes, optionally stage them, then invoke writing-commits to craft the message. |
 
 ## Credits
 

@@ -18,7 +18,7 @@ This repository contains custom Claude Code extensions including agents, skills,
 - **skills/**: Reusable skill packages invoked via the Skill tool
   - Skills are lightweight, focused capabilities
   - Located in individual subdirectories with SKILL.md files
-  - Currently includes: commit-writer
+  - Currently includes: writing-commits
 
 - **hooks/**: Event-driven shell commands (currently placeholder)
 
@@ -80,7 +80,7 @@ Skills are invoked via the Skill tool with just the skill name (no arguments). W
 
 ### Available Skills (bork plugin)
 
-1. **commit-writer**
+1. **writing-commits**
    - Crafts conventional commit messages by analyzing git diffs and history
    - Follows Conventional Commits specification
    - Adapts to repository's existing commit style
