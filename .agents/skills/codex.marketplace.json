@@ -1,7 +1,7 @@
 {
-  "name": "bork-ai",
+  "name": "skills",
   "interface": {
-    "displayName": "bork-ai"
+    "displayName": "skills"
   },
   "plugins": [
     {

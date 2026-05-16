@@ -1,4 +1,4 @@
-# bork-ai
+# skills
 
 My Original and Collected skills, agents, commands, and hooks for Claude Code, Codex, and Gemini. Writing, reviewing, planning, QA, and shipping across the development cycle.
 
@@ -12,12 +12,12 @@ Personal voice and other private things live separately at [borkweb/skills-priva
 
 Add via [skills.sh](https://skills.sh)
 ```bash
-npx skills add borkweb/bork-ai
+npx skills add borkweb/skills
 ```
 
 Or as a Claude Code [plugin](https://code.claude.com/docs/en/plugins)
 ```bash
-/plugin marketplace add https://github.com/borkweb/bork-ai
+/plugin marketplace add https://github.com/borkweb/skills
 /plugin install bork
 ```
 

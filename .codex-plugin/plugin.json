@@ -7,8 +7,8 @@
     "email": "borkweb@gmail.com",
     "url": "https://github.com/borkweb"
   },
-  "homepage": "https://github.com/borkweb/bork-ai/tree/main/bork",
-  "repository": "https://github.com/borkweb/bork-ai",
+  "homepage": "https://github.com/borkweb/skills",
+  "repository": "https://github.com/borkweb/skills",
   "license": "MIT",
   "keywords": [
     "codex",
@@ -58,9 +58,9 @@
       "Interactive",
       "Write"
     ],
-    "websiteURL": "https://github.com/borkweb/bork-ai/tree/main/bork",
-    "privacyPolicyURL": "https://github.com/borkweb/bork-ai",
-    "termsOfServiceURL": "https://github.com/borkweb/bork-ai/blob/main/LICENSE",
+    "websiteURL": "https://github.com/borkweb/skills",
+    "privacyPolicyURL": "https://github.com/borkweb/skills",
+    "termsOfServiceURL": "https://github.com/borkweb/skills/blob/main/LICENSE",
     "defaultPrompt": [
       "Plan this feature with /plan-session, then run /autoplan to vet it",
       "Review this branch with /review before I ship it",
