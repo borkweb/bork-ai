@@ -1,5 +1,5 @@
 ---
-name: security-review
+name: review-security
 description: >
   Deep security review of a diff or a specific file, grounded in 20
   evidence-based pattern libraries extracted from 400+ real-world bugs in major
@@ -183,6 +183,6 @@ Issue one of:
 ## Relationship to `/review`
 
 - `/review` is the **workflow** for every pre-landing check — scope drift, structural issues, design, adversarial, landing verdict. It calls into this skill's pattern files when a diff touches a security-sensitive surface area.
-- `/security-review` (this skill) is the **reference library + deep audit workflow**. Use it standalone for security audits, or let `/review` pull the relevant pattern files inline.
+- `/review-security` (this skill) is the **reference library + deep audit workflow**. Use it standalone for security audits, or let `/review` pull the relevant pattern files inline.
 
 The two skills are complements, not replacements.

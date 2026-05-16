@@ -16,11 +16,7 @@ Detailed guides for every team skill — philosophy, workflow, and examples.
 | [`/qa-only`](#qa-only) | **QA Reporter** | Same methodology as /qa but report only. Use when you want a pure bug report without code changes. |
 | [`/ship`](#ship) | **Release Engineer** | Sync main, run tests, audit coverage, push, open PR. One command. |
 | [`/document-release`](#document-release) | **Doc Editor** | Update all project docs to match what you just shipped. Catches stale READMEs automatically. |
-| [`/retro`](#retro) | **Eng Manager** | Team-aware weekly retro. Per-person breakdowns, shipping streaks, test health trends, growth opportunities. |
-| [`/browse`](#browse) | **QA Engineer** | Headless browser for QA testing and dogfooding. Navigate, interact, screenshot, assert. Uses Playwright MCP tools. |
 | [`/benchmark`](#benchmark) | **Perf Engineer** | Performance regression detection. Baselines page load, Core Web Vitals, bundle sizes. Compares before/after. Tracks trends. |
-| [`/setup-browser-cookies`](#setup-browser-cookies) | **Session Manager** | Import cookies from your real browser into the headless session. Test authenticated pages without logging in every time. |
-| [`/dependency-audit`](#dependency-audit) | **Security Engineer** | Audit dependencies for vulnerabilities, outdated packages, and license issues. Prioritized upgrade plans with reachability analysis. |
 
 ### Commands
 
@@ -72,7 +68,7 @@ Then it generates 2-3 concrete implementation approaches with honest effort esti
 
 ### The design doc
 
-The session ends with a design doc — and that doc feeds directly into `/plan-deep-review` and `/plan-eng-review`. The full lifecycle is: `plan-session → plan → implement → review → QA → ship → retro`.
+The session ends with a design doc — and that doc feeds directly into `/plan-deep-review` and `/plan-eng-review`. The full lifecycle is: `plan-session → plan → implement → review → QA → ship`.
 
 ---
 
@@ -345,70 +341,6 @@ Claude: Analyzing 21 files changed across 3 commits. Found 8 documentation files
 
 ---
 
-## `/retro`
-
-This is **engineering manager mode**.
-
-At the end of the week you want to know what actually happened. Not vibes — data. `/retro` analyzes commit history, work patterns, and shipping velocity and writes a candid retrospective.
-
-It's team-aware. It identifies who is running the command, gives you the deepest treatment on your own work, then breaks down every contributor with specific praise and growth opportunities. It tracks metrics like commits, LOC, test ratio, PR sizes, fix ratio, coding sessions, hotspot files, and shipping streaks.
-
-### Example
-
-```
-You:   /retro
-
-Claude: Week of Mar 1: 47 commits (3 contributors), 3.2k LOC,
-        38% tests, 12 PRs, peak: 10pm | Streak: 47d
-
-        ## Your Week
-        32 commits, +2.4k LOC, 41% tests. Peak hours: 9-11pm.
-        Biggest ship: cookie import system.
-        What you did well: shipped a complete feature with
-        encryption, UI, and 18 unit tests in one focused push...
-
-        ## Team Breakdown
-
-        ### Alice
-        12 commits focused on app/services/. Every PR under 200 LOC.
-        Opportunity: test ratio at 12%.
-
-        ### Bob
-        3 commits — fixed the N+1 query on dashboard. Small but high-impact.
-        Opportunity: only 1 active day — check if blocked.
-```
-
-It saves a JSON snapshot to `.context/retros/` so the next run can show trends.
-
----
-
-## `/browse`
-
-This is **QA engineer mode** — giving the agent eyes.
-
-`/browse` uses Playwright MCP tools to control a headless Chromium browser. Navigate to any URL, click buttons, fill forms, take screenshots, check console errors, and test responsive layouts.
-
-The core workflow: navigate → snapshot → interact → snapshot → verify. The snapshot returns an accessibility tree with element references that you can target in subsequent commands.
-
-### Example
-
-```
-You:   /browse staging.myapp.com — log in, test the signup flow
-
-Claude: [navigates to signup page]
-        [takes snapshot, identifies form fields]
-        [fills email, password, clicks submit]
-        [takes screenshot showing redirect to onboarding]
-        [checks console — no errors]
-
-        Signup works. Redirected to onboarding. Dashboard loads.
-        All pages load correctly. No console errors.
-```
-
-When the headless browser gets stuck on CAPTCHAs or MFA, it asks you to complete the action manually, then picks up where you left off.
-
----
-
 ## `/benchmark`
 
 This is **performance engineer mode**.
@@ -438,66 +370,6 @@ Claude: PERFORMANCE REPORT — myapp.com
 ```
 
 Run `/benchmark --baseline` before making changes to capture the starting point. Then `/benchmark` again after to see what moved.
-
----
-
-## `/setup-browser-cookies`
-
-This is **session manager mode**.
-
-Before `/qa` or `/browse` can test authenticated pages, they need cookies. Instead of manually logging in through the headless browser every time, `/setup-browser-cookies` imports your real sessions.
-
-Three options: provide a cookies JSON file, extract from your browser for specific domains, or log in manually through the headless browser. On macOS, Chromium browser cookies can be decrypted via the Keychain for direct import.
-
-```
-You:   /setup-browser-cookies github.com
-
-Claude: Imported 12 cookies for github.com. Session is ready.
-```
-
-Or skip the domain and get an interactive flow:
-
-```
-You:   /setup-browser-cookies
-
-Claude: Which site(s) do you need to authenticate with?
-        A) I'll provide a cookies JSON file
-        B) Import from my browser for specific domain(s)
-        C) I'll log in manually through the headless browser
-```
-
----
-
-## `/dependency-audit`
-
-This is your **security engineer**.
-
-Most production security incidents come from dependencies, not first-party code. But blindly updating everything is just as dangerous as updating nothing — the goal is informed, prioritized upgrades.
-
-`/dependency-audit` scans every package ecosystem in your project (npm, composer, pip, go, cargo, bundler) for three things: known vulnerabilities, outdated packages, and license issues. Then it does something most audit tools don't — it checks whether each vulnerability is actually reachable in your code.
-
-A critical CVE in a function your code never calls is different from a medium CVE in your authentication path. The reachability analysis means you fix what matters first.
-
-```
-You:    /dependency-audit
-
-Claude: DEPENDENCY AUDIT REPORT
-        ══════════════════════════
-        Vulnerabilities: 3 critical (2 reachable), 5 high, 12 medium
-        Outdated: 8 major, 15 minor, 22 patch
-        License warnings: 1 (GPL-3.0 in proprietary project)
-
-        TIER 1: CRITICAL — Fix immediately
-        ──────────────────────────────────
-        lodash 4.17.15 → 4.17.21  CVE-2021-23337  REACHABLE
-          Your code calls _.template() with user input at src/email.js:42
-
-        Want me to apply safe updates?
-        A) Patch-level only    B) + security fixes
-        C) All updates         D) Report only
-```
-
-The output is a structured upgrade plan grouped by risk tier, with specific commands for each fix and a list of files to check after upgrading. It integrates with `TODOS.md` — unresolved vulnerabilities become tracked items.
 
 ---
 
@@ -600,6 +472,6 @@ Smart enough to skip docs-only and test-only changes. Blocks the push if it find
 
 ## Post-Merge Hook
 
-Non-blocking reminders after merging to the default branch. Checks whether the merge touched API routes, config files, or schema — and if docs weren't updated, nudges about running `/document-release`. If lockfiles changed, suggests `/dependency-audit`. If features were added but VERSION wasn't bumped, notes that too.
+Non-blocking reminders after merging to the default branch. Checks whether the merge touched API routes, config files, or schema — and if docs weren't updated, nudges about running `/document-release`. If features were added but VERSION wasn't bumped, notes that too.
 
 Quiet when nothing needs attention.

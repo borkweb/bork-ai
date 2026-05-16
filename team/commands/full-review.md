@@ -1,6 +1,6 @@
 ---
 name: full-review
-description: Chains /review + /design-review + /qa into a single workflow, with optional /security-review stage. Runs pre-landing code review, then live design audit, then QA testing — passing context forward between each stage. Use when you want the complete review pipeline in one command. Accepts optional URL, tier, and security flag arguments.
+description: Chains /review + /design-review + /qa into a single workflow, with optional /review-security stage. Runs pre-landing code review, then live design audit, then QA testing — passing context forward between each stage. Use when you want the complete review pipeline in one command. Accepts optional URL, tier, and security flag arguments.
 allowed-tools:
   - Bash
   - Read
@@ -23,7 +23,7 @@ You are running the `/full-review` command. This chains three skills into a sing
 - `/full-review <url>` — use the given URL for design-review and QA
 - `/full-review --quick` — quick tier for QA (critical/high only)
 - `/full-review --exhaustive` — exhaustive tier for QA (all severities)
-- `/full-review --security` — insert `/security-review` as Stage 2 (deep CVE-pattern audit). Use for auth/crypto/parser/dependency-heavy PRs, release audits, or any diff you want pattern-library-grounded security coverage on.
+- `/full-review --security` — insert `/review-security` as Stage 2 (deep CVE-pattern audit). Use for auth/crypto/parser/dependency-heavy PRs, release audits, or any diff you want pattern-library-grounded security coverage on.
 - `/full-review --skip-design` — skip the design review stage
 - `/full-review --skip-qa` — skip the QA stage
 
@@ -101,16 +101,16 @@ If the user chooses B, stop and output the review summary.
 
 ---
 
-## Step 3: Stage 2 — Security Review (/security-review) [conditional]
+## Step 3: Stage 2 — Security Review (/review-security) [conditional]
 
 **Skip conditions:**
-- `--security` flag was NOT passed (this stage is opt-in by design — see `team/skills/security-review/SKILL.md` for rationale)
+- `--security` flag was NOT passed (this stage is opt-in by design — see `team/skills/review-security/SKILL.md` for rationale)
 
 If skipping, output nothing for this stage — proceed directly to Stage 3. Do not include a "SKIPPED" line in the summary.
 
 **Otherwise:**
 
-1. Read the `/security-review` skill's `SKILL.md` from `team/skills/security-review/SKILL.md`. Execute its full workflow:
+1. Read the `/review-security` skill's `SKILL.md` from `team/skills/review-security/SKILL.md`. Execute its full workflow:
    - Scope the review (same diff as Stage 1)
    - Pick relevant pattern files from the Change Type → Primary Patterns table
    - Apply each selected pattern to the diff (Read the pattern file, walk its "What To Check" list, cite `file:line` + the matched Red Flag)

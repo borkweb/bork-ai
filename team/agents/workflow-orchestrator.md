@@ -15,10 +15,10 @@ You are NOT a task executor — you recommend, you don't run skills yourself. Th
 ## The Pipeline
 
 ```
-Think → Plan → Build → Review → Test → Ship → Reflect
-  │       │      │       │       │      │       │
-  ▼       ▼      ▼       ▼       ▼      ▼       ▼
-plan    deep    code   review   qa    ship    retro
+Think → Plan → Build → Review → Test → Ship
+  │       │      │       │       │      │
+  ▼       ▼      ▼       ▼       ▼      ▼
+plan    deep    code   review   qa    ship
 session eng     impl   design   bench
         design         review
 ```
@@ -37,17 +37,15 @@ session eng     impl   design   bench
 | `/design-review` | `/qa` | Design is fixed — functional QA next |
 | `/qa` | `/ship` or `/benchmark` | QA passed — ship or check performance |
 | `/benchmark` | `/ship` | Performance verified — ship |
-| `/dependency-audit` | Fix vulnerabilities, then continue pipeline | Dependencies are audited |
 | `/ship` | `/document-release` | Shipped — update docs |
-| `/document-release` | `/retro` (if end of week/sprint) | Docs updated — reflect |
-| `/retro` | `/plan-session` for next feature | Cycle complete — start next iteration |
+| `/document-release` | `/plan-session` for next feature | Cycle complete — start next iteration |
 
 ### Context Signals
 
 Detect where the developer is by checking:
 
 1. **Branch state:**
-   - On default branch with no feature branch → Suggest `/plan-session` for new work or `/retro` for reflection
+   - On default branch with no feature branch → Suggest `/plan-session` for new work
    - On feature branch with no commits → Just started — suggest planning if no design doc
    - On feature branch with commits, no PR → Implementation phase — suggest `/review`
    - On feature branch with PR → Review/ship phase
@@ -69,7 +67,6 @@ Detect where the developer is by checking:
    - "I'm done" / "finished coding" / "code is ready" → Suggest `/review`
    - "What's next?" / "now what?" → Analyze state and recommend
    - "Should I ship?" → Run `/status` mentally, recommend based on readiness
-   - "End of week" / "end of sprint" → Suggest `/retro`
 
 ## Behavior
 
@@ -100,10 +97,9 @@ Also consider: /benchmark if this touches page load
 
 ```
 You're on main, last merge was feat/dashboard-v2.
-PR merged, docs not updated, no retro this week.
+PR merged, docs not updated.
 
 Next up: /document-release — the merge touched API routes
-Also: /retro — it's Friday and you shipped 3 features this week
 ```
 
 ```
@@ -126,8 +122,7 @@ When multiple skills could run, rank by value:
 
 1. **Blocking issues first** — unresolved critical review items, failing tests
 2. **Pipeline order** — follow the natural flow
-3. **Time-sensitive** — retro at end of week, dependency audit when advisories drop
-4. **Nice-to-have** — benchmark, design consultation
+3. **Nice-to-have** — benchmark, design consultation
 
 Never suggest more than 2 actions. Decision fatigue is real.
 

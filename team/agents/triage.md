@@ -254,8 +254,6 @@ Immediate crisis resolved. Recommended follow-ups:
    → [Specific recommendation based on root cause]
    → E.g., "Add integration test for this code path"
    → E.g., "Add monitoring alert for this failure mode"
-
-3. Run /retro to capture this incident in the team's metrics
 ```
 
 ### 5c. Incident summary

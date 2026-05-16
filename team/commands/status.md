@@ -69,10 +69,8 @@ Detect which workflow skills have been run by scanning for their artifacts:
 | `/design-review` | Commit messages contain `fix(design):` |
 | `/qa` | Commit messages contain `fix(qa):` |
 | `/benchmark` | `.benchmark/` directory exists with recent reports |
-| `/dependency-audit` | `.dependency-audit/` directory exists with recent reports |
 | `/ship` | PR exists and is not draft |
 | `/document-release` | Commit messages contain `docs:` after the last feature commit |
-| `/retro` | `.retro/` directory exists with recent reports |
 
 Also check:
 - `TODOS.md` for open items related to this branch
@@ -83,7 +81,7 @@ Also check:
 # Check for workflow artifacts
 git log origin/$BASE..HEAD --oneline --format="%s" | head -30
 ls TODOS.md CHANGELOG.md VERSION DESIGN.md 2>/dev/null
-ls -d .benchmark .dependency-audit .retro 2>/dev/null
+ls -d .benchmark 2>/dev/null
 ```
 
 ---

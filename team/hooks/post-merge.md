@@ -1,6 +1,6 @@
 ---
 name: post-merge
-description: Post-merge documentation nudge. After merging to the main branch, checks if the diff touched public APIs, config, or doc-relevant files. If so, reminds the developer to run /document-release. Also checks for outdated dependencies and suggests /dependency-audit when lockfiles changed. Non-blocking — just a helpful reminder.
+description: Post-merge documentation nudge. After merging to the main branch, checks if the diff touched public APIs, config, or doc-relevant files. If so, reminds the developer to run /document-release. Non-blocking — just a helpful reminder.
 event: post-merge
 allowed-tools:
   - Bash
@@ -91,15 +91,7 @@ DOCS_UPDATED=$(echo "$FILES_CHANGED" | grep -iE '\.(md|rst|txt)$' | grep -ivE '(
 
 ---
 
-## Step 4: Dependency check
-
-```bash
-LOCKFILES_CHANGED=$(echo "$FILES_CHANGED" | grep -iE '(package-lock|yarn\.lock|pnpm-lock|composer\.lock|Gemfile\.lock|Pipfile\.lock|go\.sum|Cargo\.lock)')
-```
-
----
-
-## Step 5: Output reminders
+## Step 4: Output reminders
 
 **If documentation is relevant AND no docs were updated:**
 ```
@@ -108,13 +100,6 @@ post-merge 📝 Documentation may need updating
   - API files changed
   - Schema/migration files changed
   Suggestion: Run /document-release to auto-sync docs with this merge.
-```
-
-**If lockfiles changed:**
-```
-post-merge 📦 Dependencies changed
-  Updated: [list lockfiles]
-  Suggestion: Run /dependency-audit to check for new vulnerabilities.
 ```
 
 **If VERSION file was not bumped but probably should have been:**

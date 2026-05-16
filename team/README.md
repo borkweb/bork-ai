@@ -1,6 +1,6 @@
 # team
 
-Development workflow skills — planning, review, QA, shipping, and retrospectives. Ported from [gstack](https://github.com/garryslist/gstack) with gstack-specific infrastructure removed.
+Development workflow skills — planning, review, QA, and shipping. Ported from [gstack](https://github.com/garryslist/gstack) with gstack-specific infrastructure removed.
 
 ## Quick Start
 
@@ -57,7 +57,7 @@ You said "daily briefing app." The agent said "you're building a chief of staff 
 
 This is a process, not a collection of tools. The skills are ordered the way a sprint runs:
 
-Think → Plan → Build → Review → Test → Ship → Reflect
+Think → Plan → Build → Review → Test → Ship
 
 Each skill feeds into the next. `/plan-session` writes a design doc that `/plan-deep-review` reads. `/plan-eng-review` writes a test plan that `/qa` picks up. `/review` catches bugs that `/ship` verifies are fixed. Nothing falls through the cracks because every step knows what came before it.
 
@@ -72,18 +72,14 @@ One sprint, one person, one feature — that takes about 30 minutes with this st
 | **plan-devex-review** | Developer Advocate | `/plan-devex-review` | DX plan review for developer-facing products (APIs, CLIs, SDKs, libraries, platforms, docs). Investigates persona, benchmarks competitors, designs magical moment, traces friction points, scores 8 DX dimensions 0-10. Three modes: DX EXPANSION / DX POLISH / DX TRIAGE. |
 | **design-consultation** | Design Partner | `/design-consultation` | Design system consultation — proposes aesthetic, typography, color, layout, spacing, and motion as a coherent package. Generates font+color preview pages and writes DESIGN.md. |
 | **review** | Staff Engineer | `/review` | Pre-landing PR review. Two-pass analysis (critical + informational) for SQL safety, race conditions, LLM trust boundaries, enum completeness, and more. Fix-first: auto-fixes mechanical issues, asks about ambiguous ones. |
-| **security-review** | Security Auditor | `/security-review` | Deep security review grounded in 20 CVE-based pattern libraries (Heartbleed, Log4Shell, Next.js bypass, runc escape, xz backdoor, etc.). Bounds, injection, auth, crypto, races, memory lifecycle, error handling, supply chain, type safety, state machines, integer arithmetic, config, trust boundaries, regressions, API contracts, web, canonicalization, sandboxing, logging, DoS. Callable standalone or as a reference from `/review`. |
+| **review-security** | Security Auditor | `/review-security` | Deep security review grounded in 20 CVE-based pattern libraries (Heartbleed, Log4Shell, Next.js bypass, runc escape, xz backdoor, etc.). Bounds, injection, auth, crypto, races, memory lifecycle, error handling, supply chain, type safety, state machines, integer arithmetic, config, trust boundaries, regressions, API contracts, web, canonicalization, sandboxing, logging, DoS. Callable standalone or as a reference from `/review`. |
 | **investigate** | Debugger | `/investigate` | Systematic debugging with root cause investigation. Five phases: collect symptoms, pattern analysis, hypothesis testing, implementation, verification. Iron Law: no fixes without root cause. |
 | **design-review** | Designer Who Codes | `/design-review` | Designer's eye QA on live sites. 10-category audit (~80 items), letter grades, AI slop detection. Fixes issues in source code with atomic commits and before/after verification. |
 | **qa** | QA Lead | `/qa` | Systematic QA testing with fix loop. Three tiers (Quick/Standard/Exhaustive), diff-aware mode, health scoring, framework-specific guidance. Fixes bugs atomically with before/after evidence. |
 | **qa-only** | QA Reporter | `/qa-only` | Report-only QA testing — finds and documents bugs with screenshots and health scores but never fixes anything. Same modes and rubric as /qa. |
 | **ship** | Release Engineer | `/ship` | Fully automated ship workflow: merge base, run tests, pre-landing review, version bump, CHANGELOG, bisectable commits, push, create PR. |
 | **document-release** | Doc Editor | `/document-release` | Post-ship documentation sync. Reads all project docs, cross-references the diff, auto-updates factual content, polishes CHANGELOG voice, cleans up TODOS, and optionally bumps VERSION. |
-| **retro** | Eng Manager | `/retro` | Weekly engineering retrospective. Analyzes commit history, work patterns, code quality metrics. Team-aware with per-person praise and growth areas. Persistent history with trend tracking. |
-| **browse** | QA Engineer | `/browse` | Headless browser for QA testing and dogfooding. Navigate, interact, screenshot, assert. Uses Playwright MCP tools. |
 | **benchmark** | Perf Engineer | `/benchmark` | Performance regression detection. Baselines page load times, Core Web Vitals, and bundle sizes. Compares before/after with regression thresholds. Tracks trends over time. |
-| **setup-browser-cookies** | Session Manager | `/setup-browser-cookies` | Import cookies from your real browser into the headless session. Test authenticated pages without logging in every time. |
-| **dependency-audit** | Security Engineer | `/dependency-audit` | Scans dependencies for vulnerabilities, outdated packages, and license issues. Groups by risk, checks reachability, generates prioritized upgrade plans. Optionally applies safe updates. |
 | **autoplan** | Plan Pipeline | `/autoplan` | Auto-review pipeline. Chains plan-deep-review → plan-design-review → plan-eng-review → plan-devex-review at full depth, auto-deciding intermediate AskUserQuestion calls via 6 principles. Surfaces taste decisions and user challenges at one Final Approval Gate. Independent Claude subagent voice per phase for cross-model consensus. |
 
 ## Commands
@@ -99,10 +95,10 @@ Compound workflows that chain multiple skills together.
 | `/plan-devex-review` | DX plan review focused on developer experience, getting started, API/CLI ergonomics, error quality, and adoption friction. |
 | `/autoplan` | Auto-review pipeline that runs all four plan-* reviews end-to-end with auto-decisions, surfacing taste decisions and user challenges at one final gate. |
 | `/review` | Pre-landing code review for correctness, safety, and regressions. |
-| `/security-review` | Deep security review grounded in the security pattern library. |
+| `/review-security` | Deep security review grounded in the security pattern library. |
 | `/qa` | QA workflow that tests and fixes issues. |
 | `/qa-only` | Report-only QA workflow that does not apply fixes. |
-| `/full-review` | Chains `/review` → `/design-review` → `/qa` into one pipeline. Passes context forward between stages. Produces a combined ship-readiness verdict. Pass `--security` to insert `/security-review` as Stage 2 for auth/crypto/parser/dependency-heavy PRs. |
+| `/full-review` | Chains `/review` → `/design-review` → `/qa` into one pipeline. Passes context forward between stages. Produces a combined ship-readiness verdict. Pass `--security` to insert `/review-security` as Stage 2 for auth/crypto/parser/dependency-heavy PRs. |
 | `/preflight` | Fast pre-merge safety check. Critical-only code review + smoke test + quick test run. Under 2 minutes. For small PRs where `/full-review` is overkill. |
 | `/status` | Read-only branch status and workflow progress report. Shows what's been done, what's left, and suggests the next step. |
 
@@ -112,7 +108,7 @@ Proactive agents that detect context and trigger automatically.
 
 | Agent | Trigger | Description |
 |-------|---------|-------------|
-| **workflow-orchestrator** | Completing a skill, "what's next?", finishing code | Detects where you are in the pipeline and suggests the next skill. Understands the full Think → Plan → Build → Review → Test → Ship → Reflect flow. |
+| **workflow-orchestrator** | Completing a skill, "what's next?", finishing code | Detects where you are in the pipeline and suggests the next skill. Understands the full Think → Plan → Build → Review → Test → Ship flow. |
 | **triage** | "production is broken", "urgent fix", "hotfix", "incident" | Emergency incident response. Triages severity, fast-tracks root cause investigation, creates minimal hotfix, ships via emergency PR. Streamlined for speed. |
 
 ## Hooks
@@ -122,7 +118,7 @@ Event-driven checks that run automatically.
 | Hook | Event | Description |
 |------|-------|-------------|
 | **pre-push** | Before `git push` | Runs critical-only review (SQL injection, auth gaps, race conditions) before any push. Blocks on critical issues. Under 30 seconds. |
-| **post-merge** | After `git merge` on default branch | Non-blocking reminders: nudges about `/document-release` when API/config/schema files changed, `/dependency-audit` when lockfiles changed. |
+| **post-merge** | After `git merge` on default branch | Non-blocking reminders: nudges about `/document-release` when API/config/schema files changed. Also flags missed VERSION bumps and open TODOS items. |
 
 ## Credits
 
