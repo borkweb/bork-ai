@@ -1,79 +1,120 @@
 # bork-ai
 
-Agents, skills, and commands for Claude Code, Gemini, and Codex.
+My Original and Collected skills, agents, commands, and hooks for Claude Code, Codex, and Gemini. Writing, reviewing, planning, QA, and shipping across the development cycle.
 
-## Installation
-
-### With Claude Code CLI
-
-```bash
-claude plugin marketplace add borkweb/bork-ai
-```
-
-Then install the plugin:
-
-```bash
-claude plugin install bork
-```
-
-### With Claude Code (Desktop App)
-
-1. In Claude Code, click the + button in the Plugins panel
-2. Select Browse plugins
-3. Click the marketplace dropdown and select Add marketplace from GitHub
-4. Enter `borkweb/bork-ai`
-5. Click _Sync_
-
-The plugins will appear in your marketplace and can be installed from there.
-
-### Optional Claude Agent Teams
-
-Some skills, such as `bork: council`, benefit from Claude Code Agent Teams, which lets them dispatch work to multiple subagents at once. To enable Agent Teams, add this to `~/.claude/settings.json`:
-
-```json
-{
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  }
-}
-```
-
-Restart Claude Code after changing the setting. Skills that support Agent Teams also work without this setting by running internally in a single assistant response.
-
-### With Codex
-
-Codex manifests live alongside the plugin package:
-
-- `bork/.codex-plugin/plugin.json`
-
-This repo also includes a repo-owned Codex marketplace bundle at `.agents/bork-ai/`.
-
-The Codex marketplace definition lives at `.agents/bork-ai/codex.marketplace.json`. Symlink it to `~/.agents/bork-ai/marketplace.json` so the marketplace definition and plugin wiring stay versioned in this repository.
-
-Setup:
-
-```bash
-mkdir -p ~/.agents/bork-ai
-ln -sfn /Users/matt/git/bork-ai/.agents/bork-ai/plugins ~/.agents/bork-ai/plugins
-ln -sfn /Users/matt/git/bork-ai/.agents/bork-ai/codex.marketplace.json ~/.agents/bork-ai/marketplace.json
-```
-
-Then enable the plugins in `~/.codex/config.toml`:
-
-```toml
-[plugins."bork@bork-ai"]
-enabled = true
-```
-
-Restart Codex after updating the symlinks and config.
-
-## Plugins
-
-| Plugin | Description |
-|--------|-------------|
-| [**bork**](bork/) | My Original and Collected skills, agents, commands, and hooks. Writing, reviewing, planning, QA, and shipping across the dev cycle. |
+Skills are organized into two buckets:
+- **`skills/core/`** — skills I wrote (or substantially extended from a small starting point)
+- **`skills/gstack/`** — skills ported from upstream sources like [gstack](https://github.com/garrytan/gstack), then trimmed of upstream-specific infrastructure and adapted to local conventions
 
 Personal voice and other private things live separately at [borkweb/skills-private](https://github.com/borkweb/skills-private).
+
+## Install
+
+Add via [skills.sh](https://skills.sh)
+```bash
+npx skills add borkweb/bork-ai
+```
+
+Or as a Claude Code [plugin](https://code.claude.com/docs/en/plugins)
+```bash
+/plugin marketplace add https://github.com/borkweb/bork-ai
+/plugin install bork
+```
+
+## Quick Start
+
+1. Run `/plan-session` — describe what you're building. It will reframe the problem before you write a line of code.
+2. Run `/plan-deep-review` on any feature idea
+3. Run `/plan-eng-review` on any plan
+4. Run `/review` on any branch with changes
+5. Run `/qa` on your staging URL
+6. Run `/ship` to merge, run tests, and open the PR
+
+## Original skills (`skills/core/`)
+
+| Skill | Command | Description |
+|-------|---------|-------------|
+| **writing-commits** | `/commit` | Analyzes staged changes and generates conventional commit messages matching repository style. |
+| **writing-sql** | — | Enforces strict vertical SQL formatting conventions for raw files, inline PHP, migrations, and framework query builders. |
+| **writing-plans** | — | Applies concise writing style to plan documents — strips filler, bans inflated adjectives, requires structured decisions. |
+| **agents-md-lint** | — | Audits AI agent instruction files (AGENTS.md, CLAUDE.md, etc.) and removes facts discoverable from code alone to save context tokens. |
+| **council** | — | Runs structured adversarial assessment of ideas, plans, and proposals through selected lenses, debate rounds, risk mapping, and a verdict. |
+| **handoff** | `/handoff` | Writes handoff documentation so agents can communicate with relevant context and pick up from an optimal place. |
+| **humanize** | `/humanize` | Detects and removes AI writing patterns (inflated language, em dash overuse, rule of three, hollow rhythm punches, etc.) on inline text or a file path; rewrites files in place. |
+| **prototype** | `/prototype` | Scaffolds a frontend prototype or a backend prototype with a disposable state machine to test an idea. |
+| **red-pen** | — | Strict editorial reviewer applying Orwell's rules and Practical Typography. Catches passive voice, dead metaphors, straight quotes, wrong dashes, and other prose drift. |
+
+## Collected skills (`skills/gstack/`)
+
+Process workflow ported from gstack and adapted. The skills are ordered the way a sprint runs:
+
+Think → Plan → Build → Review → Test → Ship
+
+Each skill feeds into the next. `/plan-session` writes a design doc that `/plan-deep-review` reads. `/plan-eng-review` writes a test plan that `/qa` picks up. `/review` catches bugs that `/ship` verifies are fixed. Nothing falls through the cracks because every step knows what came before it.
+
+| Skill | Specialist | Command | Description |
+|-------|------------|---------|-------------|
+| **plan-session** | Product Owner | `/plan-session` | Structured product design session — forces hard questions about demand, status quo, and narrowest wedge before proposing solutions. Produces a design doc, not code. |
+| **plan-deep-review** | Product Owner | `/plan-deep-review` | Deep plan review with four modes (Scope Expansion, Selective Expansion, Hold Scope, Scope Reduction). Challenges premises, maps failure modes, reviews architecture/security/performance/deployment. |
+| **plan-eng-review** | Eng Manager | `/plan-eng-review` | Eng manager-mode plan review. Locks in execution plan — architecture, data flow, diagrams, edge cases, test coverage, performance. Interactive with opinionated recommendations. |
+| **plan-design-review** | Senior Designer | `/plan-design-review` | Designer's eye plan review. Rates design dimensions 0-10, explains what would make each a 10, then fixes the plan to get there. Covers info architecture, interaction states, user journey, AI slop risk, responsive, and accessibility. |
+| **plan-devex-review** | Developer Advocate | `/plan-devex-review` | DX plan review for developer-facing products (APIs, CLIs, SDKs, libraries, platforms, docs). Investigates persona, benchmarks competitors, designs magical moment, traces friction points, scores 8 DX dimensions 0-10. Three modes: DX EXPANSION / DX POLISH / DX TRIAGE. |
+| **autoplan** | Plan Pipeline | `/autoplan` | Auto-review pipeline. Chains plan-deep-review → plan-design-review → plan-eng-review → plan-devex-review at full depth, auto-deciding intermediate AskUserQuestion calls via 6 principles. Surfaces taste decisions and user challenges at one Final Approval Gate. |
+| **design-consultation** | Design Partner | `/design-consultation` | Design system consultation — proposes aesthetic, typography, color, layout, spacing, and motion as a coherent package. Generates font+color preview pages and writes DESIGN.md. |
+| **review** | Staff Engineer | `/review` | Pre-landing PR review. Two-pass analysis (critical + informational) for SQL safety, race conditions, LLM trust boundaries, enum completeness, and more. Fix-first: auto-fixes mechanical issues, asks about ambiguous ones. |
+| **review-security** | Security Auditor | `/review-security` | Deep security review grounded in 20 CVE-based pattern libraries (Heartbleed, Log4Shell, Next.js bypass, runc escape, xz backdoor, etc.). Callable standalone or as a reference from `/review`. |
+| **investigate** | Debugger | `/investigate` | Systematic debugging with root cause investigation. Five phases: collect symptoms, pattern analysis, hypothesis testing, implementation, verification. Iron Law: no fixes without root cause. |
+| **design-review** | Designer Who Codes | `/design-review` | Designer's eye QA on live sites. 10-category audit (~80 items), letter grades, AI slop detection. Fixes issues in source code with atomic commits and before/after verification. |
+| **qa** | QA Lead | `/qa` | Systematic QA testing with fix loop. Three tiers (Quick/Standard/Exhaustive), diff-aware mode, health scoring, framework-specific guidance. Fixes bugs atomically with before/after evidence. |
+| **qa-only** | QA Reporter | `/qa-only` | Report-only QA testing — finds and documents bugs with screenshots and health scores but never fixes anything. Same modes and rubric as /qa. |
+| **ship** | Release Engineer | `/ship` | Fully automated ship workflow: merge base, run tests, pre-landing review, plan completion audit, version bump, CHANGELOG, bisectable commits, push, create PR. |
+| **document-release** | Doc Editor | `/document-release` | Post-ship documentation sync. Reads all project docs, cross-references the diff, auto-updates factual content, polishes CHANGELOG voice, cleans up TODOS, and optionally bumps VERSION. |
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `/commit` | Check for unstaged changes, optionally stage them, then invoke writing-commits to craft the message. |
+| `/handoff` | Write handoff documentation for picking up where you left off. |
+| `/humanize` | Run the humanize skill on text or a file. |
+| `/prototype` | Scaffold a throwaway prototype. |
+| `/plan-session` | Structured product design session — reframes the problem before implementation. |
+| `/plan-deep-review` | Deep plan review with scope, architecture, risk, and readiness analysis. |
+| `/plan-eng-review` | Engineering plan review focused on architecture, delivery, and execution risk. |
+| `/plan-design-review` | Design plan review focused on UX, interaction, and visual readiness. |
+| `/plan-devex-review` | DX plan review focused on developer experience, getting started, API/CLI ergonomics, error quality, and adoption friction. |
+| `/autoplan` | Auto-review pipeline that runs all four plan-* reviews end-to-end with auto-decisions, surfacing taste decisions and user challenges at one final gate. |
+| `/review` | Pre-landing code review for correctness, safety, and regressions. |
+| `/review-security` | Deep security review grounded in the security pattern library. |
+| `/qa` | QA workflow that tests and fixes issues. |
+| `/qa-only` | Report-only QA workflow that does not apply fixes. |
+| `/full-review` | Chains `/review` → `/design-review` → `/qa` into one pipeline. Passes context forward between stages. Produces a combined ship-readiness verdict. Pass `--security` to insert `/review-security` as Stage 2 for auth/crypto/parser/dependency-heavy PRs. |
+| `/preflight` | Fast pre-merge safety check. Critical-only code review + smoke test + quick test run. Under 2 minutes. For small PRs where `/full-review` is overkill. |
+| `/status` | Read-only branch status and workflow progress report. Shows what's been done, what's left, and suggests the next step. |
+
+## Agents
+
+| Agent | Trigger | Description |
+|-------|---------|-------------|
+| **github-pr-manager** | "create PR", "update PR", "do PR" | Creates and updates GitHub PRs with smart context awareness. |
+| **laravel-rest-architect** | Designing Laravel REST endpoints | Thin controllers, Form Request validation, API Resources. |
+| **refactorer** | Code/API migrations | Handles migrations with backwards compatibility, phased rollouts, and comprehensive test coverage. |
+| **workflow-orchestrator** | Completing a skill, "what's next?", finishing code | Detects where you are in the pipeline and suggests the next skill. |
+| **triage** | "production is broken", "urgent fix", "hotfix", "incident" | Emergency incident response. Triages severity, fast-tracks root cause investigation, creates minimal hotfix, ships via emergency PR. |
+
+## Hooks
+
+| Hook | Event | Description |
+|------|-------|-------------|
+| **pre-push** | Before `git push` | Runs critical-only review (SQL injection, auth gaps, race conditions) before any push. Blocks on critical issues. Under 30 seconds. |
+| **post-merge** | After `git merge` on default branch | Non-blocking reminders: nudges about `/document-release` when API/config/schema files changed. Also flags missed VERSION bumps and open TODOS items. |
+
+## Credits
+
+- The Collected workflow stack is ported from [garrytan/gstack](https://github.com/garrytan/gstack) with YCombinator-specific bits genericized and then iterated on locally.
+- `council` is based on @Devattom's [workflow-debate](https://github.com/Devattom/.claude/tree/main/skills/workflow-debate) skill.
+- `handoff` and `prototype` are from @mattpocock.
+- `humanize` originated from @blader's humanizer skill, with substantial extensions for the hand-cover diagnostic, hollow rhythm punches, and rewrite constraints.
 
 ## License
 

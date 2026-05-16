@@ -72,7 +72,7 @@ Security audit:  [yes (--security) / no]
 
 ## Step 2: Stage 1 — Code Review (/review)
 
-Read the `/review` skill's `SKILL.md` from `bork/skills/gstack/review/SKILL.md`. Execute its full workflow:
+Read the `/review` skill's `SKILL.md` from `skills/gstack/review/SKILL.md`. Execute its full workflow:
 
 - Scope drift detection
 - Two-pass checklist review (critical + informational)
@@ -104,13 +104,13 @@ If the user chooses B, stop and output the review summary.
 ## Step 3: Stage 2 — Security Review (/review-security) [conditional]
 
 **Skip conditions:**
-- `--security` flag was NOT passed (this stage is opt-in by design — see `bork/skills/gstack/review-security/SKILL.md` for rationale)
+- `--security` flag was NOT passed (this stage is opt-in by design — see `skills/gstack/review-security/SKILL.md` for rationale)
 
 If skipping, output nothing for this stage — proceed directly to Stage 3. Do not include a "SKIPPED" line in the summary.
 
 **Otherwise:**
 
-1. Read the `/review-security` skill's `SKILL.md` from `bork/skills/gstack/review-security/SKILL.md`. Execute its full workflow:
+1. Read the `/review-security` skill's `SKILL.md` from `skills/gstack/review-security/SKILL.md`. Execute its full workflow:
    - Scope the review (same diff as Stage 1)
    - Pick relevant pattern files from the Change Type → Primary Patterns table
    - Apply each selected pattern to the diff (Read the pattern file, walk its "What To Check" list, cite `file:line` + the matched Red Flag)
@@ -152,7 +152,7 @@ If skipping, output: `Stage 3: Design Review — SKIPPED (no frontend changes)` 
 
 1. Detect the running app URL. If a URL was provided as an argument, use it. Otherwise check common local dev ports (3000, 4000, 8080, 8000). If no app is found, ask the user for the URL.
 
-2. Read the `/design-review` skill's `SKILL.md` from `bork/skills/gstack/design-review/SKILL.md`. Execute its workflow in **diff-aware mode** — only audit pages affected by the current branch's changes.
+2. Read the `/design-review` skill's `SKILL.md` from `skills/gstack/design-review/SKILL.md`. Execute its workflow in **diff-aware mode** — only audit pages affected by the current branch's changes.
 
 3. For each design issue found, apply fixes with atomic commits.
 
@@ -175,7 +175,7 @@ If skipping, output: `Stage 4: QA — SKIPPED` and proceed to summary.
 
 1. Use the same URL from Stage 3 (or detect/ask if Stage 3 was skipped).
 
-2. Read the `/qa` skill's `SKILL.md` from `bork/skills/gstack/qa/SKILL.md`. Execute its workflow in **diff-aware mode** with the selected tier.
+2. Read the `/qa` skill's `SKILL.md` from `skills/gstack/qa/SKILL.md`. Execute its workflow in **diff-aware mode** with the selected tier.
 
 3. The QA skill will find bugs, fix them atomically, and re-verify.
 

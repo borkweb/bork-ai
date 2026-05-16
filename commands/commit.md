@@ -10,7 +10,7 @@ You are running the `/commit` command.
 
 ## Process
 
-1. Read `bork/skills/core/writing-commits/SKILL.md`.
+1. Read `skills/core/writing-commits/SKILL.md`.
 2. Execute that skill's workflow in full.
 3. Treat `$ARGUMENTS` as additional user context for the commit message.
 

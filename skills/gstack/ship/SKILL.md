@@ -103,9 +103,9 @@ Detect the project's test command from the codebase (package.json scripts, Makef
 
 Delegate the review to the `/review` skill's checklist rather than duplicating its logic.
 
-1. Read `checklist.md` from the review skill directory (`bork/skills/gstack/review/checklist.md`). **If not found, STOP and report.**
+1. Read `checklist.md` from the review skill directory (`skills/gstack/review/checklist.md`). **If not found, STOP and report.**
 
-2. Read `design-checklist.md` from the review skill directory (`bork/skills/gstack/review/design-checklist.md`). Keep available for Step 3.5.4.
+2. Read `design-checklist.md` from the review skill directory (`skills/gstack/review/design-checklist.md`). Keep available for Step 3.5.4.
 
 3. Run `git diff origin/<base>` to get the full diff.
 

@@ -65,7 +65,7 @@ If the user chooses A, hand off to `/full-review`. If B, continue.
 
 ## Step 2: Critical-only code review
 
-Read the review checklist from `bork/skills/gstack/review/checklist.md`.
+Read the review checklist from `skills/gstack/review/checklist.md`.
 
 Run **ONLY Pass 1 (CRITICAL)** against the diff:
 - SQL & Data Safety

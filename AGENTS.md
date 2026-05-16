@@ -80,9 +80,9 @@ Skills are invoked via the Skill tool with just the skill name (no arguments). W
 
 ### Available Skills (bork plugin)
 
-Skills are organized into two buckets under `bork/skills/`:
+Skills are organized into two buckets under `skills/`:
 
-**`bork/skills/core/`** (my Original) — skills I wrote or substantially extended:
+**`skills/core/`** (my Original) — skills I wrote or substantially extended:
 - **writing-commits** — Crafts conventional commit messages by analyzing git diffs and history. Follows Conventional Commits, adapts to repo style, suggests splitting commits across concerns.
 - **writing-sql** — Enforces vertical SQL formatting for raw files, inline PHP, migrations, and framework query builders. No exceptions for short queries.
 - **writing-plans** — Concise writing style for plan documents. Strips filler, bans inflated adjectives, requires structured decisions.
@@ -93,9 +93,9 @@ Skills are organized into two buckets under `bork/skills/`:
 - **prototype** — Scaffolds a frontend prototype or a backend prototype with a disposable state machine.
 - **red-pen** — Strict editorial reviewer applying Orwell's rules and Practical Typography.
 
-**`bork/skills/gstack/`** (Collected) — workflow stack ported from gstack:
+**`skills/gstack/`** (Collected) — workflow stack ported from gstack:
 
-See [bork/README.md](bork/README.md) for the full list: plan-session, plan-deep-review, plan-eng-review, plan-design-review, plan-devex-review, autoplan, design-consultation, review, review-security, investigate, design-review, qa, qa-only, ship, document-release.
+See [README.md](README.md) for the full list: plan-session, plan-deep-review, plan-eng-review, plan-design-review, plan-devex-review, autoplan, design-consultation, review, review-security, investigate, design-review, qa, qa-only, ship, document-release.
 
 ### Available Commands (bork plugin)
 
