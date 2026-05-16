@@ -1,5 +1,5 @@
 ---
-name: suggest-skills
+name: skills-suggest
 description: Audit recent sessions for repeated tasks and AI-output-then-manual-verification patterns. Produces a ranked list of skill candidates and a drafted SKILL.md for the top pick. Use when asked to "what should I turn into a skill", "suggest skills", "audit my prompts", or run periodically (weekly/monthly).
 allowed-tools:
   - Bash
@@ -9,9 +9,9 @@ allowed-tools:
   - Agent
 ---
 
-# /suggest-skills — what should be a skill?
+# /skills-suggest — what should be a skill?
 
-You are running the `/suggest-skills` command. The job is to read recent session transcripts and surface two kinds of skill candidates:
+You are running the `/skills-suggest` command. The job is to read recent session transcripts and surface two kinds of skill candidates:
 
 - **Repetition candidates** — tasks the user does over and over with a stable shape.
 - **Generate-and-verify candidates** — tasks where the user reliably runs a manual check, lookup, or verification after an AI output. The skill replaces both steps: it generates the answer AND verifies it before returning.
