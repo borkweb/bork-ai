@@ -8,6 +8,7 @@ description: >
   subquery, window function, UNION, EXISTS. Applies to raw .sql files, migration DDL,
   inline queries in PHP adapters/repositories, and any code review involving SQL.
   Enforces project SQL formatting conventions — no exceptions for short queries.
+user-invocable: false
 ---
 
 # Writing SQL

@@ -7,6 +7,7 @@ description: >
   VERSION. Use when asked to "update the docs", "sync documentation", or
   "post-ship docs". Proactively suggest after a PR is merged or code is
   shipped.
+disable-model-invocation: true
 allowed-tools:
   - Bash
   - Read
