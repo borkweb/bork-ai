@@ -340,6 +340,8 @@ Each decision = one AskUserQuestion with recommendation + WHY + alternatives. Ed
 * Label with issue NUMBER + option LETTER (e.g., "3A", "3B").
 * **Escape hatch:** If a section has no issues, say so and move on. If a gap has an obvious fix, state what you'll add and move on — don't waste a question on it. Only use AskUserQuestion when there is a genuine design choice with meaningful tradeoffs.
 
+**Anti-shortcut clause:** The Completion Summary, Design Readiness Verdict, and edited plan are the OUTPUT of an interactive review, not a substitute for one. Writing every design gap into one big summary dump and calling ExitPlanMode without firing AskUserQuestion is the precise failure mode this workflow exists to prevent — the model explores all 10 passes, accumulates ratings and gaps, and dumps them rather than walking the user through genuine design choices. If you have ANY non-trivial gap or design decision in any pass, the path from finding to ExitPlanMode goes THROUGH AskUserQuestion. Zero gaps in every pass is the only path that bypasses it. If you find yourself wanting to write the verdict and exit before asking, stop and call AskUserQuestion now — that's the bug, recognize it.
+
 ## Required Outputs
 
 ### "NOT in scope" section
@@ -408,3 +410,15 @@ If any AskUserQuestion goes unanswered, note it here. Never silently default to 
 * One sentence max per option.
 * After each pass, pause and wait for feedback.
 * Rate before and after each pass for scannability.
+
+## EXIT PLAN MODE GATE (BLOCKING)
+
+Before calling ExitPlanMode, run this self-check. If any item fails, do the missing work — do NOT call ExitPlanMode:
+
+1. Confirm the **Completion Summary** table was rendered to the user this session (the bordered ASCII table from "Required Outputs → Completion Summary"). The body prose summarizing pass ratings does NOT count — only the structured table satisfies this check.
+2. Confirm a **Design Readiness Verdict** was issued — one of DESIGN-COMPLETE, DESIGN-READY WITH CONDITIONS, or NEEDS DESIGN WORK. The verdict must be consistent with the ratings: if any pass is below 6/10, the verdict cannot be DESIGN-COMPLETE.
+3. Confirm the plan was actually edited with the design decisions that were resolved (this skill's output is a better plan, not a document about the plan). If you proposed fixes that the user approved, they belong in the plan file, not just in conversation.
+4. Confirm every non-trivial gap was surfaced via AskUserQuestion (one issue per question), per the Anti-shortcut clause above.
+5. If unresolved decisions exist, confirm they were listed under "Unresolved Decisions" — never silently defaulted.
+
+Failing this gate and calling ExitPlanMode anyway is a contract violation — the user sees a review that skipped the deliverable and will (correctly) reject it. Self-deception failure mode to watch for: feeling "done" after rating passes and writing critique prose. The interactive walkthrough (one gap, one AskUserQuestion, plan edited with the resolution) IS the work; the Completion Summary and Design Readiness Verdict are the evidence it happened. All are required.

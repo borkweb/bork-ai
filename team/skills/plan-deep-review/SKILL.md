@@ -606,6 +606,8 @@ Required ASCII diagram: user flow showing screens/states and transitions.
 * Label with issue NUMBER + option LETTER (e.g., "3A", "3B").
 * **Escape hatch:** If a section has no issues, say so and move on. If an issue has an obvious fix with no real alternatives, state what you'll do and move on — don't waste a question on it. Only use AskUserQuestion when there is a genuine decision with meaningful tradeoffs.
 
+**Anti-shortcut clause:** The Completion Summary, Readiness Verdict, and registries are the OUTPUT of an interactive review, not a substitute for one. Writing every finding into one big summary dump and calling ExitPlanMode without firing AskUserQuestion is the precise failure mode this workflow exists to prevent — the model explores all 12 sections, accumulates findings, and dumps them into a deliverable rather than walking the user through scope, mode, and tradeoffs. If you have ANY non-trivial finding in any section, the path from finding to ExitPlanMode goes THROUGH AskUserQuestion. Zero findings in every section is the only path that bypasses it. The same rule applies to scope expansion proposals (Step 0D): each opportunity is its own AskUserQuestion — never batched into a "here are the things I'd add" list. If you find yourself wanting to write the verdict and exit before asking, stop and call AskUserQuestion now — that's the bug, recognize it.
+
 ## Required Outputs
 
 ### "NOT in scope" section
@@ -712,3 +714,15 @@ If any AskUserQuestion goes unanswered, note it here. Never silently default.
 * One sentence max per option.
 * After each section, pause and wait for feedback.
 * Use **CRITICAL GAP** / **WARNING** / **OK** for scannability.
+
+## EXIT PLAN MODE GATE (BLOCKING)
+
+Before calling ExitPlanMode, run this self-check. If any item fails, do the missing work — do NOT call ExitPlanMode:
+
+1. Confirm the **Completion Summary** table was rendered to the user this session (the bordered ASCII table from "Required Outputs → Completion Summary"). The body prose summarizing findings does NOT count — only the structured table satisfies this check.
+2. Confirm a **Readiness Verdict** was issued — one of READY TO IMPLEMENT, READY WITH CONDITIONS, or NEEDS REWORK. The verdict must be consistent with the data: if any row in the Failure Modes Registry shows `RESCUED=N, TEST=N, USER SEES=Silent`, the verdict cannot be READY TO IMPLEMENT.
+3. Confirm the required registries were produced: Error & Rescue Registry, Failure Modes Registry, NOT in scope, What already exists, Dream state delta. Empty sections must be explicitly stated as "none" — not silently omitted.
+4. Confirm every non-trivial finding and every scope expansion proposal was surfaced via AskUserQuestion (one issue per question), per the Anti-shortcut clause above.
+5. If unresolved decisions exist, confirm they were listed under "Unresolved Decisions" — never silently defaulted.
+
+Failing this gate and calling ExitPlanMode anyway is a contract violation — the user sees a review that skipped the deliverable and will (correctly) reject it. Self-deception failure mode to watch for: feeling "done" after writing review prose. The interactive walkthrough (one issue, one AskUserQuestion) IS the work; the Completion Summary, Readiness Verdict, and registries are the evidence it happened. All are required.

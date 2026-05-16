@@ -69,6 +69,7 @@ One sprint, one person, one feature — that takes about 30 minutes with this st
 | **plan-deep-review** | Product Owner | `/plan-deep-review` | Deep plan review with four modes (Scope Expansion, Selective Expansion, Hold Scope, Scope Reduction). Challenges premises, maps failure modes, reviews architecture/security/performance/deployment. |
 | **plan-eng-review** | Eng Manager | `/plan-eng-review` | Eng manager-mode plan review. Locks in execution plan — architecture, data flow, diagrams, edge cases, test coverage, performance. Interactive with opinionated recommendations. |
 | **plan-design-review** | Senior Designer | `/plan-design-review` | Designer's eye plan review. Rates 7 design dimensions 0-10, explains what would make each a 10, then fixes the plan to get there. Covers info architecture, interaction states, user journey, AI slop risk, responsive, and accessibility. |
+| **plan-devex-review** | Developer Advocate | `/plan-devex-review` | DX plan review for developer-facing products (APIs, CLIs, SDKs, libraries, platforms, docs). Investigates persona, benchmarks competitors, designs magical moment, traces friction points, scores 8 DX dimensions 0-10. Three modes: DX EXPANSION / DX POLISH / DX TRIAGE. |
 | **design-consultation** | Design Partner | `/design-consultation` | Design system consultation — proposes aesthetic, typography, color, layout, spacing, and motion as a coherent package. Generates font+color preview pages and writes DESIGN.md. |
 | **review** | Staff Engineer | `/review` | Pre-landing PR review. Two-pass analysis (critical + informational) for SQL safety, race conditions, LLM trust boundaries, enum completeness, and more. Fix-first: auto-fixes mechanical issues, asks about ambiguous ones. |
 | **security-review** | Security Auditor | `/security-review` | Deep security review grounded in 20 CVE-based pattern libraries (Heartbleed, Log4Shell, Next.js bypass, runc escape, xz backdoor, etc.). Bounds, injection, auth, crypto, races, memory lifecycle, error handling, supply chain, type safety, state machines, integer arithmetic, config, trust boundaries, regressions, API contracts, web, canonicalization, sandboxing, logging, DoS. Callable standalone or as a reference from `/review`. |
@@ -83,6 +84,7 @@ One sprint, one person, one feature — that takes about 30 minutes with this st
 | **benchmark** | Perf Engineer | `/benchmark` | Performance regression detection. Baselines page load times, Core Web Vitals, and bundle sizes. Compares before/after with regression thresholds. Tracks trends over time. |
 | **setup-browser-cookies** | Session Manager | `/setup-browser-cookies` | Import cookies from your real browser into the headless session. Test authenticated pages without logging in every time. |
 | **dependency-audit** | Security Engineer | `/dependency-audit` | Scans dependencies for vulnerabilities, outdated packages, and license issues. Groups by risk, checks reachability, generates prioritized upgrade plans. Optionally applies safe updates. |
+| **autoplan** | Plan Pipeline | `/autoplan` | Auto-review pipeline. Chains plan-deep-review → plan-design-review → plan-eng-review → plan-devex-review at full depth, auto-deciding intermediate AskUserQuestion calls via 6 principles. Surfaces taste decisions and user challenges at one Final Approval Gate. Independent Claude subagent voice per phase for cross-model consensus. |
 
 ## Commands
 
@@ -94,6 +96,8 @@ Compound workflows that chain multiple skills together.
 | `/plan-deep-review` | Deep plan review with scope, architecture, risk, and readiness analysis. |
 | `/plan-eng-review` | Engineering plan review focused on architecture, delivery, and execution risk. |
 | `/plan-design-review` | Design plan review focused on UX, interaction, and visual readiness. |
+| `/plan-devex-review` | DX plan review focused on developer experience, getting started, API/CLI ergonomics, error quality, and adoption friction. |
+| `/autoplan` | Auto-review pipeline that runs all four plan-* reviews end-to-end with auto-decisions, surfacing taste decisions and user challenges at one final gate. |
 | `/review` | Pre-landing code review for correctness, safety, and regressions. |
 | `/security-review` | Deep security review grounded in the security pattern library. |
 | `/qa` | QA workflow that tests and fixes issues. |

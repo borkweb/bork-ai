@@ -245,6 +245,8 @@ If no new concurrency concerns exist, say so and move on.
 * Label with issue NUMBER + option LETTER (e.g., "3A", "3B").
 * **Escape hatch:** If a section has no issues, say so and move on. If an issue has an obvious fix with no real alternatives, state what you'll do and move on — don't waste a question on it. Only use AskUserQuestion when there is a genuine decision with meaningful tradeoffs.
 
+**Anti-shortcut clause:** The Completion Summary and Readiness Verdict are the OUTPUT of an interactive review, not a substitute for one. Writing every finding into one big summary dump and calling ExitPlanMode without firing AskUserQuestion is the precise failure mode this workflow exists to prevent — the model explores, finds issues, and dumps them into a deliverable rather than walking the user through them. If you have ANY non-trivial finding in any review section, the path from finding to ExitPlanMode goes THROUGH AskUserQuestion. Zero findings in every section is the only path that bypasses it. If you find yourself wanting to write the verdict and exit before asking, stop and call AskUserQuestion now — that's the bug, recognize it.
+
 ## Required outputs
 
 ### "NOT in scope" section
@@ -341,3 +343,14 @@ Check the git log for this branch. If there are prior commits suggesting a previ
 
 ## Unresolved decisions
 If the user does not respond to an AskUserQuestion or interrupts to move on, note which decisions were left unresolved. At the end of the review, list these as "Unresolved decisions that may bite you later" — never silently default to an option.
+
+## EXIT PLAN MODE GATE (BLOCKING)
+
+Before calling ExitPlanMode, run this self-check. If any item fails, do the missing work — do NOT call ExitPlanMode:
+
+1. Confirm the **Completion Summary** table was rendered to the user this session (the bordered ASCII table from "Required outputs → Completion summary"). The body prose summarizing findings does NOT count — only the structured table satisfies this check.
+2. Confirm a **Readiness verdict** was issued — one of READY TO IMPLEMENT, READY WITH CONDITIONS, or NEEDS REWORK. The verdict must be consistent with the data: if any row in the Failure Modes table shows `RESCUED=N, TEST=N, USER SEES=Silent`, the verdict cannot be READY TO IMPLEMENT.
+3. Confirm every non-trivial finding was surfaced via AskUserQuestion (not dumped into a single summary). One issue per question, per the Anti-shortcut clause above.
+4. If unresolved decisions exist, confirm they were listed under "Unresolved decisions that may bite you later" — never silently defaulted.
+
+Failing this gate and calling ExitPlanMode anyway is a contract violation — the user sees a review that skipped the deliverable and will (correctly) reject it. Self-deception failure mode to watch for: feeling "done" after writing review prose. The interactive walkthrough (one issue, one AskUserQuestion) IS the work; the Completion Summary and Readiness verdict are the evidence it happened. Both are required.

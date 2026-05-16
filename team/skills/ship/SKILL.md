@@ -252,6 +252,80 @@ If `TODOS.md` doesn't exist, skip silently.
 
 ---
 
+## Step 6.7: Plan Completion Audit
+
+If a plan file exists for this branch, verify that everything in the plan actually shipped. Skip silently if no plan file is found.
+
+### Plan File Discovery
+
+1. **Conversation context (primary):** If the host agent's system messages reference a plan file path, use it directly.
+2. **Filesystem search (fallback):** Look in `docs/plans/`, `docs/designs/`, `.claude/plans/`, project root for a markdown file matching the current branch name. Take the most recently modified match. If multiple candidates exist and none clearly matches, treat as "no plan file found."
+3. **Validation:** Read the first 20 lines. If it doesn't appear related to the current branch's work, treat as "no plan file found."
+
+**If no plan file is found:** Skip with "No plan file detected — skipping plan completion audit." Continue to Step 7.
+
+### Dispatch as Subagent
+
+Use the Agent tool with `subagent_type: "general-purpose"`. The subagent reads the plan and the diff in fresh context; parent gets the conclusion. Subagent prompt:
+
+> Audit plan completion for the current branch. Base branch: `<base>`. Plan file: `<path>`.
+>
+> **Extract actionable items** from the plan: checkboxes (`- [ ]` / `- [x]`), numbered implementation steps, imperative statements ("Add X", "Create Y"), file-level specs, test requirements, data model changes. Cap at 50 items. **Ignore** Context/Background/Problem sections, open questions ("TBD", "TODO: decide"), explicitly deferred items ("Out of scope:", "Future:", "P2:", "P3:"), and previous review reports.
+>
+> **Classify how each item can be verified:**
+> - **DIFF-VERIFIABLE** — Would show up in `git diff <base>...HEAD` for this repo.
+> - **CROSS-REPO** — Names a file in a sibling repo. Try `[ -f <path> ]` if the path is reachable; UNVERIFIABLE if not.
+> - **EXTERNAL-STATE** — Names state in an external system (DNS, OAuth allowlist, SaaS config). Always UNVERIFIABLE.
+> - **CONTENT-SHAPE** — File must follow a convention. Run any project validator (`validate-*`, `lint-docs`, etc.) before falling back to UNVERIFIABLE.
+>
+> **Path concreteness rule:** If a plan item names a concrete filesystem path, it MUST be DONE or NOT DONE based on `[ -f <path> ]`. UNVERIFIABLE is only valid when the path is genuinely abstract or unreachable.
+>
+> **Status per item:**
+> - **DONE** — Clear evidence in the diff or filesystem. Cite the file(s).
+> - **PARTIAL** — Some work toward the item exists but incomplete.
+> - **NOT DONE** — Verification ran and produced negative evidence.
+> - **CHANGED** — Implemented differently but same goal achieved; note the difference.
+> - **UNVERIFIABLE** — Cannot prove or disprove. Cite the specific manual check.
+>
+> **Honesty rule:** Code that *handles* a deliverable is not the deliverable. Shipping a markdown-extraction library is not the same as shipping the markdown file. When in doubt between DONE and UNVERIFIABLE, prefer UNVERIFIABLE.
+>
+> Output a markdown checklist grouped by category (Implementation / Tests / Migrations / Cross-Repo / External) with `[STATUS]` prefixes. End with a summary line: `COMPLETION: X/Y DONE, A PARTIAL, B NOT DONE, C CHANGED, D UNVERIFIABLE`.
+
+### Gate Logic
+
+After the subagent returns, evaluate in priority order:
+
+1. **Any NOT DONE items** (known missing work). Use AskUserQuestion:
+   - Show the completion checklist.
+   - "{N} items from the plan are NOT DONE."
+   - Options: **A)** Stop — implement before shipping. **B)** Ship anyway — defer as P1 TODOs. **C)** Intentionally dropped — remove from scope.
+   - RECOMMENDATION: A if core functionality missing, B for minor docs/config.
+   - On A: STOP. On B: continue, append `Deferred from plan: {path}` to TODOS.md for each. On C: continue, note in PR body.
+
+2. **Any UNVERIFIABLE items** (only after NOT DONE is resolved or absent). **Per-item confirmation is mandatory — no blanket-confirm.** Loop one at a time:
+   - For each item, AskUserQuestion with that item's *specific* manual check ("Confirm: does `~/path/to/file` exist?", not "Have you checked all items?").
+   - Per-item options: **Y)** Confirmed done — cite what you verified (free-text). **N)** Not done — block ship, re-enter priority 1. **D)** Intentionally dropped.
+   - On any N: STOP. On all Y or D: continue, embed `## Plan Completion — Manual Verifications` in PR body with each Y'd item's evidence and each D'd item marked dropped.
+   - **Cap:** If more than 5 UNVERIFIABLE items, present them as a list first and ask: (1) confirm each individually [recommended], (2) stop and reduce scope, (3) explicitly accept blanket-confirmation (warn this is the failure shape that prompted this gate).
+
+3. **Only PARTIAL items (no NOT DONE, no UNVERIFIABLE):** Continue with a note in PR body. Not blocking.
+
+4. **All DONE or CHANGED:** Pass. Continue.
+
+### Fail-Closed on Subagent Failure
+
+If the subagent fails or returns malformed output, do NOT silently pass. Try once to run the extraction inline in the parent context. If that also fails, surface as AskUserQuestion:
+
+> "Plan Completion audit could not run ({reason}). Options: **A)** Skip audit and ship anyway — record that the audit was skipped in the PR body. **B)** Stop and fix the audit."
+
+RECOMMENDATION: B. Silent fail-open is the failure shape this gate exists to prevent.
+
+### PR Body
+
+Add a `## Plan Completion` section to the PR body in Step 9 with the checklist summary. If UNVERIFIABLE items were confirmed via per-item flow, also add `## Plan Completion — Manual Verifications` listing each confirmation.
+
+---
+
 ## Step 7: Verification Gate
 
 **IRON LAW: NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE.**
@@ -329,6 +403,14 @@ Relates to #<issue>
 
 ## TODOS
 <completed items, or "No TODO items completed in this PR.">
+
+<If Step 6.7 ran:>
+## Plan Completion
+<checklist summary from Step 6.7, or "No plan file detected.">
+
+<If UNVERIFIABLE items were confirmed via per-item flow:>
+## Plan Completion — Manual Verifications
+<each Y'd item with user evidence; each D'd item marked "intentionally dropped">
 
 ## Test plan
 - [x] All tests pass
