@@ -8,10 +8,6 @@
     {
       "name": "bork",
       "source": "./bork"
-    },
-    {
-      "name": "matt",
-      "source": "./matt"
     }
   ]
 }

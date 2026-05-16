@@ -10,11 +10,10 @@ Agents, skills, and commands for Claude Code, Gemini, and Codex.
 claude plugin marketplace add borkweb/bork-ai
 ```
 
-Then install the plugins you want:
+Then install the plugin:
 
 ```bash
 claude plugin install bork
-claude plugin install matt
 ```
 
 ### With Claude Code (Desktop App)
@@ -43,10 +42,9 @@ Restart Claude Code after changing the setting. Skills that support Agent Teams 
 
 ### With Codex
 
-Codex manifests live alongside each plugin package:
+Codex manifests live alongside the plugin package:
 
 - `bork/.codex-plugin/plugin.json`
-- `matt/.codex-plugin/plugin.json`
 
 This repo also includes a repo-owned Codex marketplace bundle at `.agents/bork-ai/`.
 
@@ -65,9 +63,6 @@ Then enable the plugins in `~/.codex/config.toml`:
 ```toml
 [plugins."bork@bork-ai"]
 enabled = true
-
-[plugins."matt@bork-ai"]
-enabled = true
 ```
 
 Restart Codex after updating the symlinks and config.
@@ -77,7 +72,8 @@ Restart Codex after updating the symlinks and config.
 | Plugin | Description |
 |--------|-------------|
 | [**bork**](bork/) | My Original and Collected skills, agents, commands, and hooks. Writing, reviewing, planning, QA, and shipping across the dev cycle. |
-| [**matt**](matt/) | Personal voice profile and writing style configuration. |
+
+Personal voice and other private things live separately at [borkweb/skills-private](https://github.com/borkweb/skills-private).
 
 ## License
 
