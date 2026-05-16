@@ -29,6 +29,7 @@
     "./skills/core/humanize",
     "./skills/core/prototype",
     "./skills/core/red-pen",
+    "./skills/core/review-security",
     "./skills/core/writing-commits",
     "./skills/core/writing-plans",
     "./skills/core/writing-sql",
@@ -45,13 +46,12 @@
     "./skills/gstack/qa",
     "./skills/gstack/qa-only",
     "./skills/gstack/review",
-    "./skills/gstack/review-security",
     "./skills/gstack/ship"
   ],
   "interface": {
     "displayName": "bork",
     "shortDescription": "My Original and Collected skills, agents, commands, and hooks.",
-    "longDescription": "Bork bundles my Original skills (commit writing, SQL formatting, plan writing, humanize, council, red-pen, prototype, handoff, agents-md-lint) with Collected skills ported from upstream sources like gstack (plan-session, plan-deep-review, plan-eng-review, plan-design-review, plan-devex-review, autoplan, review, review-security, qa, qa-only, design-review, design-consultation, investigate, ship, document-release). Includes supporting agents, commands, and hooks across the development cycle.",
+    "longDescription": "Bork bundles my Original skills (commit writing, SQL formatting, plan writing, humanize, council, red-pen, prototype, handoff, agents-md-lint, review-security) with Collected skills ported from upstream sources like gstack (plan-session, plan-deep-review, plan-eng-review, plan-design-review, plan-devex-review, autoplan, review, qa, qa-only, design-review, design-consultation, investigate, ship, document-release). Includes supporting agents, commands, and hooks across the development cycle.",
     "developerName": "Matthew Batchelder",
     "category": "Coding",
     "capabilities": [

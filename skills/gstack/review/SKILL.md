@@ -122,7 +122,7 @@ Apply the checklist against the diff in two passes:
 1. **Pass 1 (CRITICAL):** SQL & Data Safety, Migration & Schema Safety, Race Conditions & Concurrency, Auth & Permission Gaps, LLM Output Trust Boundary, Enum & Value Completeness, API Contract Breaking Changes
 2. **Pass 2 (INFORMATIONAL):** Error Handling Anti-Patterns, Conditional Side Effects, Magic Numbers & String Coupling, Dead Code & Consistency, LLM Prompt Issues, Test Gaps, Crypto & Entropy, Time Window Safety, Type Coercion at Boundaries, View/Frontend, Performance & Bundle Impact
 
-**Security pattern references:** For deeper CVE-grounded patterns on any of the areas below, read the matching file from `../review-security/patterns/` BEFORE flagging. These calibrate findings against real incidents (Heartbleed, Log4Shell, Next.js CVE-2025-29927, runc escape, etc.) and catch failure modes the checklist's one-liners miss.
+**Security pattern references:** For deeper CVE-grounded patterns on any of the areas below, read the matching file from `../../core/review-security/patterns/` BEFORE flagging. These calibrate findings against real incidents (Heartbleed, Log4Shell, Next.js CVE-2025-29927, runc escape, etc.) and catch failure modes the checklist's one-liners miss.
 
 | Diff touches…                       | Read pattern(s)                        |
 |-------------------------------------|----------------------------------------|

@@ -104,13 +104,13 @@ If the user chooses B, stop and output the review summary.
 ## Step 3: Stage 2 — Security Review (/review-security) [conditional]
 
 **Skip conditions:**
-- `--security` flag was NOT passed (this stage is opt-in by design — see `skills/gstack/review-security/SKILL.md` for rationale)
+- `--security` flag was NOT passed (this stage is opt-in by design — see `skills/core/review-security/SKILL.md` for rationale)
 
 If skipping, output nothing for this stage — proceed directly to Stage 3. Do not include a "SKIPPED" line in the summary.
 
 **Otherwise:**
 
-1. Read the `/review-security` skill's `SKILL.md` from `skills/gstack/review-security/SKILL.md`. Execute its full workflow:
+1. Read the `/review-security` skill's `SKILL.md` from `skills/core/review-security/SKILL.md`. Execute its full workflow:
    - Scope the review (same diff as Stage 1)
    - Pick relevant pattern files from the Change Type → Primary Patterns table
    - Apply each selected pattern to the diff (Read the pattern file, walk its "What To Check" list, cite `file:line` + the matched Red Flag)

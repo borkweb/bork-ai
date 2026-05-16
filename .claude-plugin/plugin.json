@@ -13,6 +13,7 @@
 		"./skills/core/humanize",
 		"./skills/core/prototype",
 		"./skills/core/red-pen",
+		"./skills/core/review-security",
 		"./skills/core/writing-commits",
 		"./skills/core/writing-plans",
 		"./skills/core/writing-sql",
@@ -29,7 +30,6 @@
 		"./skills/gstack/qa",
 		"./skills/gstack/qa-only",
 		"./skills/gstack/review",
-		"./skills/gstack/review-security",
 		"./skills/gstack/ship"
 	]
 }

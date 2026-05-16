@@ -63,10 +63,11 @@ Skills are organized into two buckets under `skills/`:
 - **humanize** — Detects and removes AI writing patterns (inflated language, em dash overuse, hollow rhythm punches, etc.) on text or files in place.
 - **prototype** — Scaffolds a frontend prototype or a backend prototype with a disposable state machine.
 - **red-pen** — Strict editorial reviewer applying Orwell's rules and Practical Typography.
+- **review-security** — Deep security review grounded in 20 CVE-based pattern libraries (Heartbleed, Log4Shell, Next.js bypass, runc escape, xz backdoor, etc.). Callable standalone or as a reference from `/review`.
 
 **`skills/gstack/`** (Collected) — workflow stack ported from gstack:
 
-See [README.md](README.md) for the full list: plan-session, plan-deep-review, plan-eng-review, plan-design-review, plan-devex-review, autoplan, design-consultation, review, review-security, investigate, design-review, qa, qa-only, ship, document-release.
+See [README.md](README.md) for the full list: plan-session, plan-deep-review, plan-eng-review, plan-design-review, plan-devex-review, autoplan, design-consultation, review, investigate, design-review, qa, qa-only, ship, document-release.
 
 ### Available Commands (bork plugin)
 
