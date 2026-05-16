@@ -32,43 +32,43 @@ Or as a Claude Code [plugin](https://code.claude.com/docs/en/plugins)
 
 ## Original and collected skills (`skills/core/`)
 
-| Skill | Command | Description |
-|-------|---------|-------------|
-| **writing-commits** | `/commit` | Analyzes staged changes and generates conventional commit messages matching repository style. |
-| **writing-sql** | — | Enforces strict vertical SQL formatting conventions for raw files, inline PHP, migrations, and framework query builders. |
-| **writing-plans** | — | Applies concise writing style to plan documents — strips filler, bans inflated adjectives, requires structured decisions. |
-| **agents-md-lint** | — | Audits AI agent instruction files (AGENTS.md, CLAUDE.md, etc.) and removes facts discoverable from code alone to save context tokens. |
-| **council** | — | Runs structured adversarial assessment of ideas, plans, and proposals through selected lenses, debate rounds, risk mapping, and a verdict. |
-| **handoff** | `/handoff` | Writes handoff documentation so agents can communicate with relevant context and pick up from an optimal place. |
-| **humanize** | `/humanize` | Detects and removes AI writing patterns (inflated language, em dash overuse, rule of three, hollow rhythm punches, etc.) on inline text or a file path; rewrites files in place. |
-| **prototype** | `/prototype` | Scaffolds a frontend prototype or a backend prototype with a disposable state machine to test an idea. |
-| **red-pen** | — | Strict editorial reviewer applying Orwell's rules and Practical Typography. Catches passive voice, dead metaphors, straight quotes, wrong dashes, and other prose drift. |
-| **review-security** | `/review-security` | Deep security review grounded in 20 CVE-based pattern libraries (Heartbleed, Log4Shell, Next.js bypass, runc escape, xz backdoor, etc.). Callable standalone or as a reference from `/review`. |
+| Skill | Description |
+|-------|-------------|
+| **agents-md-lint** | Audits AI agent instruction files (AGENTS.md, CLAUDE.md, etc.) and removes facts discoverable from code alone to save context tokens. |
+| **council** | Runs structured adversarial assessment of ideas, plans, and proposals through selected lenses, debate rounds, risk mapping, and a verdict. |
+| **handoff** | Writes handoff documentation so agents can communicate with relevant context and pick up from an optimal place. |
+| **humanize** | Detects and removes AI writing patterns (inflated language, em dash overuse, rule of three, hollow rhythm punches, etc.) on inline text or a file path; rewrites files in place. |
+| **prototype** | Scaffolds a frontend prototype or a backend prototype with a disposable state machine to test an idea. |
+| **red-pen** | Strict editorial reviewer applying Orwell's rules and Practical Typography. Catches passive voice, dead metaphors, straight quotes, wrong dashes, and other prose drift. |
+| **review-security** | Deep security review grounded in 20 CVE-based pattern libraries (Heartbleed, Log4Shell, Next.js bypass, runc escape, xz backdoor, etc.). Callable standalone or as a reference from `review`. |
+| **writing-commits** | Analyzes staged changes and generates conventional commit messages matching repository style. |
+| **writing-plans** | Applies concise writing style to plan documents — strips filler, bans inflated adjectives, requires structured decisions. |
+| **writing-sql** | Enforces strict vertical SQL formatting conventions for raw files, inline PHP, migrations, and framework query builders. |
 
 ## Gstack ports (`skills/gstack/`)
 
-Process workflow ported from gstack and adapted. The skills are ordered the way a sprint runs:
+Workflow stack ported from gstack and adapted. Together the skills cover a full sprint:
 
 Think → Plan → Build → Review → Test → Ship
 
-Each skill feeds into the next. `/plan-session` writes a design doc that `/plan-deep-review` reads. `/plan-eng-review` writes a test plan that `/qa` picks up. `/review` catches bugs that `/ship` verifies are fixed. Nothing falls through the cracks because every step knows what came before it.
+Each skill feeds into the next. `plan-session` writes a design doc that `plan-deep-review` reads. `plan-eng-review` writes a test plan that `qa` picks up. `review` catches bugs that `ship` verifies are fixed. Nothing falls through the cracks because every step knows what came before it.
 
-| Skill | Specialist | Command | Description |
-|-------|------------|---------|-------------|
-| **plan-session** | Product Owner | `/plan-session` | Structured product design session — forces hard questions about demand, status quo, and narrowest wedge before proposing solutions. Produces a design doc, not code. |
-| **plan-deep-review** | Product Owner | `/plan-deep-review` | Deep plan review with four modes (Scope Expansion, Selective Expansion, Hold Scope, Scope Reduction). Challenges premises, maps failure modes, reviews architecture/security/performance/deployment. |
-| **plan-eng-review** | Eng Manager | `/plan-eng-review` | Eng manager-mode plan review. Locks in execution plan — architecture, data flow, diagrams, edge cases, test coverage, performance. Interactive with opinionated recommendations. |
-| **plan-design-review** | Senior Designer | `/plan-design-review` | Designer's eye plan review. Rates design dimensions 0-10, explains what would make each a 10, then fixes the plan to get there. Covers info architecture, interaction states, user journey, AI slop risk, responsive, and accessibility. |
-| **plan-devex-review** | Developer Advocate | `/plan-devex-review` | DX plan review for developer-facing products (APIs, CLIs, SDKs, libraries, platforms, docs). Investigates persona, benchmarks competitors, designs magical moment, traces friction points, scores 8 DX dimensions 0-10. Three modes: DX EXPANSION / DX POLISH / DX TRIAGE. |
-| **autoplan** | Plan Pipeline | `/autoplan` | Auto-review pipeline. Chains plan-deep-review → plan-design-review → plan-eng-review → plan-devex-review at full depth, auto-deciding intermediate AskUserQuestion calls via 6 principles. Surfaces taste decisions and user challenges at one Final Approval Gate. |
-| **design-consultation** | Design Partner | `/design-consultation` | Design system consultation — proposes aesthetic, typography, color, layout, spacing, and motion as a coherent package. Generates font+color preview pages and writes DESIGN.md. |
-| **review** | Staff Engineer | `/review` | Pre-landing PR review. Two-pass analysis (critical + informational) for SQL safety, race conditions, LLM trust boundaries, enum completeness, and more. Fix-first: auto-fixes mechanical issues, asks about ambiguous ones. |
-| **investigate** | Debugger | `/investigate` | Systematic debugging with root cause investigation. Five phases: collect symptoms, pattern analysis, hypothesis testing, implementation, verification. Iron Law: no fixes without root cause. |
-| **design-review** | Designer Who Codes | `/design-review` | Designer's eye QA on live sites. 10-category audit (~80 items), letter grades, AI slop detection. Fixes issues in source code with atomic commits and before/after verification. |
-| **qa** | QA Lead | `/qa` | Systematic QA testing with fix loop. Three tiers (Quick/Standard/Exhaustive), diff-aware mode, health scoring, framework-specific guidance. Fixes bugs atomically with before/after evidence. |
-| **qa-only** | QA Reporter | `/qa-only` | Report-only QA testing — finds and documents bugs with screenshots and health scores but never fixes anything. Same modes and rubric as /qa. |
-| **ship** | Release Engineer | `/ship` | Fully automated ship workflow: merge base, run tests, pre-landing review, plan completion audit, version bump, CHANGELOG, bisectable commits, push, create PR. |
-| **document-release** | Doc Editor | `/document-release` | Post-ship documentation sync. Reads all project docs, cross-references the diff, auto-updates factual content, polishes CHANGELOG voice, cleans up TODOS, and optionally bumps VERSION. |
+| Skill | Specialist | Description |
+|-------|------------|-------------|
+| **autoplan** | Plan Pipeline | Auto-review pipeline. Chains plan-deep-review → plan-design-review → plan-eng-review → plan-devex-review at full depth, auto-deciding intermediate AskUserQuestion calls via 6 principles. Surfaces taste decisions and user challenges at one Final Approval Gate. |
+| **design-consultation** | Design Partner | Design system consultation — proposes aesthetic, typography, color, layout, spacing, and motion as a coherent package. Generates font+color preview pages and writes DESIGN.md. |
+| **design-review** | Designer Who Codes | Designer's eye QA on live sites. 10-category audit (~80 items), letter grades, AI slop detection. Fixes issues in source code with atomic commits and before/after verification. |
+| **document-release** | Doc Editor | Post-ship documentation sync. Reads all project docs, cross-references the diff, auto-updates factual content, polishes CHANGELOG voice, cleans up TODOS, and optionally bumps VERSION. |
+| **investigate** | Debugger | Systematic debugging with root cause investigation. Five phases: collect symptoms, pattern analysis, hypothesis testing, implementation, verification. Iron Law: no fixes without root cause. |
+| **plan-deep-review** | Product Owner | Deep plan review with four modes (Scope Expansion, Selective Expansion, Hold Scope, Scope Reduction). Challenges premises, maps failure modes, reviews architecture/security/performance/deployment. |
+| **plan-design-review** | Senior Designer | Designer's eye plan review. Rates design dimensions 0-10, explains what would make each a 10, then fixes the plan to get there. Covers info architecture, interaction states, user journey, AI slop risk, responsive, and accessibility. |
+| **plan-devex-review** | Developer Advocate | DX plan review for developer-facing products (APIs, CLIs, SDKs, libraries, platforms, docs). Investigates persona, benchmarks competitors, designs magical moment, traces friction points, scores 8 DX dimensions 0-10. Three modes: DX EXPANSION / DX POLISH / DX TRIAGE. |
+| **plan-eng-review** | Eng Manager | Eng manager-mode plan review. Locks in execution plan — architecture, data flow, diagrams, edge cases, test coverage, performance. Interactive with opinionated recommendations. |
+| **plan-session** | Product Owner | Structured product design session — forces hard questions about demand, status quo, and narrowest wedge before proposing solutions. Produces a design doc, not code. |
+| **qa** | QA Lead | Systematic QA testing with fix loop. Three tiers (Quick/Standard/Exhaustive), diff-aware mode, health scoring, framework-specific guidance. Fixes bugs atomically with before/after evidence. |
+| **qa-only** | QA Reporter | Report-only QA testing — finds and documents bugs with screenshots and health scores but never fixes anything. Same modes and rubric as qa. |
+| **review** | Staff Engineer | Pre-landing PR review. Two-pass analysis (critical + informational) for SQL safety, race conditions, LLM trust boundaries, enum completeness, and more. Fix-first: auto-fixes mechanical issues, asks about ambiguous ones. |
+| **ship** | Release Engineer | Fully automated ship workflow: merge base, run tests, pre-landing review, plan completion audit, version bump, CHANGELOG, bisectable commits, push, create PR. |
 
 ## Commands
 
