@@ -39,40 +39,11 @@ Agents are markdown files with YAML frontmatter defining:
 
 ### Available Agents
 
-1. **github-pr-manager** (proactive)
-   - Creates and updates GitHub PRs with smart context awareness
-   - Auto-invoked on: "create PR", "update PR", "do PR"
-   - Auto-detects current branch and repository info
-   - Handles PR sizing (concise for small PRs, detailed for large)
-   - Never @mentions PR author, only reviewers
-   - Uses `gh` CLI for all GitHub operations
-
-2. **laravel-rest-architect**
-   - Designs and implements Laravel REST API endpoints
-   - Focuses on RESTful conventions, validation, resources, and security
-   - Implements thin controllers with service/repository pattern
-   - Uses Opus model for complex architectural decisions
-
-3. **melancholic-commit-writer**
-   - Generates commit messages with technical accuracy and emotional depth
-   - Specializes in PHP codebases
-   - Follows conventional commit format with dark humor elements
-
-4. **refactorer**
-   - Handles code/API migrations with backwards compatibility
-   - Creates migration plans, compatibility layers, and test coverage
-   - Specializes in versioning strategies and phased rollouts
-
-5. **wp-backend-optimizer**
-   - Optimizes WordPress backend performance
-   - Database optimization, caching strategies, efficient data structures
-   - Balances performance with code readability
-
-6. **wp-rest-endpoint-architect** (proactive)
-   - Creates WordPress REST API endpoints with clean architecture
-   - Enforces separation of concerns (thin controllers)
-   - Business logic in service classes, data access in repositories
-   - Avoids mocks in tests; inserts actual database rows
+1. **triage** (proactive)
+   - Emergency incident response for production issues and urgent bugs
+   - Auto-invoked on: "production is broken", "urgent fix", "hotfix", "incident"
+   - Fast-tracks triage → root cause → minimal fix → emergency PR
+   - Coordinates `/investigate`, `/review`, `/ship` in emergency mode
 
 ## Skills Architecture
 
@@ -105,10 +76,6 @@ Compound workflows: full-review (review → design-review → qa, with optional 
 
 ### Available Agents (bork plugin)
 
-- **github-pr-manager** (proactive) — Creates and updates GitHub PRs with context awareness
-- **laravel-rest-architect** — Laravel REST endpoint design with thin controllers, Form Request validation, API Resources
-- **refactorer** — Code/API migrations with backwards compatibility and phased rollouts
-- **workflow-orchestrator** (proactive) — Detects pipeline stage and suggests next skill
 - **triage** (proactive) — Emergency incident response, fast-tracks investigation → fix → ship
 
 ### Available Hooks (bork plugin)
@@ -152,29 +119,6 @@ Agents specify which tools they can use (Bash, Read, Grep, Glob, WebFetch, Task,
 - Skills provide focused, reusable capabilities
 - Hooks respond to specific events
 - Commands provide custom slash command behavior
-
-### WordPress Patterns
-WordPress-focused agents (wp-backend-optimizer, wp-rest-endpoint-architect) enforce:
-- Service classes for business logic
-- Repository pattern for data access
-- Value objects for data integrity
-- Dependency injection via DI container
-- Integration tests with actual database rows (not mocks)
-
-### Laravel Patterns
-Laravel-focused agents (laravel-rest-architect) enforce:
-- Thin controllers with service delegation
-- Form Request validation classes
-- API Resources for response formatting
-- PSR-12 coding standards
-- Comprehensive authorization with policies
-
-## Testing Philosophy
-
-- WordPress agents: Insert actual test data, avoid mocking
-- All endpoints/features should have integration tests
-- Test coverage for happy paths, edge cases, and authorization
-- Performance tests for critical paths
 
 ## Plugin Metadata
 

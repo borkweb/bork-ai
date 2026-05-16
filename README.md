@@ -96,10 +96,6 @@ Each skill feeds into the next. `/plan-session` writes a design doc that `/plan-
 
 | Agent | Trigger | Description |
 |-------|---------|-------------|
-| **github-pr-manager** | "create PR", "update PR", "do PR" | Creates and updates GitHub PRs with smart context awareness. |
-| **laravel-rest-architect** | Designing Laravel REST endpoints | Thin controllers, Form Request validation, API Resources. |
-| **refactorer** | Code/API migrations | Handles migrations with backwards compatibility, phased rollouts, and comprehensive test coverage. |
-| **workflow-orchestrator** | Completing a skill, "what's next?", finishing code | Detects where you are in the pipeline and suggests the next skill. |
 | **triage** | "production is broken", "urgent fix", "hotfix", "incident" | Emergency incident response. Triages severity, fast-tracks root cause investigation, creates minimal hotfix, ships via emergency PR. |
 
 ## Hooks

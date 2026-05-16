@@ -86,7 +86,23 @@ ls TODOS.md CHANGELOG.md VERSION DESIGN.md 2>/dev/null
 
 ## Step 4: Readiness Assessment
 
-Based on what's been detected, assess what's left:
+Use this dependency map to pick the next action based on what's been detected:
+
+| After completing... | Suggest next... | Why |
+|---------------------|----------------|-----|
+| `/plan-session` | `/plan-deep-review` or `/plan-eng-review` | Design doc needs validation before implementation |
+| `/plan-deep-review` | `/plan-eng-review` | Scope is locked — now lock the architecture |
+| `/plan-eng-review` | `/plan-design-review` (if UI) or start coding | Architecture is locked — design review or implement |
+| `/plan-design-review` | `/design-consultation` (if no design system) or start coding | Design is validated — implement |
+| `/design-consultation` | Start coding | Design system established |
+| Implementation done | `/review` | Code needs review before testing |
+| `/review` | `/qa` or `/design-review` (if frontend) | Reviewed code needs testing |
+| `/design-review` | `/qa` | Design is fixed — functional QA next |
+| `/qa` | `/ship` | QA passed — ship |
+| `/ship` | `/document-release` | Shipped — update docs |
+| `/document-release` | `/plan-session` for next feature | Cycle complete — start next iteration |
+
+Then output the readiness assessment:
 
 ```
 STATUS REPORT
