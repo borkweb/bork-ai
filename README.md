@@ -30,7 +30,7 @@ Or as a Claude Code [plugin](https://code.claude.com/docs/en/plugins)
 5. Run `/qa` on your staging URL
 6. Run `/ship` to merge, run tests, and open the PR
 
-## Original skills (`skills/core/`)
+## Original and collected skills (`skills/core/`)
 
 | Skill | Command | Description |
 |-------|---------|-------------|
@@ -45,7 +45,7 @@ Or as a Claude Code [plugin](https://code.claude.com/docs/en/plugins)
 | **red-pen** | — | Strict editorial reviewer applying Orwell's rules and Practical Typography. Catches passive voice, dead metaphors, straight quotes, wrong dashes, and other prose drift. |
 | **review-security** | `/review-security` | Deep security review grounded in 20 CVE-based pattern libraries (Heartbleed, Log4Shell, Next.js bypass, runc escape, xz backdoor, etc.). Callable standalone or as a reference from `/review`. |
 
-## Collected skills (`skills/gstack/`)
+## Gstack ports (`skills/gstack/`)
 
 Process workflow ported from gstack and adapted. The skills are ordered the way a sprint runs:
 
