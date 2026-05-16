@@ -1,6 +1,6 @@
 ---
 name: humanizer
-version: 2.3.0
+version: 2.4.0
 description: |
   Remove signs of AI-generated writing from text. Use when editing or reviewing
   text to make it sound more natural and human-written. Based on Wikipedia's
@@ -375,6 +375,63 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 **After:**
 > The cross functional team delivered a high quality, data driven report on our client facing tools. Their decision making process was known for being thorough and detail oriented.
+
+
+## HOLLOW STRUCTURAL MOVES
+
+These patterns add structure (an opening verdict, a closing punch, a rhythmic fragment) without adding content. They mimic the *shape* of confident writing without doing the work.
+
+**Diagnostic test for all three:** does the sentence introduce new information — a reaction, a turn, a confession, a concrete consequence — or does it just re-package what the rest of the paragraph already says? Cover the sentence with your hand. If the paragraph loses nothing, the sentence is hollow and must go.
+
+**What this rule does NOT ban:** authentic short sentences. A two-word reaction that carries the writer's actual response to a specific thing ("Very cool." after sharing a tool they genuinely think is cool) passes the test — it adds new content (the reaction). The rule targets fragments that would work attached to any paragraph about any topic.
+
+### 26. Verdict Openers
+
+**Problem:** AI opens a piece by pronouncing the verdict, then justifies it. The shape mimics confidence, but the verdict has no weight yet because the reader hasn't seen the evidence.
+
+**Words to watch:** any opening that asserts an outcome or quality before showing the evidence — "The X delivered.", "The X was a win.", "X crushed it.", "The launch went great.", "This week was a success."
+
+**Before:**
+> The Telex speedrun delivered. Over three days we shipped a working REST layer, a new admin UI, and demoed both at the all-hands.
+
+**After:**
+> Three days ago a handful of us holed up in a conference room to see how much of Telex we could ship in a sprint. We came out with a working REST layer, a new admin UI, and demoed both at the all-hands.
+
+The "After" lets the reader form the verdict from the details. The "Before" tells them what to think before they have the facts.
+
+### 27. Restatement Kickers
+
+**Problem:** AI follows a long sentence with a short one that just re-asserts the long sentence. Humans emphasize by adding something (a reaction, a stake, a consequence); AI emphasizes by repeating.
+
+**Before:**
+> We shipped three demos, a working REST layer, and rewrote the auth middleware in five days. That's the big one.
+
+**After (option A — replace with content):**
+> We shipped three demos, a working REST layer, and rewrote the auth middleware in five days. The auth rewrite is the part that unblocks the SSO migration next quarter.
+
+**After (option B — delete the kicker):**
+> We shipped three demos, a working REST layer, and rewrote the auth middleware in five days.
+
+The original "That's the big one." adds nothing the reader didn't already have. Either replace it with a sentence that names *why* it's the big one, or drop it entirely.
+
+### 28. Manufactured Punch Fragments
+
+**Problem:** AI drops two-or-three-word fragments ("Worth it." / "Solid trip." / "Done." / "Big win." / "Nice." / "Locked in.") into prose to create the *feel* of varied rhythm. The fragments are generic — they would work attached to any prior paragraph on any topic — and that genericness is the tell.
+
+The fragments fail the diagnostic on all three counts:
+1. They can be removed without losing any content.
+2. They would work attached to almost any prior paragraph.
+3. They are inserted for cadence, not for meaning.
+
+**Before:**
+> The setup script took an afternoon. Worth it.
+
+**After:**
+> The setup script took an afternoon and I haven't thought about port juggling since.
+
+The "After" tells you *why* it was worth it. The "Before" just asserts a generic verdict that a reader could already infer.
+
+**Contrast with what's allowed:** "Very cool." after a sentence about a specific tool the writer just discovered passes the test — it's the writer's actual reaction to a specific thing, and removing it loses that reaction. "Worth it." after a sentence about a setup script fails the test — the previous sentence already implies the verdict, so the fragment carries no new content.
 
 ---
 

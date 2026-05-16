@@ -27,7 +27,7 @@ The skill also includes a final "obviously AI generated" audit pass and a second
 
 > "LLMs use statistical algorithms to guess what should come next. The result tends toward the most statistically likely result that applies to the widest variety of cases."
 
-## 25 Patterns Detected (with Before/After Examples)
+## 28 Patterns Detected (with Before/After Examples)
 
 ### Content Patterns
 
@@ -78,6 +78,16 @@ The skill also includes a final "obviously AI generated" audit pass and a second
 | 22 | **Filler phrases** | "In order to", "Due to the fact that" | "To", "Because" |
 | 23 | **Excessive hedging** | "could potentially possibly" | "may" |
 | 24 | **Generic conclusions** | "The future looks bright" | Specific plans or facts |
+
+### Hollow Structural Moves
+
+These add the shape of confident writing without adding content. Diagnostic: cover the sentence with your hand — if the paragraph loses nothing, cut it. Authentic short reactions ("Very cool." about a specific thing) pass the test; generic punches do not.
+
+| # | Pattern | Before | After |
+|---|---------|--------|-------|
+| 26 | **Verdict openers** | "The Telex speedrun delivered. Over three days we shipped..." | "Three days ago we holed up to see how much we could ship..." |
+| 27 | **Restatement kickers** | "...rewrote the auth middleware in five days. That's the big one." | Replace with a sentence that names *why*, or delete |
+| 28 | **Manufactured punch fragments** | "The setup script took an afternoon. Worth it." | "The setup script took an afternoon and I haven't thought about port juggling since." |
 
 ## Full Example
 
