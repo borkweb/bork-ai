@@ -35,6 +35,7 @@ Or as a Claude Code [plugin](https://code.claude.com/docs/en/plugins)
 | Skill | Description |
 |-------|-------------|
 | **agents-md-lint** | Audits AI agent instruction files (AGENTS.md, CLAUDE.md, etc.) and removes facts discoverable from code alone to save context tokens. |
+| **caveman** | Ultra-compressed response mode that drops articles, filler, and hedging to cut tokens ~75% while preserving technical accuracy. Intensity levels: lite / full / ultra (and wenyan variants). |
 | **council** | Runs structured adversarial assessment of ideas, plans, and proposals through selected lenses, debate rounds, risk mapping, and a verdict. |
 | **handoff** | Writes handoff documentation so agents can communicate with relevant context and pick up from an optimal place. |
 | **humanize** | Detects and removes AI writing patterns (inflated language, em dash overuse, rule of three, hollow rhythm punches, etc.) on inline text or a file path; rewrites files in place. |
