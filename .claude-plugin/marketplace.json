@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "bork",
-      "source": "./bork"
+      "source": "./"
     }
   ]
 }
