@@ -1,6 +1,6 @@
 ---
 name: humanize
-version: 2.6.0
+version: 2.7.0
 description: |
   Remove signs of AI-generated writing from text or a file. Use when editing or
   reviewing prose to make it sound more natural and human-written. Accepts either
@@ -65,6 +65,7 @@ These guardrails protect the rewrite from introducing new problems while fixing 
 - **Don't add facts.** No new dates, names, quotes, statistics, or citations that are not already in the input or supplied by the user. Don't imply a source ("according to a 2024 study…") unless the input names that source. When the input is vague, leave it vague — don't invent specificity.
 - **Don't rewrite quoted material.** Direct quotes from people, documents, or sources stay exactly as written, even if they contain AI-pattern words. Only rewrite a quote if the user explicitly asked you to.
 - **Your rewrite must pass the same rules you're applying.** Common traps to watch for in the cleanup pass: introducing "Here's the thing:" / "Look:" / "The reality is:" prefaces, sneaking in a new "It's not about X, it's about Y" reframe, forcing a new rule-of-three list, or replacing one set of AI-vocabulary words with another. Audit your draft against the patterns below before delivering.
+- **Tighten, don't pad.** Humanizing removes AI bloat — inflated significance, hedging, filler, restated kickers — so the result should be the same length or shorter than the input. Aim to land between 85% and 100% of the original word count. Never expand past the original length: if a run comes out longer, you have been adding prose rather than editing it, so cut until it is back in band. Trimming hard (down toward 85%) is fine; growing past 100% is not.
 
 
 ## PERSONALITY AND SOUL
@@ -256,7 +257,9 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 ### 13. Em Dash Overuse
 
-**Problem:** LLMs use em dashes (—) more than humans, mimicking "punchy" sales writing.
+**Problem:** LLMs use em dashes (—) far more than humans, mimicking "punchy" sales writing. Any single em dash can look perfectly reasonable — and that is exactly why this pattern slips through. The tell is not one dash but the *density*: AI reaches for the em dash as a default rhythm device, so a document with one in most paragraphs reads as machine-made even when each dash is grammatically fine.
+
+**Rule:** Do not evaluate em dashes one at a time and keep the "reasonable-looking" ones — judging case by case is precisely what makes one rewrite keep six dashes and the next keep zero. Convert by default. Replace each em dash with a comma, parentheses, a colon, or a period (splitting into two sentences) — whichever fits the sentence. A parenthetical or appositive em dash is still a conversion target; "it reads fine" is not grounds to keep it. After the pass the whole document should contain at most one or two em dashes total, and only where no other punctuation works. If the input had several, the humanized output should be near zero.
 
 **Before:**
 > The term is primarily promoted by Dutch institutions—not by the people themselves. You don't say "Netherlands, Europe" as an address—yet this mislabeling continues—even in official documents.
