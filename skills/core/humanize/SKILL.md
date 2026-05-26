@@ -1,6 +1,6 @@
 ---
 name: humanize
-version: 2.7.0
+version: 2.8.0
 description: |
   Remove signs of AI-generated writing from text or a file. Use when editing or
   reviewing prose to make it sound more natural and human-written. Accepts either
@@ -43,6 +43,17 @@ When the input was a file:
 - After producing the final humanized version, write the result back to the original file path using the Edit or Write tool. Confirm to the user which file was updated and summarise the changes.
 
 When the input was inline text, deliver the result directly in the response. There is no file write.
+
+## Clarification Gate
+
+Before rewriting, check whether the brief already settles the two things that materially change the result:
+
+1. **Edit intensity** — a light touch (fix only the clearest AI tells; keep the structure, voice, and length almost exactly) versus a full rewrite (rework rhythm and inject personality per the SOUL section below). These produce very different outputs from the same input.
+2. **Target register** — the voice the result should land in (formal, casual, technical, marketing) when it isn't obvious from the text itself.
+
+If the user already signalled these — explicitly ("lightly clean this up", "make it sound casual") or implicitly (the source is a legal notice, a personal blog post, API docs) — don't ask. Say which reading you're using in one line, then proceed.
+
+Only when a genuine ambiguity would change the output, ask one batched AskUserQuestion (intensity, plus register if unclear) and wait for the answer. Never ask on a clear brief, never ask more than once, and don't stall — when it's obvious, just say so and go. This gate is about *how* to rewrite, not *what* to rewrite; the empty-input case is already handled in Input Handling.
 
 ## Your Task
 
